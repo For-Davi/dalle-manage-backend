@@ -7,6 +7,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductMovementController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingAppearanceController;
+use App\Http\Controllers\SettingSystemController;
 use App\Http\Controllers\SupplierCatalogController;
 use App\Http\Controllers\SupplierCategoryController;
 use App\Http\Controllers\SupplierController;
@@ -209,6 +211,11 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
             Route::put('/', [SettingAppearanceController::class, 'update']);
             Route::get('/', [SettingAppearanceController::class, 'show']);
         });
+
+        Route::prefix('system')->group(function () {
+            Route::put('/', [SettingSystemController::class, 'update']);
+            Route::get('/', [SettingSystemController::class, 'show']);
+        });
     });
 
     Route::prefix('feedback')->group(function () {
@@ -225,5 +232,11 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
         Route::post('/finish', [ScheduleController::class, 'finishSchedule']);
         Route::put('/', [ScheduleController::class, 'update']);
         Route::delete('/{scheduleID}', [ScheduleController::class, 'destroy']);
+    });
+
+    Route::prefix('notification')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::put('/{notificationID}', [NotificationController::class, 'updateRead']);
+        Route::delete('/delete/{notificationID}', [NotificationController::class, 'destroy']);
     });
 });

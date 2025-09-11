@@ -6,18 +6,21 @@ use App\DTO\Employee\StartEmployeeDTO;
 use App\DTO\Enterprise\EnterpriseStartDTO;
 use App\DTO\Role\RoleStartDTO;
 use App\DTO\Setting\Appearance\CreateSettingAppearanceDTO;
+use App\DTO\Setting\System\CreateSettingSystemDTO;
 use App\DTO\User\CreateUserDTO;
 use App\DTO\User\UpdateProfileDataDTO;
 use App\DTO\User\UpdateProfilePasswordDTO;
 use App\DTO\User\UpdateUserDTO;
 use App\DTO\User\UserStartDTO;
 use App\Helpers\UserHelper;
+use App\Jobs\SendInviteUserEmailJob;
 use App\Jobs\SendResetPasswordEmail;
 use App\Models\PasswordResetToken;
 use App\Repositories\EmployeeRepository;
 use App\Repositories\EnterpriseRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\SettingAppearanceRepository;
+use App\Repositories\SettingSystemRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +33,8 @@ class UserService
         protected EnterpriseRepository $enterpriseRepository,
         protected RoleRepository $roleRepository,
         protected EmployeeRepository $employeeRepository,
-        protected SettingAppearanceRepository $settingAppearanceRepository
+        protected SettingAppearanceRepository $settingAppearanceRepository,
+        protected SettingSystemRepository $settingSystemRepository
     ) {}
 
     public function login($request)
@@ -76,6 +80,13 @@ class UserService
         $this->settingAppearanceRepository->create($settingAppearanceDTO->toArray());
     }
 
+    private function createSettingSystem($enterpriseID)
+    {
+        $settingSystemDTO = CreateSettingSystemDTO::fromRequest(['enterpriseID' => $enterpriseID]);
+
+        $this->settingSystemRepository->create($settingSystemDTO->toArray());
+    }
+
     private function createEmployee($employeeDTO)
     {
         return $this->employeeRepository->create($employeeDTO);
@@ -94,6 +105,7 @@ class UserService
         $enterprise = $this->createEnterprise($enterpriseDTO->toArray());
 
         $this->createSettingAppearance($enterprise->id);
+        $this->createSettingSystem($enterprise->id);
 
         $roleDTO = RoleStartDTO::fromRequest(['enterprise_id' => $enterprise->id]);
         $role = $this->startRole($roleDTO->toArray());
@@ -113,6 +125,7 @@ class UserService
 
         if ($user) {
             $token = app('auth.password.broker')->createToken($user);
+            $this->setTypePassword($user->email, 'reset');
             SendResetPasswordEmail::dispatch($user, $token);
         }
 
@@ -128,12 +141,16 @@ class UserService
             return response()->json(['error' => 'Token inválido.'], 400);
         }
 
-        $isExpired = Carbon::parse($register->created_at)->addMinutes(30)->isPast();
+        if ($register->type === 'reset') {
 
-        if ($isExpired) {
-            throw ValidationException::withMessages([
-                'token' => ['Token expirado'],
-            ]);
+            $isExpired = Carbon::parse($register->created_at)->addMinutes(30)->isPast();
+
+            if ($isExpired) {
+                throw ValidationException::withMessages([
+                    'token' => ['Token expirado'],
+                ]);
+            }
+
         }
 
         $data = ['password' => Hash::make($request->input('password'))];
@@ -153,6 +170,14 @@ class UserService
 
         $user = $this->createUser($userDTO->toArray());
 
+        $admin = $request->user();
+        $enterprise = $this->enterpriseRepository->findById($request->get('enterprise_id'));
+        $token = app('auth.password.broker')->createToken($user);
+
+        $this->setTypePassword($user->email, 'invite');
+
+        SendInviteUserEmailJob::dispatch($user, $admin, $enterprise, $token);
+
         if ($request->createEmployee) {
             $employeeDTO = StartEmployeeDTO::fromRequest([
                 ...$request->only([
@@ -169,6 +194,16 @@ class UserService
         }
 
         return true;
+    }
+
+    private function setTypePassword($email, $type)
+    {
+        $resetRecord = PasswordResetToken::where('email', $email)
+            ->latest()
+            ->first();
+        if ($resetRecord) {
+            $resetRecord->update(['type' => 'reset']);
+        }
     }
 
     public function update($request)
