@@ -19,6 +19,7 @@ use App\Http\Controllers\SettingSystemController;
 use App\Http\Controllers\SupplierCatalogController;
 use App\Http\Controllers\SupplierCategoryController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupplierOrderController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
