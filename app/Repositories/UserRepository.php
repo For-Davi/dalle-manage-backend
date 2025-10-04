@@ -132,16 +132,25 @@ class UserRepository
         DB::table('employees')->where('user_id', $userId)->update(['user_id' => null, 'has_login_access' => 0]);
     }
 
-    public function delete($id)
+    public function delete($id, $deleteEmployee)
     {
         $user = $this->findById($id);
         if ($user) {
-            $this->updateInfoAccessLogin($id);
+            if ($deleteEmployee) {
+                $this->destroyEmployee($id);
+            } else {
+                $this->updateInfoAccessLogin($id);
+            }
 
             return $user->delete();
         }
 
         return false;
+    }
+
+    private function destroyEmployee($userId)
+    {
+        DB::table('employees')->where('user_id', $userId)->delete();
     }
 
     public function updateProfilePhoto($userID, $deleteID, $addID)
