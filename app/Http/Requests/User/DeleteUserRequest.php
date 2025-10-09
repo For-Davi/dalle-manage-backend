@@ -15,6 +15,7 @@ class DeleteUserRequest extends FormRequest
     {
         return [
             'userID' => 'required|exists:users,id',
+            'deleteEmployee' => 'required|in:0,1',
         ];
     }
 
@@ -23,6 +24,8 @@ class DeleteUserRequest extends FormRequest
         return [
             'userID.required' => 'O ID do usuário é obrigatório.',
             'userID.exists' => 'O usuário informado não existe.',
+            'deleteEmployee.required' => 'O campo do checkbox é obrigatório',
+            'deleteEmployee.in' => 'O valor do campo do checkbox deve ser 1 ou 0',
         ];
     }
 

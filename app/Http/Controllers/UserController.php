@@ -283,7 +283,7 @@ class UserController
         try {
             DB::beginTransaction();
 
-            $user = $this->repository->delete($request->route('userID'));
+            $user = $this->repository->delete($request->route('userID'), $request->deleteEmployee);
 
             if ($user) {
                 DB::commit();
