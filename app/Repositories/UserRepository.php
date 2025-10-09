@@ -154,11 +154,6 @@ class UserRepository
         DB::table('employees')->where('user_id', $userId)->delete();
     }
 
-    private function destroyEmployee($userId)
-    {
-        DB::table('employees')->where('user_id', $userId)->delete();
-    }
-
     public function updateProfilePhoto(int $userID, UpdateUserProfilePhotoDTO $dto): ?object
     {
         $user = $this->findById($userID);
