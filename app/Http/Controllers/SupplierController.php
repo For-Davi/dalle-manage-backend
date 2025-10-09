@@ -34,6 +34,19 @@ class SupplierController
         }
     }
 
+    public function list(Request $request)
+    {
+        try {
+            $suppliers = $this->repository->getAllByEnterprise($request->get('enterprise_id'), ['id', 'name']);
+
+            return response()->json(['suppliers' => $suppliers], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar fornecedores:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar fornecedores'], 500);
+        }
+    }
+
     public function show(ShowSupplierRequest $request)
     {
         try {

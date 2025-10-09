@@ -101,6 +101,7 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
         });
 
         Route::get('/', [SupplierController::class, 'index']);
+        Route::get('/list-select', [SupplierController::class, 'list']);
         Route::get('/{supplierID}', [SupplierController::class, 'show']);
         Route::post('/', [SupplierController::class, 'store']);
         Route::post('/filter', [SupplierController::class, 'filter']);

@@ -9,9 +9,9 @@ class SupplierRepository
 {
     public function __construct(protected Supplier $model) {}
 
-    public function getAllByEnterprise($enterpriseId)
+    public function getAllByEnterprise($enterpriseId, array $columns = ['*'])
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
+        return $this->model->where('enterprise_id', $enterpriseId)->get($columns);
     }
 
     public function findById($id)
