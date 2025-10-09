@@ -4,6 +4,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EnterpriseController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
@@ -140,7 +141,7 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::get('/{userID}', [UserController::class, 'show']);
-        Route::put('/update-data', [UserController::class, 'updateData']);
+        Route::post('/update-data', [UserController::class, 'updateData']);
         Route::put('/update-password', [UserController::class, 'updatePassword']);
         Route::post('/', [UserController::class, 'store']);
         Route::post('/filter', [UserController::class, 'filter']);
@@ -239,5 +240,11 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
         Route::get('/', [NotificationController::class, 'index']);
         Route::put('/{notificationID}', [NotificationController::class, 'updateRead']);
         Route::delete('/delete/{notificationID}', [NotificationController::class, 'destroy']);
+    });
+
+    Route::prefix('enterprise')->group(function () {
+        Route::get('/', [EnterpriseController::class, 'show']);
+        Route::put('/', [EnterpriseController::class, 'update']);
+        Route::delete('/', [EnterpriseController::class, 'destroy']);
     });
 });

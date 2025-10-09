@@ -40,10 +40,9 @@ class EmployeeController
     public function show(ShowEmployeeRequest $request)
     {
         try {
-            $employee = $this->repository->findById($request->route('employeeId'));
+            $employee = $this->repository->findById($request->route('employeeID'));
 
             return response()->json(['employee' => $employee], 200);
-
         } catch (\Exception $e) {
             ErrorLogger::log('Erro ao buscar funcionário:', $e, $request);
 

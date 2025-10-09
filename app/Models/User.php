@@ -18,6 +18,7 @@ class User extends Authenticatable
         'active',
         'role',
         'enterprise_id',
+        'image_id',
         'role_id',
         'department_id',
     ];
@@ -33,6 +34,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function image()
+    {
+        return $this->belongsTo(Image::class);
     }
 
     public function enterprise()

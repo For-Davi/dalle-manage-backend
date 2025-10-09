@@ -26,7 +26,13 @@ class Enterprise extends Model
         'subscription_id',
         'number_address',
         'active',
+        'seller_id',
     ];
+
+    public function setSellerCodeAttribute($value)
+    {
+        $this->attributes['seller_id'] = strtoupper($value);
+    }
 
     public function users()
     {

@@ -28,7 +28,7 @@ class EmployeeService
         if ($request->hasLoginAccess === 1) {
             $userDTO = UserStartDTO::fromRequest([
                 ...$request->only(['name', 'password', 'email', 'roleId', 'departmentId']),
-                'enterprise_id' => $request->get('enterprise_id'),
+                'enterpriseID' => $request->get('enterprise_id'),
             ]);
 
             $user = $this->createUser($userDTO->toArray());

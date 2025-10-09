@@ -15,4 +15,9 @@ class Subscription extends Model
         'name',
         'price',
     ];
+
+    public function enterprises()
+    {
+        return $this->hasMany(Enterprise::class, 'subscription_id');
+    }
 }

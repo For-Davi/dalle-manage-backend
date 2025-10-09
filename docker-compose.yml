@@ -24,10 +24,34 @@ services:
             - './storage/framework:/var/www/html/storage/framework'
             - './storage/logs:/var/www/html/storage/logs'
         networks:
-            - sail
+            - manage-network
         depends_on:
             - mysql_manage
             - smtp
+            - prometheus
+
+    prometheus:
+        image: prom/prometheus
+        container_name: prometheus
+        ports:
+            - '9090:9090'
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        command: --config.file=/etc/prometheus/prometheus.yml
+        networks:
+            - manage-network
+
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        ports:
+            - '3000:3000'
+        volumes:
+            - grafana_data:/var/lib/grafana
+        networks:
+            - manage-network
+        depends_on:
+            - prometheus
 
     mysql_manage:
         image: 'mysql/mysql-server:8.0'
@@ -43,7 +67,7 @@ services:
         volumes:
             - 'sail-mysql:/var/lib/mysql'
         networks:
-            - sail
+            - manage-network
         healthcheck:
             test:
                 - CMD
@@ -60,15 +84,17 @@ services:
         logging:
             driver: 'none'
         ports:
-            - "1025:1025"  
-            - "8025:8025"  
+            - "1025:1025"
+            - "8025:8025"
         networks:
-            - sail
+            - manage-network
 
 networks:
-    sail:
+    manage-network:
         driver: bridge
+        external: true
 
 volumes:
     sail-mysql:
         driver: local
+    grafana_data:

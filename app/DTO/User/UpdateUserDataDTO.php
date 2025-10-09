@@ -5,8 +5,8 @@ namespace App\DTO\User;
 class UpdateUserDataDTO
 {
     public function __construct(
-        public string $name,
-        public string $email,
+        public ?string $name,
+        public ?string $email,
     ) {}
 
     public static function fromRequest($data): self

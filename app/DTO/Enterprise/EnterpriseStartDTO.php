@@ -8,6 +8,7 @@ class EnterpriseStartDTO
 {
     public function __construct(
         public string $name,
+        public ?string $seller_id,
         public int $subscription_id
     ) {}
 
@@ -19,6 +20,7 @@ class EnterpriseStartDTO
 
         return new self(
             name: $data['nameEnterprise'],
+            seller_id: $data['sellerCode'] ?? null,
             subscription_id: $subscription->id
         );
     }
@@ -27,6 +29,7 @@ class EnterpriseStartDTO
     {
         return [
             'name' => $this->name,
+            'seller_id' => $this->seller_id,
             'subscription_id' => $this->subscription_id,
         ];
     }
