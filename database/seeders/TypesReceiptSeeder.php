@@ -18,7 +18,6 @@ class TypesReceiptSeeder extends Seeder
                 'Cartão de crédito',
                 'Cartão de débito',
                 'PIX',
-                'Transferência Bancária'
             ]
         }
         foreach ($types as $type) {
