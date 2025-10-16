@@ -13,6 +13,7 @@ class ProductVariantTableResource extends JsonResource
             'product_variant_id' => $this->id,
             'name' => $this->product?->name,
             'price' => $this->price,
+            'offer' => $this->offer,
             'stock_quantity' => $this->stock_quantity,
             'sku' => $this->sku,
             'variant_active' => $this->active,
