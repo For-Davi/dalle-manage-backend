@@ -22,27 +22,4 @@ class TypeReceiptRepository
     {
         return $this->model->create($data);
     }
-
-    public function update($id, array $data)
-    {
-        $type = $this->findById($id);
-        if ($type) {
-            $type->update($data);
-
-            return $type;
-        }
-
-        return null;
-    }
-
-    public function delete($id)
-    {
-        $type = $this->findById($id);
-
-        if ($type) {
-            return $type->delete();
-        }
-
-        return false;
-    }
 }

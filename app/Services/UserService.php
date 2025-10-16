@@ -14,6 +14,7 @@ use App\DTO\User\UpdateUserDTO;
 use App\DTO\User\UpdateUserPasswordDTO;
 use App\DTO\User\UpdateUserProfilePhotoDTO;
 use App\DTO\User\UserStartDTO;
+use App\DTO\Receipt\Type\CreateTypeReceiptDTO;
 use App\Helpers\SellerHelper;
 use App\Helpers\UserHelper;
 use App\Jobs\SendInviteUserEmailJob;
@@ -25,6 +26,7 @@ use App\Repositories\ImageRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\SettingAppearanceRepository;
 use App\Repositories\SettingSystemRepository;
+use App\Repositories\TypeReceiptRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -40,7 +42,8 @@ class UserService
         protected EmployeeRepository $employeeRepository,
         protected SettingAppearanceRepository $settingAppearanceRepository,
         protected SettingSystemRepository $settingSystemRepository,
-        protected ImageRepository $imageRepository
+        protected ImageRepository $imageRepository,
+        protected TypeReceiptRepository $typeReceiptRepository
     ) {}
 
     public function login($request)
@@ -92,6 +95,24 @@ class UserService
 
         $this->settingSystemRepository->create($settingSystemDTO->toArray());
     }
+    private function createTypesReceipt($enterpriseID)
+    {
+        $defaultTypes = [
+        'Dinheiro',
+        'Cartão de Crédito',
+        'Cartão de Débito',
+        'PIX',
+    ];
+
+    foreach ($defaultTypes as $type) {
+        $typesReceiptDTO = CreateTypeReceiptDTO::fromRequest([
+            'name' => $type,
+            'enterpriseID' => $enterpriseID,
+        ]);
+
+        $this->typeReceiptRepository->create($typesReceiptDTO->toArray());
+    }
+    }
 
     private function createEmployee($employeeDTO)
     {
@@ -114,6 +135,7 @@ class UserService
 
         $this->createSettingAppearance($enterprise->id);
         $this->createSettingSystem($enterprise->id);
+        $this->createTypesReceipt($enterprise->id);
 
         $roleDTO = RoleStartDTO::fromRequest(['enterprise_id' => $enterprise->id]);
         $role = $this->startRole($roleDTO->toArray());

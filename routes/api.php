@@ -187,9 +187,6 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
     Route::prefix('receipt')->group(function () {
         Route::prefix('type')->group(function () {
             Route::get('/', [TypeReceiptController::class, 'index']);
-            Route::post('/', [TypeReceiptController::class, 'store']);
-            Route::put('/', [TypeReceiptController::class, 'update']);
-            Route::delete('/{typeID}', [TypeReceiptController::class, 'destroy']);
         });
 
         Route::get('/', [ReceiptController::class, 'index']);
