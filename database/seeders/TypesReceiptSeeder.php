@@ -12,19 +12,20 @@ class TypesReceiptSeeder extends Seeder
     {
         $enterprises = Enterprise::all();
 
+        $types = [
+            'PIX',
+            'CREDIT_CARD',
+            'DEBT_CARD',
+            'MONEY',
+        ];
+
         foreach($enterprises as $enterprise){
-            $types = [
-                'Dinheiro',
-                'Cartão de crédito',
-                'Cartão de débito',
-                'PIX',
-            ]
+            foreach ($types as $type) {
+                    TypeReceipt::create([
+                        'name' => $type,
+                        'enterprise_id' => $enterprise->id,
+                    ]);
+                }
         }
-        foreach ($types as $type) {
-                TypeReceipt::create([
-                    'name' => $type,
-                    'enterprise_id' => $enterprise->id,
-                ]);
-            }
     }
 }
