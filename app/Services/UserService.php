@@ -98,20 +98,20 @@ class UserService
     private function createTypesReceipt($enterpriseID)
     {
         $defaultTypes = [
-        'Dinheiro',
-        'Cartão de Crédito',
-        'Cartão de Débito',
         'PIX',
+        'CREDIT_CARD',
+        'DEBT_CARD',
+        'MONEY',
     ];
 
-    foreach ($defaultTypes as $type) {
-        $typesReceiptDTO = CreateTypeReceiptDTO::fromRequest([
-            'name' => $type,
-            'enterpriseID' => $enterpriseID,
-        ]);
+        foreach ($defaultTypes as $type) {
+            $typesReceiptDTO = CreateTypeReceiptDTO::fromRequest([
+                'name' => $type,
+                'enterpriseID' => $enterpriseID,
+            ]);
 
-        $this->typeReceiptRepository->create($typesReceiptDTO->toArray());
-    }
+            $this->typeReceiptRepository->create($typesReceiptDTO->toArray());
+        }
     }
 
     private function createEmployee($employeeDTO)

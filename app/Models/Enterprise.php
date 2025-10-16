@@ -43,4 +43,9 @@ class Enterprise extends Model
     {
         return $this->belongsTo(Subscription::class, 'subscription_id');
     }
+
+    public function typeReceipt()
+    {
+        return $this->hasMany(TypeReceipt::class, 'enterprise_id', 'id');
+    }
 }
