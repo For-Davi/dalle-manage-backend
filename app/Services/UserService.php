@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\Employee\StartEmployeeDTO;
 use App\DTO\Enterprise\EnterpriseStartDTO;
 use App\DTO\Image\CreateImageDTO;
+use App\DTO\Receipt\Type\CreateTypeReceiptDTO;
 use App\DTO\Role\RoleStartDTO;
 use App\DTO\Setting\Appearance\CreateSettingAppearanceDTO;
 use App\DTO\Setting\System\CreateSettingSystemDTO;
@@ -14,7 +15,6 @@ use App\DTO\User\UpdateUserDTO;
 use App\DTO\User\UpdateUserPasswordDTO;
 use App\DTO\User\UpdateUserProfilePhotoDTO;
 use App\DTO\User\UserStartDTO;
-use App\DTO\Receipt\Type\CreateTypeReceiptDTO;
 use App\Helpers\SellerHelper;
 use App\Helpers\UserHelper;
 use App\Jobs\SendInviteUserEmailJob;
@@ -95,14 +95,15 @@ class UserService
 
         $this->settingSystemRepository->create($settingSystemDTO->toArray());
     }
+
     private function createTypesReceipt($enterpriseID)
     {
         $defaultTypes = [
-        'PIX',
-        'CREDIT_CARD',
-        'DEBT_CARD',
-        'MONEY',
-    ];
+            'PIX',
+            'CREDIT_CARD',
+            'DEBT_CARD',
+            'MONEY',
+        ];
 
         foreach ($defaultTypes as $type) {
             $typesReceiptDTO = CreateTypeReceiptDTO::fromRequest([

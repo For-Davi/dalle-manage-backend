@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\Receipt\FilterReceiptDTO;
 use App\Http\Requests\Receipt\CreateReceiptRequest;
 use App\Http\Requests\Receipt\DeleteReceiptRequest;
+use App\Http\Requests\Receipt\FilterReceiptRequest;
 use App\Http\Requests\Receipt\ShowReceiptRequest;
 use App\Http\Requests\Receipt\UpdateReceiptRequest;
 use App\Repositories\ReceiptRepository;
@@ -43,6 +45,23 @@ class ReceiptController
             ErrorLogger::log('Erro ao buscar recebimento:', $e, $request);
 
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function filter(FilterReceiptRequest $request)
+    {
+        try {
+            $receiptFilterDTO = FilterReceiptDTO::fromRequest([
+                ...$request->only(['active']),
+                'enterpriseID' => $request->get('enterprise_id'),
+            ]);
+            $receipts = $this->repository->getAllWithFilter($receiptFilterDTO);
+
+            return response()->json(['receipts' => $receipts], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar os recebimentos', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar os recebimentos'], 500);
         }
     }
 

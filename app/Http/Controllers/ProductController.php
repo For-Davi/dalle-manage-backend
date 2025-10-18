@@ -108,7 +108,7 @@ class ProductController
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            dd('Erro', $e);
+
             ErrorLogger::log('Erro ao cadastrar produto:', $e, $request);
 
             return response()->json(['message' => 'Erro ao cadastrar produto'], 500);

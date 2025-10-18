@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Receipt\Type\CreateTypeReceiptRequest;
-use App\Http\Requests\Receipt\Type\DeleteTypeReceiptRequest;
-use App\Http\Requests\Receipt\Type\UpdateTypeReceiptRequest;
+use App\DTO\Receipt\FilterReceiptDTO;
+use App\Http\Requests\Receipt\FilterReceiptRequest;
 use App\Repositories\TypeReceiptRepository;
 use App\Services\TypeReceiptService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TypeReceiptController
 {
@@ -22,6 +20,23 @@ class TypeReceiptController
     {
         try {
             $types = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+
+            return response()->json(['types' => $types], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar os tipos de recebimentos', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar os tipos de recebimentos'], 500);
+        }
+    }
+
+    public function filter(FilterReceiptRequest $request)
+    {
+        try {
+            $typeReceiptFilterDTO = FilterReceiptDTO::fromRequest([
+                ...$request->only(['active']),
+                'enterpriseID' => $request->get('enterprise_id'),
+            ]);
+            $types = $this->repository->getAllWithFilter($typeReceiptFilterDTO);
 
             return response()->json(['types' => $types], 200);
         } catch (\Exception $e) {
