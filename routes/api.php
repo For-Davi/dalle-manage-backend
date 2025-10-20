@@ -14,6 +14,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductMovementController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingAppearanceController;
 use App\Http\Controllers\SettingSystemController;
@@ -236,5 +237,9 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
         Route::get('/', [EnterpriseController::class, 'show']);
         Route::put('/', [EnterpriseController::class, 'update']);
         Route::delete('/', [EnterpriseController::class, 'destroy']);
+    });
+
+    Route::prefix('sale')->group(function () {
+        Route::post('/', [SaleController::class, 'store']);
     });
 });
