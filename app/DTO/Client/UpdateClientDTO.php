@@ -2,7 +2,9 @@
 
 namespace App\DTO\Client;
 
-class UpdateClientDTO
+use App\DTO\BaseDTO;
+
+class UpdateClientDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -47,10 +49,5 @@ class UpdateClientDTO
             complement: $data['complement'],
             description: $data['description'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
     }
 }

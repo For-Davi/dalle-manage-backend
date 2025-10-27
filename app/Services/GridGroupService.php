@@ -22,10 +22,7 @@ class GridGroupService
     {
         $this->enterpriseID = $request->get('enterprise_id');
 
-        $gridGroupDTO = CreateGridGroupDTO::fromRequest([
-            ...$request->only(['gridName']),
-            'enterpriseID' => $request->get('enterprise_id'),
-        ]);
+        $gridGroupDTO = CreateGridGroupDTO::fromRequest($request);
 
         $gridGroup = $this->repository->create($gridGroupDTO->toArray());
         $this->createItem($gridGroup->id, $request->items, 'create');

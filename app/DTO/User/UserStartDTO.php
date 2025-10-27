@@ -2,10 +2,11 @@
 
 namespace App\DTO\User;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
-class UserStartDTO
+class UserStartDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -24,10 +25,5 @@ class UserStartDTO
             role_id: $data['roleId'],
             enterprise_id: Auth::user()->enterprise_id,
         );
-    }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
     }
 }

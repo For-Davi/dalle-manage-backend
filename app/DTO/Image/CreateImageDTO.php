@@ -2,13 +2,16 @@
 
 namespace App\DTO\Image;
 
-class CreateImageDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateImageDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
         public readonly string $url,
         public readonly int $size,
-        public readonly string $enterprise_id,
+        public readonly int $enterprise_id,
     ) {}
 
     public static function fromRequest($data): self
@@ -17,17 +20,7 @@ class CreateImageDTO
             name: $data['name'],
             size: $data['size'],
             url: $data['url'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'size' => $this->size,
-            'url' => $this->url,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

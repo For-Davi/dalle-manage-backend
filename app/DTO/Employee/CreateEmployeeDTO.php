@@ -2,9 +2,10 @@
 
 namespace App\DTO\Employee;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Auth;
 
-class CreateEmployeeDTO
+class CreateEmployeeDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -57,10 +58,5 @@ class CreateEmployeeDTO
             user_id: $userID,
             enterprise_id: Auth::user()->enterprise_id,
         );
-    }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
     }
 }

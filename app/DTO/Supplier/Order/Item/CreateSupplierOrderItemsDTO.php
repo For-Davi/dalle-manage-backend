@@ -2,7 +2,9 @@
 
 namespace App\DTO\Supplier\Order\Item;
 
-class CreateSupplierOrderItemDTO
+use App\DTO\BaseDTO;
+
+class CreateSupplierOrderItemDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $supplier_order_id,
@@ -22,10 +24,4 @@ class CreateSupplierOrderItemDTO
             total_cost: $data['totalCost'],
         );
     }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
-    }
-
 }

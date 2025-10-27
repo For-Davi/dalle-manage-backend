@@ -2,9 +2,10 @@
 
 namespace App\DTO\User;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Hash;
 
-class CreateUserDTO
+class CreateUserDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -25,10 +26,5 @@ class CreateUserDTO
             department_id: $data['departmentId'],
             role_id: $data['roleId']
         );
-    }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
     }
 }

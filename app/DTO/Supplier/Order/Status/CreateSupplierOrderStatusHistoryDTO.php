@@ -2,9 +2,10 @@
 
 namespace App\DTO\Supplier\Order\Status;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Auth;
 
-class CreateSupplierOrderStatusHistoryDTO
+class CreateSupplierOrderStatusHistoryDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $supplier_order_id,
@@ -19,10 +20,5 @@ class CreateSupplierOrderStatusHistoryDTO
             notes: $initialNote,
             changed_by: Auth::user()->id,
         );
-    }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
     }
 }

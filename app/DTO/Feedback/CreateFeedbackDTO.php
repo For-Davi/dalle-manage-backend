@@ -2,7 +2,10 @@
 
 namespace App\DTO\Feedback;
 
-class CreateFeedbackDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateFeedbackDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $text,
@@ -14,23 +17,14 @@ class CreateFeedbackDTO
 
     public static function fromRequest($data): self
     {
+        $user = Auth::user();
+
         return new self(
             text: $data['text'],
-            enterprise_name: $data['enterprise_name'],
-            user_name: $data['user_name'],
-            user_email: $data['user_email'],
-            image_id: $data['image_id'],
+            enterprise_name: $user->enterprise->name,
+            user_name: $user->name,
+            user_email: $user->email,
+            image_id: $data['image_id'] ?? null,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'text' => $this->text,
-            'enterprise_name' => $this->enterprise_name,
-            'user_name' => $this->user_name,
-            'user_email' => $this->user_email,
-            'image_id' => $this->image_id,
-        ];
     }
 }

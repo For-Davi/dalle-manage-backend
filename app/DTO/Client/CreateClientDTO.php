@@ -2,9 +2,10 @@
 
 namespace App\DTO\Client;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Auth;
 
-class CreateClientDTO
+class CreateClientDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -51,10 +52,5 @@ class CreateClientDTO
             description: $data['description'],
             enterprise_id: Auth::user()->enterprise_id
         );
-    }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
     }
 }

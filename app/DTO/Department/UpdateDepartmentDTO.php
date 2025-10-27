@@ -2,7 +2,9 @@
 
 namespace App\DTO\Department;
 
-class UpdateDepartmentDTO
+use App\DTO\BaseDTO;
+
+class UpdateDepartmentDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -15,10 +17,5 @@ class UpdateDepartmentDTO
             name: $data['name'],
             parent_id: $data['parentId'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
     }
 }

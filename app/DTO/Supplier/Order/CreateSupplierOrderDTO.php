@@ -2,9 +2,10 @@
 
 namespace App\DTO\Supplier\Order;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Auth;
 
-class CreateSupplierOrderDTO
+class CreateSupplierOrderDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $supplier_id,
@@ -28,10 +29,4 @@ class CreateSupplierOrderDTO
             description: $data['description'],
         );
     }
-
-    public function toArray(): array
-    {
-        return get_object_vars($this);
-    }
-
 }
