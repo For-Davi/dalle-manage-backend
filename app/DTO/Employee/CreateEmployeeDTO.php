@@ -2,6 +2,8 @@
 
 namespace App\DTO\Employee;
 
+use Illuminate\Support\Facades\Auth;
+
 class CreateEmployeeDTO
 {
     public function __construct(
@@ -29,7 +31,7 @@ class CreateEmployeeDTO
         public readonly ?string $user_id,
     ) {}
 
-    public static function fromRequest($data): self
+    public static function fromRequest($data,int $userID): self
     {
         return new self(
             name: $data['name'],
@@ -50,38 +52,15 @@ class CreateEmployeeDTO
             number: $data['number'],
             complement: $data['complement'],
             description: $data['description'],
-            enterprise_id: $data['enterpriseId'],
             has_login_access: $data['hasLoginAccess'],
             department_id: $data['departmentId'],
-            user_id: $data['userId'],
+            user_id: $userID,
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'sex' => $this->sex,
-            'phone' => $this->phone,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'state_registration' => $this->state_registration,
-            'municipal_registration' => $this->municipal_registration,
-            'date_birthday' => $this->date_birthday,
-            'cep' => $this->cep,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'neighborhood' => $this->neighborhood,
-            'address' => $this->address,
-            'number' => $this->number,
-            'complement' => $this->complement,
-            'description' => $this->description,
-            'department_id' => $this->department_id,
-            'user_id' => $this->user_id,
-            'enterprise_id' => $this->enterprise_id,
-            'has_login_access' => $this->has_login_access,
-        ];
+        return get_object_vars($this);
     }
 }

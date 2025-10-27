@@ -23,74 +23,23 @@ class EmployeeService
 
     public function create($request)
     {
-        $userId = null;
+        $userID = null;
 
         if ($request->hasLoginAccess === 1) {
-            $userDTO = UserStartDTO::fromRequest([
-                ...$request->only(['name', 'password', 'email', 'roleId', 'departmentId']),
-                'enterpriseID' => $request->get('enterprise_id'),
-            ]);
+            $userDTO = UserStartDTO::fromRequest($request);
 
             $user = $this->createUser($userDTO->toArray());
-            $userId = $user->id;
+            $userID = $user->id;
         }
 
-        $employeeDTO = CreateEmployeeDTO::fromRequest([
-            ...$request->only([
-                'name',
-                'email',
-                'sex',
-                'phone',
-                'cpf',
-                'cnpj',
-                'stateRegistration',
-                'municipalRegistration',
-                'dateBirthday',
-                'cep',
-                'country',
-                'state',
-                'city',
-                'neighborhood',
-                'address',
-                'number',
-                'complement',
-                'description',
-                'hasLoginAccess',
-                'departmentId',
-            ]),
-            'userId' => $userId,
-            'enterpriseId' => $request->get('enterprise_id'),
-        ]);
+        $employeeDTO = CreateEmployeeDTO::fromRequest($request, $userID);
 
         return $this->repository->create($employeeDTO->toArray());
     }
 
     public function update($request)
     {
-        $employeeDTO = UpdateEmployeeDTO::fromRequest([
-            ...$request->only([
-                'name',
-                'email',
-                'sex',
-                'phone',
-                'cpf',
-                'cnpj',
-                'stateRegistration',
-                'municipalRegistration',
-                'dateBirthday',
-                'cep',
-                'country',
-                'state',
-                'city',
-                'neighborhood',
-                'address',
-                'number',
-                'complement',
-                'description',
-                'departmentId',
-                'active',
-            ]),
-        ]);
+        $employeeDTO = UpdateEmployeeDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $employeeDTO->toArray());
     }
@@ -105,7 +54,6 @@ class EmployeeService
             'roleId' => $request->roleId,
             'departmentId' => $employee->department_id,
             'password' => $request->password,
-            'enterprise_id' => $request->get('enterprise_id'),
         ]);
 
         $user = $this->createUser($userDTO->toArray());

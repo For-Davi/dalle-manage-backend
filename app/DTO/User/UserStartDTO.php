@@ -3,6 +3,7 @@
 namespace App\DTO\User;
 
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserStartDTO
 {
@@ -19,20 +20,14 @@ class UserStartDTO
         return new self(
             name: $data['name'],
             email: $data['email'],
-            enterprise_id: $data['enterpriseID'],
             password: Hash::make($data['password']),
-            role_id: $data['roleId']
+            role_id: $data['roleId'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password,
-            'role_id' => $this->role_id,
-            'enterprise_id' => $this->enterprise_id,
-        ];
+        return get_object_vars($this);
     }
 }

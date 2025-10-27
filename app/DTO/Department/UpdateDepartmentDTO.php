@@ -6,7 +6,7 @@ class UpdateDepartmentDTO
 {
     public function __construct(
         public string $name,
-        public ?string $parent_id,
+        public ?int $parent_id,
     ) {}
 
     public static function fromRequest($data): self
@@ -19,9 +19,6 @@ class UpdateDepartmentDTO
 
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'parent_id' => $this->parent_id,
-        ];
+        return get_object_vars($this);
     }
 }

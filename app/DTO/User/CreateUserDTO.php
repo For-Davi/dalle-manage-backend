@@ -29,13 +29,6 @@ class CreateUserDTO
 
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password,
-            'role_id' => $this->role_id,
-            'enterprise_id' => $this->enterprise_id,
-            'department_id' => $this->department_id,
-        ];
+        return get_object_vars($this);
     }
 }

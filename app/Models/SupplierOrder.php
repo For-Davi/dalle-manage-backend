@@ -21,6 +21,7 @@ class SupplierOrder extends Model
         'cancellation_reason',
         'date_received',
         'description',
+        'enterprise_id'
     ];
 
     public function enterprise()
@@ -31,5 +32,15 @@ class SupplierOrder extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(SupplierOrderItem::class, 'supplier_order_id');
+    }
+
+    public function status()
+    {
+        return $this->hasMany(SupplierOrderStatusHistory::class, 'supplier_order_id');
     }
 }

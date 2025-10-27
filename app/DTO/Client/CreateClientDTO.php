@@ -2,6 +2,8 @@
 
 namespace App\DTO\Client;
 
+use Illuminate\Support\Facades\Auth;
+
 class CreateClientDTO
 {
     public function __construct(
@@ -23,7 +25,7 @@ class CreateClientDTO
         public readonly ?int $number,
         public readonly ?string $complement,
         public readonly ?string $description,
-        public readonly string $enterprise_id,
+        public readonly int $enterprise_id,
     ) {}
 
     public static function fromRequest($data): self
@@ -47,32 +49,12 @@ class CreateClientDTO
             number: $data['number'],
             complement: $data['complement'],
             description: $data['description'],
-            enterprise_id: $data['enterpriseId'],
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'sex' => $this->sex,
-            'phone' => $this->phone,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'state_registration' => $this->state_registration,
-            'municipal_registration' => $this->municipal_registration,
-            'date_birthday' => $this->date_birthday,
-            'cep' => $this->cep,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'neighborhood' => $this->neighborhood,
-            'address' => $this->address,
-            'number' => $this->number,
-            'complement' => $this->complement,
-            'description' => $this->description,
-            'enterprise_id' => $this->enterprise_id,
-        ];
+        return get_object_vars($this);
     }
 }

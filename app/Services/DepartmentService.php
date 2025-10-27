@@ -20,10 +20,7 @@ class DepartmentService
             'create'
         );
 
-        $departmentDTO = CreateDepartmentDTO::fromRequest([
-            ...$request->only(['name', 'parentId']),
-            'enterprise_id' => $request->get('enterprise_id'),
-        ]);
+        $departmentDTO = CreateDepartmentDTO::fromRequest($request);
 
         return $this->repository->create($departmentDTO->toArray());
     }
@@ -37,9 +34,7 @@ class DepartmentService
             'update'
         );
 
-        $departmentDTO = UpdateDepartmentDTO::fromRequest([
-            ...$request->only(['name', 'parentId']),
-        ]);
+        $departmentDTO = UpdateDepartmentDTO::fromRequest($request);
 
         return $this->repository->update($request->input('id'), $departmentDTO->toArray());
     }

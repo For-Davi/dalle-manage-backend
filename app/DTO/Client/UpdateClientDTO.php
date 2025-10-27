@@ -51,25 +51,6 @@ class UpdateClientDTO
 
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'sex' => $this->sex,
-            'phone' => $this->phone,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'state_registration' => $this->state_registration,
-            'municipal_registration' => $this->municipal_registration,
-            'date_birthday' => $this->date_birthday,
-            'cep' => $this->cep,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'neighborhood' => $this->neighborhood,
-            'address' => $this->address,
-            'number' => $this->number,
-            'complement' => $this->complement,
-            'description' => $this->description,
-        ];
+        return get_object_vars($this);
     }
 }

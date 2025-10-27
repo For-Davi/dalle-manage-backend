@@ -12,58 +12,14 @@ class ClientService
 
     public function create($request)
     {
-        $clientDTO = CreateClientDTO::fromRequest([
-            ...$request->only([
-                'name',
-                'email',
-                'sex',
-                'phone',
-                'cpf',
-                'cnpj',
-                'stateRegistration',
-                'municipalRegistration',
-                'dateBirthday',
-                'cep',
-                'country',
-                'state',
-                'city',
-                'neighborhood',
-                'address',
-                'complement',
-                'number',
-                'description',
-            ]),
-            'enterpriseId' => $request->get('enterprise_id'),
-        ]);
+        $clientDTO = CreateClientDTO::fromRequest($request);
 
         return $this->repository->create($clientDTO->toArray());
     }
 
     public function update($request)
     {
-        $supplierDTO = UpdateClientDTO::fromRequest([
-            ...$request->only([
-                'name',
-                'email',
-                'sex',
-                'phone',
-                'cpf',
-                'cnpj',
-                'stateRegistration',
-                'municipalRegistration',
-                'dateBirthday',
-                'cep',
-                'country',
-                'state',
-                'city',
-                'neighborhood',
-                'address',
-                'complement',
-                'number',
-                'description',
-            ]),
-            'enterpriseId' => $request->get('enterprise_id'),
-        ]);
+        $supplierDTO = UpdateClientDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $supplierDTO->toArray());
     }
