@@ -2,7 +2,9 @@
 
 namespace App\DTO\Movement;
 
-class FilterMovementDTO
+use App\DTO\BaseDTO;
+
+class FilterMovementDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $period,
@@ -19,15 +21,5 @@ class FilterMovementDTO
             category: $data['category'],
             enterprise_id: $data['enterpriseID'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'period' => $this->period,
-            'type' => $this->type,
-            'category' => $this->category,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

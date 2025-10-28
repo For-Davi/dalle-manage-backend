@@ -2,7 +2,9 @@
 
 namespace App\DTO\Schedule;
 
-class FilterScheduleDTO
+use App\DTO\BaseDTO;
+
+class FilterScheduleDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $period,
@@ -19,15 +21,5 @@ class FilterScheduleDTO
             category: $data['category'],
             enterprise_id: $data['enterpriseID'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'period' => $this->period,
-            'type' => $this->type,
-            'category' => $this->category,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

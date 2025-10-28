@@ -2,7 +2,9 @@
 
 namespace App\DTO\Product;
 
-class FilterProductDTO
+use App\DTO\BaseDTO;
+
+class FilterProductDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $name,
@@ -23,17 +25,5 @@ class FilterProductDTO
             enterpriseID: $data['enterpriseID'],
             active: $data['active']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'sku' => $this->sku,
-            'stockCritical' => $this->stockCritical,
-            'categoryID' => $this->categoryID,
-            'enterpriseID' => $this->enterpriseID,
-            'active' => $this->active,
-        ];
     }
 }

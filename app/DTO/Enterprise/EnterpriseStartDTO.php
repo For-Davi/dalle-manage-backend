@@ -2,9 +2,10 @@
 
 namespace App\DTO\Enterprise;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\DB;
 
-class EnterpriseStartDTO
+class EnterpriseStartDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -23,14 +24,5 @@ class EnterpriseStartDTO
             seller_id: $data['sellerCode'] ?? null,
             subscription_id: $subscription->id
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'seller_id' => $this->seller_id,
-            'subscription_id' => $this->subscription_id,
-        ];
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\DTO\Setting\System;
 
-class CreateSettingSystemDTO
+use App\DTO\BaseDTO;
+
+class CreateSettingSystemDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $enterprise_id,
@@ -15,13 +17,5 @@ class CreateSettingSystemDTO
             enterprise_id: $data['enterpriseID'],
             send_notification_stock_critical: 1,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'enterprise_id' => $this->enterprise_id,
-            'send_notification_stock_critical' => $this->send_notification_stock_critical,
-        ];
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\DTO\Transaction\Category;
 
-class CreateTransactionCategoryDTO
+use App\DTO\BaseDTO;
+
+class CreateTransactionCategoryDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
@@ -15,13 +17,5 @@ class CreateTransactionCategoryDTO
             name: $data['name'],
             enterprise_id: $data['enterpriseID']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

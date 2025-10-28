@@ -16,4 +16,8 @@ class Role extends Model
         'enterprise_id',
         'permissions',
     ];
+
+    protected $casts = [
+        'permissions' => 'array',
+    ];
 }

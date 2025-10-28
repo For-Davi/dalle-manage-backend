@@ -2,7 +2,9 @@
 
 namespace App\DTO\Supplier;
 
-class FilterSupplierDTO
+use App\DTO\BaseDTO;
+
+class FilterSupplierDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $name,
@@ -31,21 +33,5 @@ class FilterSupplierDTO
             enterprise_id: $data['enterprise_id'],
             active: $data['active']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'active' => $this->active,
-            'category_id' => $this->category_id,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

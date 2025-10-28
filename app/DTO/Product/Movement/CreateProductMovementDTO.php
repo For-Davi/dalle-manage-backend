@@ -2,9 +2,10 @@
 
 namespace App\DTO\Product\Movement;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\DB;
 
-class CreateProductMovementDTO
+class CreateProductMovementDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $reason,
@@ -51,25 +52,5 @@ class CreateProductMovementDTO
             enterprise_id: $data['enterpriseID'],
             description: $data['description'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'description' => $this->description,
-            'reason' => $this->reason,
-            'type' => $this->type,
-            'document_number' => $this->document_number,
-            'lot_number' => $this->lot_number,
-            'quantity' => $this->quantity,
-            'previous_stock' => $this->previous_stock,
-            'new_stock' => $this->new_stock,
-            'unit_cost' => $this->unit_cost,
-            'total_cost' => $this->total_cost,
-            'product_variant_id' => $this->product_variant_id,
-            'supplier_id' => $this->supplier_id,
-            'created_by' => $this->created_by,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

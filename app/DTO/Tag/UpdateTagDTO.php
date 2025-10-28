@@ -2,7 +2,9 @@
 
 namespace App\DTO\Tag;
 
-class UpdateTagDTO
+use App\DTO\BaseDTO;
+
+class UpdateTagDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
@@ -15,13 +17,5 @@ class UpdateTagDTO
             name: $data['name'],
             active: $data['active'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'active' => $this->active,
-        ];
     }
 }

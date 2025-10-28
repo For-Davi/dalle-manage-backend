@@ -2,7 +2,9 @@
 
 namespace App\DTO\Client;
 
-class FilterClientDTO
+use App\DTO\BaseDTO;
+
+class FilterClientDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $name,
@@ -27,19 +29,5 @@ class FilterClientDTO
             city: $data['city'] !== '' ? $data['city'] : null,
             enterprise_id: $data['enterprise_id'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

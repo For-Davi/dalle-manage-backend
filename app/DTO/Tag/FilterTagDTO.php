@@ -2,7 +2,9 @@
 
 namespace App\DTO\Tag;
 
-class FilterTagDTO
+use App\DTO\BaseDTO;
+
+class FilterTagDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $name,
@@ -17,14 +19,5 @@ class FilterTagDTO
             active: $data['active'],
             enterprise_id: $data['enterpriseID'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'active' => $this->active,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

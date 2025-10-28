@@ -2,7 +2,9 @@
 
 namespace App\DTO\Schedule;
 
-class CreateOrUpdateScheduleDTO
+use App\DTO\BaseDTO;
+
+class CreateOrUpdateScheduleDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $date,
@@ -23,17 +25,5 @@ class CreateOrUpdateScheduleDTO
             description: $data['description'],
             enterprise_id: $data['enterpriseID'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'date' => $this->date,
-            'type' => $this->type,
-            'transaction_category_id' => $this->transaction_category_id,
-            'value' => $this->value,
-            'description' => $this->description,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

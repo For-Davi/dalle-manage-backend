@@ -2,7 +2,9 @@
 
 namespace App\DTO\Product\Color;
 
-class CreateProductColorDTO
+use App\DTO\BaseDTO;
+
+class CreateProductColorDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
@@ -17,14 +19,5 @@ class CreateProductColorDTO
             hex_color_code: $data['hexColorCode'],
             enterprise_id: $data['enterpriseID'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'hex_color_code' => $this->hex_color_code,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

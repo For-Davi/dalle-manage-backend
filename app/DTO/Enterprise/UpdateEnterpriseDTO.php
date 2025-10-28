@@ -2,7 +2,9 @@
 
 namespace App\DTO\Enterprise;
 
-class UpdateEnterpriseDTO
+use App\DTO\BaseDTO;
+
+class UpdateEnterpriseDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -35,23 +37,5 @@ class UpdateEnterpriseDTO
             number_address: $data['numberAddress'],
             complement: $data['complement'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'cep' => $this->cep,
-            'state' => $this->state,
-            'city' => $this->city,
-            'neighborhood' => $this->neighborhood,
-            'address' => $this->address,
-            'number_address' => $this->number_address,
-            'complement' => $this->complement,
-        ];
     }
 }

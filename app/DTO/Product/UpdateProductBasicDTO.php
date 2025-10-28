@@ -2,7 +2,9 @@
 
 namespace App\DTO\Product;
 
-class UpdateProductBasicDTO
+use App\DTO\BaseDTO;
+
+class UpdateProductBasicDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
@@ -19,15 +21,5 @@ class UpdateProductBasicDTO
             description: $data['description'],
             product_category_id: $data['category'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'type' => $this->type,
-            'description' => $this->description,
-            'product_category_id' => $this->product_category_id,
-        ];
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\DTO\Receipt\Type;
 
-class UpdateTypeReceiptDTO
+use App\DTO\BaseDTO;
+
+class UpdateTypeReceiptDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -13,12 +15,5 @@ class UpdateTypeReceiptDTO
         return new self(
             name: $data['name'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
     }
 }

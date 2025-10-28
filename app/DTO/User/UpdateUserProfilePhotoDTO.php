@@ -2,7 +2,9 @@
 
 namespace App\DTO\User;
 
-class UpdateUserProfilePhotoDTO
+use App\DTO\BaseDTO;
+
+class UpdateUserProfilePhotoDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?int $photo_add_id,
@@ -30,13 +32,5 @@ class UpdateUserProfilePhotoDTO
     public function hasBothOperations(): bool
     {
         return $this->hasAddOperation() && $this->hasDeleteOperation();
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'photo_add_id' => $this->photo_add_id,
-            'photo_delete_id' => $this->photo_delete_id,
-        ];
     }
 }

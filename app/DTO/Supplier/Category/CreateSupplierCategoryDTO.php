@@ -2,7 +2,9 @@
 
 namespace App\DTO\Supplier\Category;
 
-class CreateSupplierCategoryDTO
+use App\DTO\BaseDTO;
+
+class CreateSupplierCategoryDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
@@ -15,13 +17,5 @@ class CreateSupplierCategoryDTO
             name: $data['name'],
             enterprise_id: $data['enterpriseID']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

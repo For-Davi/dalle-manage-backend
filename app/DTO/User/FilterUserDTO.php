@@ -2,7 +2,9 @@
 
 namespace App\DTO\User;
 
-class FilterUserDTO
+use App\DTO\BaseDTO;
+
+class FilterUserDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $name,
@@ -23,17 +25,5 @@ class FilterUserDTO
             role_id: $data['role'],
             active: $data['active']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'active' => $this->active,
-            'department_id' => $this->department_id,
-            'role_id' => $this->role_id,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

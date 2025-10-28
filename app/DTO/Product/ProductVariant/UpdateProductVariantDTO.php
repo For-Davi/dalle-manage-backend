@@ -2,7 +2,9 @@
 
 namespace App\DTO\Product\ProductVariant;
 
-class UpdateProductVariantDTO
+use App\DTO\BaseDTO;
+
+class UpdateProductVariantDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $active,
@@ -29,20 +31,5 @@ class UpdateProductVariantDTO
             offer: $data['offer'],
             min_stock_alert: $data['minStockAlert'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'active' => $this->active,
-            'sku' => $this->sku,
-            'code' => $this->code,
-            'description' => $this->description,
-            'location' => $this->location,
-            'price' => $this->price,
-            'cost' => $this->cost,
-            'offer' => $this->offer,
-            'min_stock_alert' => $this->min_stock_alert,
-        ];
     }
 }

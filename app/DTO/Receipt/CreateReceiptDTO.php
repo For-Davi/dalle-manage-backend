@@ -2,7 +2,9 @@
 
 namespace App\DTO\Receipt;
 
-class CreateReceiptDTO
+use App\DTO\BaseDTO;
+
+class CreateReceiptDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $identifier,
@@ -19,15 +21,5 @@ class CreateReceiptDTO
             enterprise_id: $data['enterpriseID'],
             description: $data['description']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'identifier' => $this->identifier,
-            'type_receipt_id' => $this->type_receipt_id,
-            'enterprise_id' => $this->enterprise_id,
-            'description' => $this->description,
-        ];
     }
 }

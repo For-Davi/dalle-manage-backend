@@ -2,7 +2,9 @@
 
 namespace App\DTO\Product\ProductAdvanced;
 
-class CreateProductAdvancedDTO
+use App\DTO\BaseDTO;
+
+class CreateProductAdvancedDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $product_id,
@@ -25,18 +27,5 @@ class CreateProductAdvancedDTO
             has_commission: $data['hasCommission'],
             commission_percentage: $data['commissionPercentage'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'product_id' => $this->product_id,
-            'active' => $this->active,
-            'allow_coupon' => $this->allow_coupon,
-            'allow_discount' => $this->allow_discount,
-            'discount_max_percentage' => $this->discount_max_percentage,
-            'has_commission' => $this->has_commission,
-            'commission_percentage' => $this->commission_percentage,
-        ];
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\DTO\Supplier\Category;
 
-class UpdateSupplierCategoryDTO
+use App\DTO\BaseDTO;
+
+class UpdateSupplierCategoryDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -13,12 +15,5 @@ class UpdateSupplierCategoryDTO
         return new self(
             name: $data['name'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
     }
 }
