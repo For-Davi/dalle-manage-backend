@@ -14,7 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'token.expiration' => \App\Http\Middleware\CheckTokenExpiration::class,
-            'set.enterprise' => \App\Http\Middleware\SetEnterpriseId::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

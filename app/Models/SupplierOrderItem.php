@@ -31,4 +31,9 @@ class SupplierOrderItem extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function receivings()
+    {
+        return $this->hasMany(SupplierOrderReceivings::class, 'supplier_order_item_id');
+    }
 }

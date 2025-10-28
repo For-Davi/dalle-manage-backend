@@ -32,7 +32,7 @@ class CreateEmployeeDTO extends BaseDTO
         public readonly ?string $user_id,
     ) {}
 
-    public static function fromRequest($data,int $userID): self
+    public static function fromRequest($data, int $userID): self
     {
         return new self(
             name: $data['name'],

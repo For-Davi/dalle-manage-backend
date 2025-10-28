@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by')->nullable();
             $table->longText('cancellation_reason')->nullable();
             $table->date('date_received')->nullable();
-            $table->longText('description')->nullable();
+            $table->longText('observation')->nullable();
             $table->timestamps();
         });
     }

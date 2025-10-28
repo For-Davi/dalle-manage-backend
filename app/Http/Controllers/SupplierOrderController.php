@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Tag\CreateTagRequest;
-use App\Http\Requests\Tag\DeleteTagRequest;
-use App\Http\Requests\Tag\UpdateTagRequest;
-use App\Repositories\TagRepository;
-use App\Services\TagService;
+use App\Http\Requests\Supplier\Order\CreateSupplierOrderRequest;
+use App\Http\Requests\Supplier\Order\DeleteSupplierOrderRequest;
+use App\Http\Requests\Supplier\Order\UpdateSupplierOrderRequest;
+use App\Http\Resources\Supplier\Order\SupplierOrderListResource;
+use App\Repositories\SupplierOrderRepository;
+use App\Services\SupplierOrderService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,85 +15,85 @@ use Illuminate\Support\Facades\DB;
 class SupplierOrderController
 {
     public function __construct(
-        private TagService $service,
-        private TagRepository $repository
+        private SupplierOrderService $service,
+        private SupplierOrderRepository $repository
     ) {}
 
     public function index(Request $request)
     {
         try {
-            $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $orders = $this->repository->getAllByEnterprise();
 
-            return response()->json(['tags' => $tags], 200);
+            return response()->json(['orders' => SupplierOrderListResource::collection($orders)], 200);
         } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar tags:', $e, $request);
+            ErrorLogger::log('Erro ao buscar pedidos:', $e, $request);
 
-            return response()->json(['message' => 'Erro ao buscar tags'], 500);
+            return response()->json(['message' => 'Erro ao buscar pedidos'], 500);
         }
     }
 
-    public function store(CreateTagRequest $request)
+    public function store(CreateSupplierOrderRequest $request)
     {
         try {
             DB::beginTransaction();
-            $tag = $this->service->create($request);
+            $order = $this->service->create($request);
 
-            if ($tag) {
+            if ($order) {
                 DB::commit();
-                $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $orders = $this->repository->getAllByEnterprise();
 
-                return response()->json(['tags' => $tags, 'message' => 'Tag cadastrada'], 201);
+                return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido cadastrado'], 201);
             }
         } catch (\Exception $e) {
             DB::rollBack();
 
-            ErrorLogger::log('Erro ao cadastrar tag:', $e, $request);
+            ErrorLogger::log('Erro ao cadastrar pedido:', $e, $request);
 
-            return response()->json(['message' => 'Erro ao cadastrar tag'], 500);
+            return response()->json(['message' => 'Erro ao cadastrar pedido'], 500);
         }
     }
 
-    public function update(UpdateTagRequest $request)
+    public function update(UpdateSupplierOrderRequest $request)
     {
         try {
             DB::beginTransaction();
-            $tag = $this->service->update($request);
+            $order = $this->service->update($request);
 
-            if ($tag) {
+            if ($order) {
                 DB::commit();
 
-                $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $orders = $this->repository->getAllByEnterprise();
 
-                return response()->json(['tags' => $tags, 'message' => 'Tag atualizada'], 200);
+                return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido atualizado'], 200);
             }
         } catch (\Exception $e) {
             DB::rollBack();
 
-            ErrorLogger::log('Erro ao atualizar tag:', $e, $request);
+            ErrorLogger::log('Erro ao atualizar pedido:', $e, $request);
 
-            return response()->json(['message' => 'Erro ao atualizar tag'], 500);
+            return response()->json(['message' => 'Erro ao atualizar pedido'], 500);
         }
     }
 
-    public function destroy(DeleteTagRequest $request)
+    public function destroy(DeleteSupplierOrderRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            $tag = $this->repository->delete($request->route('tagID'));
+            $order = $this->repository->delete($request->route('orderID'));
 
-            if ($tag) {
+            if ($order) {
                 DB::commit();
-                $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $orders = $this->repository->getAllByEnterprise();
 
-                return response()->json(['tags' => $tags, 'message' => 'Tag excluída'], 200);
+                return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido excluído'], 200);
             }
         } catch (\Exception $e) {
             DB::rollBack();
 
-            ErrorLogger::log('Erro ao excluir tag:', $e, $request);
+            ErrorLogger::log('Erro ao excluir pedido:', $e, $request);
 
-            return response()->json(['message' => 'Erro ao excluir tag'], 500);
+            return response()->json(['message' => 'Erro ao excluir pedido'], 500);
         }
     }
 }

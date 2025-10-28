@@ -9,14 +9,9 @@ class TagRepository
 {
     public function __construct(protected Tag $model) {}
 
-    public function getAll()
+    public function getAllByEnterprise()
     {
-        return $this->model->all();
-    }
-
-    public function getAllByEnterprise($enterpriseId)
-    {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
+        return $this->model->get();
     }
 
     public function findById($id)
@@ -26,7 +21,7 @@ class TagRepository
 
     public function getAllWithFilter(FilterTagDTO $filters)
     {
-        $query = $this->model->where('enterprise_id', $filters->enterprise_id);
+        $query = $this->model->newQuery();
 
         if ($filters->name !== null) {
             $query->where('name', 'like', "%{$filters->name}%");

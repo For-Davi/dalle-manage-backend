@@ -17,5 +17,4 @@ class SupplierOrderStatusHistory extends Model
         'notes',
         'changed_by',
     ];
-
 }

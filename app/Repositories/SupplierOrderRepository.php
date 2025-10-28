@@ -8,14 +8,9 @@ class SupplierOrderRepository
 {
     public function __construct(protected SupplierOrder $model) {}
 
-    public function getAll()
+    public function getAllByEnterprise()
     {
         return $this->model->all();
-    }
-
-    public function getAllByEnterprise($enterpriseId)
-    {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
     }
 
     public function findById($id)
@@ -44,6 +39,13 @@ class SupplierOrderRepository
     {
         $order = $this->findById($id);
         if ($order) {
+
+            $order->items->each(function ($item) {
+                $item->receivings()->delete();
+            });
+
+            $order->status()->delete();
+            $order->items()->delete();
 
             return $order->delete();
         }

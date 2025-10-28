@@ -33,7 +33,7 @@ Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/verify', [UserController::class, 'verify']);
 Route::post('/newPassword', [UserController::class, 'newPassword']);
 
-Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group(function () {
+Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('department')->group(function () {
         Route::get('/', [DepartmentController::class, 'index']);

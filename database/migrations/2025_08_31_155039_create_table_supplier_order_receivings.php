@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_order_item_id');
             $table->integer('quantity_received');
             $table->date('receiving_date');
-            $table->text('notes')->nullable();
+            $table->text('observation')->nullable();
             $table->unsignedBigInteger('received_by')->nullable();
             $table->timestamps();
             $table->foreign('supplier_order_item_id')->references('id')->on('supplier_order_items');
