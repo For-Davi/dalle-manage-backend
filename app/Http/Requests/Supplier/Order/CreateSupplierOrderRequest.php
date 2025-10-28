@@ -21,10 +21,9 @@ class CreateSupplierOrderRequest extends FormRequest
             'observation' => 'nullable|string',
 
             'items' => 'required|array',
-            'items.*.product_variant_id' => 'required|exists:product_variants,id',
-            'items.*.quantity_requested' => 'required|integer|min:1',
-            'items.*.unit_cost' => 'required|numeric|min:0',
-            'items.*.total_cost' => 'required|numeric|min:0',
+            'items.*.productVariantID' => 'required|exists:product_variants,id',
+            'items.*.quantityRequested' => 'required|integer|min:1',
+            'items.*.unitCost' => 'required|numeric|min:0',
         ];
     }
 
@@ -40,20 +39,17 @@ class CreateSupplierOrderRequest extends FormRequest
             'items.required' => 'É obrigatório informar pelo menos um item.',
             'items.array' => 'Os itens devem estar em formato de lista.',
 
-            'items.*.product_variant_id.required' => 'O item deve conter uma variante de produto.',
-            'items.*.product_variant_id.exists' => 'A variante de produto informada é inválida.',
+            'items.*.productVariantID.required' => 'O item deve conter uma variante de produto.',
+            'items.*.productVariantID.exists' => 'A variante de produto informada é inválida.',
 
-            'items.*.quantity_requested.required' => 'A quantidade solicitada do item é obrigatória.',
-            'items.*.quantity_requested.integer' => 'A quantidade solicitada deve ser um número inteiro.',
-            'items.*.quantity_requested.min' => 'A quantidade solicitada deve ser no mínimo 1.',
+            'items.*.quantityRequested.required' => 'A quantidade solicitada do item é obrigatória.',
+            'items.*.quantityRequested.integer' => 'A quantidade solicitada deve ser um número inteiro.',
+            'items.*.quantityRequested.min' => 'A quantidade solicitada deve ser no mínimo 1.',
 
-            'items.*.unit_cost.required' => 'O custo unitário do item é obrigatório.',
-            'items.*.unit_cost.numeric' => 'O custo unitário deve ser um número.',
-            'items.*.unit_cost.min' => 'O custo unitário não pode ser negativo.',
+            'items.*.unitCost.required' => 'O custo unitário do item é obrigatório.',
+            'items.*.unitCost.numeric' => 'O custo unitário deve ser um número.',
+            'items.*.unitCost.min' => 'O custo unitário não pode ser negativo.',
 
-            'items.*.total_cost.required' => 'O custo total do item é obrigatório.',
-            'items.*.total_cost.numeric' => 'O custo total deve ser um número.',
-            'items.*.total_cost.min' => 'O custo total não pode ser negativo.',
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Supplier\Order\CreateSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\DeleteSupplierOrderRequest;
+use App\Http\Requests\Supplier\Order\ShowSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\UpdateSupplierOrderRequest;
 use App\Http\Resources\Supplier\Order\SupplierOrderListResource;
 use App\Repositories\SupplierOrderRepository;
@@ -29,6 +30,20 @@ class SupplierOrderController
             ErrorLogger::log('Erro ao buscar pedidos:', $e, $request);
 
             return response()->json(['message' => 'Erro ao buscar pedidos'], 500);
+        }
+    }
+
+    public function show(ShowSupplierOrderRequest $request)
+    {
+        try {
+            $order = $this->repository->findById($request->route('orderID'));
+
+            return response()->json(['order' => $order], 200);
+
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar pedido:', $e, $request);
+
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
