@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\Product\Movement\CreateProductMovementDTO;
 use App\Repositories\ProductMovementRepository;
 use App\Repositories\ProductVariantRepository;
+use Illuminate\Support\Facades\Auth;
 
 class ProductMovementService
 {
@@ -28,7 +29,7 @@ class ProductMovementService
                 'supplierID',
                 'description',
             ]),
-            'createdBY' => $request->user()->id,
+            'createdBY' => Auth::user()->id,
             'enterpriseID' => $request->get('enterprise_id'),
         ]);
 

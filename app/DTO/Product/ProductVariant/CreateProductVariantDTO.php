@@ -15,7 +15,7 @@ class CreateProductVariantDTO
         public readonly ?int $grid_item_id,
         public readonly ?int $color_id,
         public readonly float $price,
-        public readonly float $offer,
+        public readonly ?float $offer,
         public readonly float $cost,
         public readonly float $stock_quantity,
         public readonly float $min_stock_alert

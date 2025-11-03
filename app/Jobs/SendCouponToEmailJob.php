@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Mail\CouponMail;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Mail;
+
+class SendCouponToEmailJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $email;
+
+    protected $coupon;
+
+    public function __construct($email, $coupon)
+    {
+        $this->email = $email;
+        $this->coupon = $coupon;
+    }
+
+    public function handle(): void
+    {
+        Mail::to($this->email)->send(new CouponMail($this->coupon));
+    }
+}

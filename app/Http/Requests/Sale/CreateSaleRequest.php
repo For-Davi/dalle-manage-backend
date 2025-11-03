@@ -14,21 +14,22 @@ class CreateSaleRequest extends FormRequest
     protected function prepareForValidation()
     {
 
-        if ($this->has('dataSale.products')) {
+        if ($this->has('saleData.products')) {
             $this->merge([
-                'dataSale' => array_merge($this->input('dataSale', []), [
-                    'products' => collect($this->input('dataSale.products', []))
+                'saleData' => array_merge($this->input('saleData', []), [
+                    'products' => collect($this->input('saleData.products', []))
                         ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
                         ->toArray(),
                 ]),
             ]);
         }
-
-        if ($this->has('payment')) {
+        if ($this->has('paymentData.payment')) {
             $this->merge([
-                'payment' => collect($this->input('payment', []))
-                    ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
-                    ->toArray(),
+                'paymentData' => array_merge($this->input('paymentData', []), [
+                    'payment' => collect($this->input('paymentData.payment', []))
+                        ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
+                        ->toArray(),
+                ]),
             ]);
         }
     }
@@ -37,8 +38,9 @@ class CreateSaleRequest extends FormRequest
     {
         return [
             // REGRAS DO CLIENTE
-            'clientData.id' => 'nullable|exists:clients,id',
-            'clientData.name' => 'nullable|string|min:1|max:100',
+            'clientData' => 'nullable|array',
+            'clientData.id' => 'required_with:clientData|exists:clients,id',
+            'clientData.name' => 'required_with:clientData|string|min:1|max:100',
             'clientData.email' => 'nullable|email|max:100',
             'clientData.dateBirthday' => 'nullable|string',
             'clientData.cpf' => 'nullable|numeric',
@@ -55,17 +57,16 @@ class CreateSaleRequest extends FormRequest
             'clientData.number' => 'nullable|numeric',
             'clientData.complement' => 'nullable|string|max:100',
             'clientData.description' => 'nullable|string|max:500',
-            'sex' => 'nullable|in:M,F',
+            'clientData.sex' => 'nullable|in:M,F',
 
             // REGRAS DA VENDA
-            'dataSale.totalPrice' => 'required|numeric|min:0',
-            'dataSale.products' => 'required|array',
-            'dataSale.products.*.product_variant_id' => 'required|exists:product_variants,id',
-            'dataSale.products.*.newQuantity' => 'required|min:1',
-            'dataSale.products.*.stock_quantity' => 'required|min:1',
-            'dataSale.products.*.variant_active' => 'required|in:1',
+            'saleData.totalPrice' => 'required|numeric|min:0.01',
+            'saleData.products' => 'required|array',
+            'saleData.products.*.productVariantID' => 'required|exists:product_variants,id',
+            'saleData.products.*.newQuantity' => 'required|min:1',
+            'saleData.products.*.variantActive' => 'required|in:1',
 
-            //REGRAS DA ENTREGA
+            // REGRAS DA ENTREGA
             'deliveryData.freight' => 'required|boolean',
             'deliveryData.freightValue' => 'required|numeric|min:0',
             'deliveryData.cep' => 'nullable|numeric',
@@ -77,19 +78,20 @@ class CreateSaleRequest extends FormRequest
             'deliveryData.complement' => 'nullable|string|max:100',
             'deliveryData.recipientName' => 'nullable|string|min:3|max:100',
             'deliveryData.recipientPhone' => 'nullable|string|max:20',
+            'deliveryData.observation' => 'nullable|string|max:5000',
 
             // REGRAS DO PAGAMENTO
             'sellerID' => 'nullable|exists:employees,id',
-            'change' => 'required|numeric|min:0',
-            'fees' => 'required|numeric|min:0',
-            'couponID' => 'nullable',
-            'payment' => 'required|array',
-            'payment.*.paymentType' => 'required|string|exists:types_receipt,name',
-            'payment.*.value' => 'nullable|numeric|min:0',
-            'payment.*.receiptID' => 'required|exists:receipts,id',
-            'payment.*.installment' => 'nullable',
-            'payment.*.installment.value' => 'nullable|integer|min:2|max:12',
-            'payment.*.installment.amount' => 'nullable|numeric',
+            'paymentData.change' => 'required|numeric|min:0',
+            'paymentData.fees' => 'required|numeric|min:0',
+            'paymentData.couponID' => 'nullable',
+            'paymentData.payment' => 'required|array',
+            'paymentData.payment.*.paymentType' => 'required|string|exists:types_receipt,name',
+            'paymentData.payment.*.value' => 'nullable|numeric|min:0',
+            'paymentData.payment.*.receiptID' => 'required|exists:receipts,id',
+            'paymentData.payment.*.installment' => 'nullable',
+            'paymentData.payment.*.installment.value' => 'nullable|integer|min:1|max:12',
+            'paymentData.payment.*.installment.amount' => 'nullable|numeric',
         ];
     }
 
@@ -97,11 +99,14 @@ class CreateSaleRequest extends FormRequest
     {
         return [
             // Cliente
+            'clientData.array' => 'Os dados do cliente devem ser um array',
             'clientData.id.exists' => 'O cliente selecionado não existe.',
+            'clientData.id.required_with' => 'O ID do cliente é obrigatório quando os dados do cliente são informados.',
+            'clientData.name.required_with' => 'O nome do cliente é obrigatório quando os dados do cliente são informados.',
             'clientData.name.string' => 'O nome do cliente deve ser um texto.',
             'clientData.name.min' => 'O nome do cliente deve ter pelo menos 1 caractere.',
             'clientData.name.max' => 'O nome do cliente não pode exceder 100 caracteres.',
-            'clientData.email.email' => 'O e-mail do cliente deve ser válido.',
+            'clientData.email' => 'O e-mail do cliente deve ser válido.',
             'clientData.email.max' => 'O e-mail do cliente não pode exceder 100 caracteres.',
             'clientData.cpf.numeric' => 'O CPF deve ser um número.',
             'clientData.cnpj.numeric' => 'O CNPJ deve ser um número.',
@@ -117,7 +122,7 @@ class CreateSaleRequest extends FormRequest
             'clientData.number.numeric' => 'O número deve ser numérico.',
             'clientData.complement.max' => 'O complemento não pode exceder 100 caracteres.',
             'clientData.description.max' => 'A descrição não pode exceder 500 caracteres.',
-            'sex.in' => 'O sexo deve ser "M" ou "F".',
+            'clientData.sex.in' => 'O sexo deve ser "M" ou "F".',
 
             // Venda
             'saleData.totalPrice.required' => 'O valor total da venda é obrigatório.',
@@ -125,13 +130,11 @@ class CreateSaleRequest extends FormRequest
             'saleData.totalPrice.min' => 'O valor total da venda deve ser no mínimo 0',
             'saleData.products.required' => 'É necessário enviar pelo menos um produto.',
             'saleData.products.array' => 'Os produtos devem ser um array.',
-            'saleData.products.*.product_variant_id.required' => 'O ID da variante do produto é obrigatório.',
-            'saleData.products.*.product_variant_id.exists' => 'O produto selecionado não existe.',
+            'saleData.products.*.productVariantID.required' => 'O ID da variante do produto é obrigatório.',
+            'saleData.products.*.productVariantID.exists' => 'O produto selecionado não existe.',
             'saleData.products.*.newQuantity.required' => 'A quantidade do produto é obrigatória.',
             'saleData.products.*.newQuantity.min' => 'A quantidade do produto deve ser no mínimo 1.',
-            'saleData.products.*.stock_quantity.required' => 'A quantidade em estoque é obrigatória.',
-            'saleData.products.*.stock_quantity.min' => 'A quantidade em estoque deve ser no mínimo 1.',
-            'saleData.products.*.variant_active.required' => 'Deve ser informado se a variante está ativa ou não',
+            'saleData.products.*.variantActive.required' => 'Deve ser informado se a variante está ativa ou não',
 
             // Entrega
             'deliveryData.freightValue.required' => 'O valor do frete é obrigatório.',
@@ -148,26 +151,26 @@ class CreateSaleRequest extends FormRequest
             'deliveryData.recipientName.max' => 'O nome do recebedor não pode exceder 100 caracteres.',
             'deliveryData.recipientPhone.max' => 'O telefone do recebedor não pode exceder 20 caracteres.',
 
-            //Pagamento
+            // Pagamento
             'sellerID.exists' => 'O vendedor selecionado não existe.',
-            'change.required' => 'O valor do troco é obrigatório.',
-            'change.numeric' => 'O valor do troco deve ser numérico.',
-            'change.min' => 'O valor do troco não pode ser negativo.',
-            'fees.required' => 'O valor das tarifas é obrigatório.',
-            'fees.numeric' => 'O valor das tarifas deve ser numérico.',
-            'fees.min' => 'O valor das tarifas não pode ser negativo.',
-            'payment.required' => 'É necessário enviar pelo menos um pagamento.',
-            'payment.array' => 'O pagamento deve ser um array.',
-            'payment.*.paymentType.required' => 'O tipo de pagamento é obrigatório.',
-            'payment.*.paymentType.exists' => 'O tipo de pagamento selecionado não existe.',
-            'payment.*.value.numeric' => 'O valor do pagamento deve ser numérico.',
-            'payment.*.value.min' => 'O valor do pagamento não pode ser negativo.',
-            'payment.*.receiptID.required' => 'O recebimento é obrigatório.',
-            'payment.*.receiptID.exists' => 'O recebimento selecionado não existe.',
-            'payment.*.installment.value.integer' => 'O número de parcelas deve ser um inteiro.',
-            'payment.*.installment.value.min' => 'O mínimo de parcelas é 2.',
-            'payment.*.installment.value.max' => 'O máximo de parcelas é 12.',
-            'payment.*.installment.amount.numeric' => 'O valor da parcela deve ser numérico.',
+            'paymentData.change.required' => 'O valor do troco é obrigatório.',
+            'paymentData.change.numeric' => 'O valor do troco deve ser numérico.',
+            'paymentData.change.min' => 'O valor do troco não pode ser negativo.',
+            'paymentData.fees.required' => 'O valor das tarifas é obrigatório.',
+            'paymentData.fees.numeric' => 'O valor das tarifas deve ser numérico.',
+            'paymentData.fees.min' => 'O valor das tarifas não pode ser negativo.',
+            'paymentData.payment.required' => 'É necessário enviar pelo menos um pagamento.',
+            'paymentData.payment.array' => 'O pagamento deve ser um array.',
+            'paymentData.payment.*.paymentType.required' => 'O tipo de pagamento é obrigatório.',
+            'paymentData.payment.*.paymentType.exists' => 'O tipo de pagamento selecionado não existe.',
+            'paymentData.payment.*.value.numeric' => 'O valor do pagamento deve ser numérico.',
+            'paymentData.payment.*.value.min' => 'O valor do pagamento não pode ser negativo.',
+            'paymentData.payment.*.receiptID.required' => 'O recebimento é obrigatório.',
+            'paymentData.payment.*.receiptID.exists' => 'O recebimento selecionado não existe.',
+            'paymentData.payment.*.installment.value.integer' => 'O número de parcelas deve ser um inteiro.',
+            'paymentData.payment.*.installment.value.min' => 'O mínimo de parcelas é 1.',
+            'paymentData.payment.*.installment.value.max' => 'O máximo de parcelas é 12.',
+            'paymentData.payment.*.installment.amount.numeric' => 'O valor da parcela deve ser numérico.',
         ];
     }
 }

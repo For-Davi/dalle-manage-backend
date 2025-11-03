@@ -7,31 +7,47 @@ use Illuminate\Validation\ValidationException;
 
 class SaleHelper
 {
-    public static function productValidation($enterpriseId, $productVariantID)
+    public static function findPaymentMethodID($name, $enterpriseId, $receiptId)
     {
-        $existingProduct = DB::table('product_variants')->where('enterpriseID', $enterpriseId)->where('id', $productVariantID)->first();
+        $existPaymentMethod = DB::table('types_receipt')->where('enterprise_id', $enterpriseId)->where('name', $name)->first();
 
-        if(!$existingProduct){
-            throw ValidationException::withMessages([
-                    'dataSale.products.*.product_variant_id' => ['O produto selecionado não existe.'],
-                ]);
-        }
+        if ($existPaymentMethod) {
 
-        if($existingProduct && $existingProduct->active === 0){
-            throw ValidationException::withMessages([
-                    'dataSale.products.*.product_variant_id' => ['O produto selecionado não está ativo.'],
-                ]);
-        }
+            $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
+                ->where('type_receipt_id', $existPaymentMethod->id)
+                ->first();
 
-        if($existingProduct && $existingProduct->stock_quantity === 0){
-            throw ValidationException::withMessages([
-                    'dataSale.products.*.stock_quantity' => ['O produto informado está com sua quantidade de estoque 0.'],
+            if ($isTypePaymentReceiptCorrect) {
+
+                return $existPaymentMethod->id;
+
+            } else {
+
+                throw ValidationException::withMessages([
+                    'paymentData.payment.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
                 ]);
-        }
-        if($existingProduct && $newQuantity > $existingProduct->stock_quantity){
+
+            }
+        } else {
             throw ValidationException::withMessages([
-                    'dataSale.products.*.stock_quantity' => ['A quantidade do produto informado excede a quantidade que possui em estoque.'],
-                ]);
+                'paymentData.payment.*.paymentType' => ['O tipo de pagamento informado não existe.'],
+            ]);
         }
-    } 
+    }
+
+    public static function findReceipt($receiptId)
+    {
+        $existReceipt = DB::table('receipts')->where('id', $receiptId)->first();
+
+        if (! $existReceipt) {
+            throw ValidationException::withMessages([
+                'paymentData.payment.*.receiptID' => ['O tipo de recebimento informado não existe.'],
+            ]);
+        }
+        if ($existReceipt && $existReceipt->active === 0) {
+            throw ValidationException::withMessages([
+                'paymentData.payment.*.receiptID' => ['O tipo de recebimento informado não está ativo.'],
+            ]);
+        }
+    }
 }

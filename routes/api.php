@@ -241,5 +241,8 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
 
     Route::prefix('sale')->group(function () {
         Route::post('/', [SaleController::class, 'store']);
+        Route::get('/{saleID}', [SaleController::class, 'showCouponInfos']);
+        Route::post('/export', [SaleController::class, 'export']);
+        Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
     });
 });
