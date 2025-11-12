@@ -3,7 +3,6 @@
 namespace App\DTO\User;
 
 use App\DTO\BaseDTO;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserStartDTO extends BaseDTO

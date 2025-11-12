@@ -9,9 +9,9 @@ class GridGroupRepository
 {
     public function __construct(protected GridGroup $model) {}
 
-    public function getAllByEnterprise($enterpriseId, $relations = null)
+    public function getAllByEnterprise($relations = null)
     {
-        $query = $this->model->where('enterprise_id', $enterpriseId);
+        $query = $this->model->query();
 
         if ($relations) {
             $query->with($relations);

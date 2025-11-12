@@ -16,9 +16,9 @@ class UserRepository
         return $this->model->all();
     }
 
-    public function getAllByEnterprise($enterpriseId, array $relations = [])
+    public function getAllByEnterprise(array $relations = [])
     {
-        $query = $this->model->where('enterprise_id', $enterpriseId);
+        $query = $this->model->query();
 
         if (! empty($relations)) {
             $query->with($relations);

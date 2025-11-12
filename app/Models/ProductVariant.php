@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\EnterpriseScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
@@ -27,6 +28,11 @@ class ProductVariant extends Model
         'color_id',
         'offer',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new EnterpriseScope);
+    }
 
     public function setNameAttribute($value)
     {

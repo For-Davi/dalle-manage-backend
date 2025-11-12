@@ -17,7 +17,6 @@ class SupplierCatalogService
 
         $catalogDTO = CreateSupplierCatalogDTO::fromRequest([
             ...$request->only(['productVariantID', 'price', 'supplierID', 'description']),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($catalogDTO->toArray());

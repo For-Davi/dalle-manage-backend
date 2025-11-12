@@ -8,9 +8,9 @@ class TransactionCategoryRepository
 {
     public function __construct(protected TransactionCategory $model) {}
 
-    public function getAllByEnterprise($enterpriseId)
+    public function getAllByEnterprise()
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
+        return $this->model->get();
     }
 
     public function findById($id)

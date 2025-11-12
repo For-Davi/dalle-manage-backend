@@ -2,15 +2,16 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CodeHelper
 {
-    public static function existsCode($enterpriseId, $code, $mode, $variantID = null)
+    public static function existsCode($code, $mode, $variantID = null)
     {
         $existingCode = DB::table('product_variants')
-            ->where('enterprise_id', $enterpriseId)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
             ->where('code', $code)
             ->first();
 

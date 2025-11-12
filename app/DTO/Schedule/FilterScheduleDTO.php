@@ -3,6 +3,7 @@
 namespace App\DTO\Schedule;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class FilterScheduleDTO extends BaseDTO
 {
@@ -19,7 +20,7 @@ class FilterScheduleDTO extends BaseDTO
             period: $data['period'],
             type: $data['type'],
             category: $data['category'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 }

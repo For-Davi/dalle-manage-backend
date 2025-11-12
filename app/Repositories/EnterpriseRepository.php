@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Enterprise;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EnterpriseRepository
@@ -14,9 +15,9 @@ class EnterpriseRepository
         return $this->model->all();
     }
 
-    public function findById($id)
+    public function findById($id = null)
     {
-        return $this->model->find($id);
+        return $this->model->find($id ?? Auth::user()->enterprise_id);
     }
 
     public function findByCpf($cpf)
@@ -46,8 +47,9 @@ class EnterpriseRepository
         return null;
     }
 
-    public function delete($id)
+    public function delete()
     {
+        $id = Auth::user()->enterpise_id;
         $enterprise = $this->findById($id);
         if ($enterprise) {
             // CLIENTS

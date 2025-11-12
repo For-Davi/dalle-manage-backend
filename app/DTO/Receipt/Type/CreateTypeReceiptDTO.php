@@ -3,6 +3,7 @@
 namespace App\DTO\Receipt\Type;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateTypeReceiptDTO extends BaseDTO
 {
@@ -15,7 +16,7 @@ class CreateTypeReceiptDTO extends BaseDTO
     {
         return new self(
             name: $data['name'],
-            enterprise_id: $data['enterpriseID']
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

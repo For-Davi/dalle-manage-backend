@@ -14,14 +14,12 @@ class SupplierCategoryService
     public function create($request)
     {
         SupplierCategoryHelper::existsCategory(
-            $request->get('enterprise_id'),
             $request->name,
             'create'
         );
 
         $categoryDTO = CreateSupplierCategoryDTO::fromRequest([
             ...$request->only(['name']),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($categoryDTO->toArray());
@@ -30,7 +28,6 @@ class SupplierCategoryService
     public function update($request)
     {
         SupplierCategoryHelper::existsCategory(
-            $request->get('enterprise_id'),
             $request->name,
             'update',
             $request->id

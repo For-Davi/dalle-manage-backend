@@ -27,7 +27,7 @@ class EmployeeController
     public function index(Request $request)
     {
         try {
-            $employees = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $employees = $this->repository->getAllByEnterprise();
 
             return response()->json(['employees' => EmployeeTableResource::collection($employees)], 200);
         } catch (\Exception $e) {
@@ -59,7 +59,7 @@ class EmployeeController
 
             if ($employee) {
                 DB::commit();
-                $employees = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $employees = $this->repository->getAllByEnterprise();
 
                 return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Removido acesso ao sistema'], 200);
             }
@@ -80,7 +80,7 @@ class EmployeeController
 
             if ($employee) {
                 DB::commit();
-                $employees = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $employees = $this->repository->getAllByEnterprise();
 
                 return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Criado acesso ao sistema'], 201);
             }
@@ -97,7 +97,6 @@ class EmployeeController
         try {
             $employeeFilterDTO = FilterEmployeeDTO::fromRequest([
                 ...$request->only(['name', 'email', 'sex', 'cpf', 'cnpj', 'active', 'department', 'hasLoginAccess']),
-                'enterprise_id' => $request->get('enterprise_id'),
             ]);
             $employees = $this->repository->getAllWithFilter($employeeFilterDTO);
 
@@ -118,7 +117,7 @@ class EmployeeController
             if ($employee) {
                 DB::commit();
 
-                $employees = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $employees = $this->repository->getAllByEnterprise();
 
                 return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário cadastrado'], 201);
             }
@@ -140,7 +139,7 @@ class EmployeeController
             if ($employee) {
                 DB::commit();
 
-                $employees = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $employees = $this->repository->getAllByEnterprise();
 
                 return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário atualizado'], 200);
             }
@@ -162,7 +161,7 @@ class EmployeeController
 
             if ($employee) {
                 DB::commit();
-                $employees = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $employees = $this->repository->getAllByEnterprise();
 
                 return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário excluído'], 200);
             }

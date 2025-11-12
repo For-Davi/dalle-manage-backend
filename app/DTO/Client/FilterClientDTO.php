@@ -3,6 +3,7 @@
 namespace App\DTO\Client;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class FilterClientDTO extends BaseDTO
 {
@@ -27,7 +28,7 @@ class FilterClientDTO extends BaseDTO
             country: $data['country'] !== '' ? $data['country'] : null,
             state: $data['state'] !== '' ? $data['state'] : null,
             city: $data['city'] !== '' ? $data['city'] : null,
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

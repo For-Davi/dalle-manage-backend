@@ -14,14 +14,12 @@ class TransactionCategoryService
     public function create($request)
     {
         TransactionCategoryHelper::existsCategory(
-            $request->get('enterprise_id'),
             $request->name,
             'create'
         );
 
         $categoryDTO = CreateTransactionCategoryDTO::fromRequest([
             ...$request->only(['name']),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($categoryDTO->toArray());
@@ -30,7 +28,6 @@ class TransactionCategoryService
     public function update($request)
     {
         TransactionCategoryHelper::existsCategory(
-            $request->get('enterprise_id'),
             $request->name,
             'update',
             $request->id

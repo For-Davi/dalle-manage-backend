@@ -32,6 +32,6 @@ class SettingAppearanceService
             ]),
         ]);
 
-        return $this->repository->update($request->get('enterprise_id'), $appearanceDTO->toArray());
+        return $this->repository->update($appearanceDTO->toArray());
     }
 }

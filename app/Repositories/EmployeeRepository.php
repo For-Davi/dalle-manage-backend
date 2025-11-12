@@ -10,9 +10,9 @@ class EmployeeRepository
 {
     public function __construct(protected Employee $model) {}
 
-    public function getAllByEnterprise($enterpriseId)
+    public function getAllByEnterprise()
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
+        return $this->model->get();
     }
 
     public function findById($id)

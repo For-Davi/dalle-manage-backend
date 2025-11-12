@@ -19,7 +19,7 @@ class SettingSystemController
     public function show(Request $request)
     {
         try {
-            $system = $this->repository->getByEnterprise($request->get('enterprise_id'));
+            $system = $this->repository->getByEnterprise();
 
             return response()->json(['system' => $system], 200);
         } catch (\Exception $e) {
@@ -38,7 +38,7 @@ class SettingSystemController
             if ($system) {
                 DB::commit();
 
-                $system = $this->repository->getByEnterprise($request->get('enterprise_id'));
+                $system = $this->repository->getByEnterprise();
 
                 return response()->json(['system' => $system, 'message' => 'Sistema atualizado'], 200);
             }

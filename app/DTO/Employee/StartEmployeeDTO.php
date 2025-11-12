@@ -3,6 +3,7 @@
 namespace App\DTO\Employee;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class StartEmployeeDTO extends BaseDTO
 {
@@ -21,7 +22,7 @@ class StartEmployeeDTO extends BaseDTO
             name: $data['name'],
             email: $data['email'],
             department_id: $data['departmentId'],
-            enterprise_id: $data['enterpriseId'],
+            enterprise_id: Auth::user()->enterprise_id,
             has_login_access: $data['hasLoginAccess'],
             user_id: $data['userId'],
         );

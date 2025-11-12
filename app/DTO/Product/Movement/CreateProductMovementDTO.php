@@ -3,6 +3,7 @@
 namespace App\DTO\Product\Movement;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CreateProductMovementDTO extends BaseDTO
@@ -49,7 +50,7 @@ class CreateProductMovementDTO extends BaseDTO
             product_variant_id: $data['variantID'],
             supplier_id: $data['supplierID'],
             created_by: $data['createdBY'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
             description: $data['description'],
         );
     }

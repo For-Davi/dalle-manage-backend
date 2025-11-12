@@ -24,7 +24,7 @@ class SupplierController
     public function index(Request $request)
     {
         try {
-            $suppliers = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $suppliers = $this->repository->getAllByEnterprise();
 
             return response()->json(['suppliers' => $suppliers], 200);
         } catch (\Exception $e) {
@@ -37,7 +37,7 @@ class SupplierController
     public function list(Request $request)
     {
         try {
-            $suppliers = $this->repository->getAllByEnterprise($request->get('enterprise_id'), ['id', 'name']);
+            $suppliers = $this->repository->getAllByEnterprise(['id', 'name']);
 
             return response()->json(['suppliers' => $suppliers], 200);
         } catch (\Exception $e) {
@@ -66,7 +66,6 @@ class SupplierController
         try {
             $supplierFilterDTO = FilterSupplierDTO::fromRequest([
                 ...$request->only(['name', 'email', 'cpf', 'cnpj', 'active', 'country', 'state', 'city', 'category']),
-                'enterprise_id' => $request->get('enterprise_id'),
             ]);
             $suppliers = $this->repository->getAllWithFilter($supplierFilterDTO);
 
@@ -87,7 +86,7 @@ class SupplierController
             if ($supplier) {
                 DB::commit();
 
-                $suppliers = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $suppliers = $this->repository->getAllByEnterprise();
 
                 return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor cadastrado'], 201);
             }
@@ -109,7 +108,7 @@ class SupplierController
             if ($supplier) {
                 DB::commit();
 
-                $suppliers = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $suppliers = $this->repository->getAllByEnterprise();
 
                 return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor atualizado'], 200);
             }
@@ -131,7 +130,7 @@ class SupplierController
 
             if ($supplier) {
                 DB::commit();
-                $suppliers = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $suppliers = $this->repository->getAllByEnterprise();
 
                 return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor excluído'], 200);
             }

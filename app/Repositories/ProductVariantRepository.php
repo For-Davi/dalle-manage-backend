@@ -10,9 +10,9 @@ class ProductVariantRepository
 {
     public function __construct(protected ProductVariant $model) {}
 
-    public function getAllByEnterprise($enterpriseId, $relations = null)
+    public function getAllByEnterprise($relations = null)
     {
-        $query = $this->model->where('enterprise_id', $enterpriseId);
+        $query = $this->model->query();
 
         if ($relations) {
             $query->with($relations);
@@ -21,10 +21,9 @@ class ProductVariantRepository
         return $query->get();
     }
 
-    public function getAllBySearch($enterpriseId, $value, $relations = null)
+    public function getAllBySearch($value, $relations = null)
     {
         $query = $this->model
-            ->where('product_variants.enterprise_id', $enterpriseId)
             ->leftJoin('products', 'products.id', '=', 'product_variants.product_id');
 
         if ($relations) {

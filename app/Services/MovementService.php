@@ -31,7 +31,8 @@ class MovementService
 
                 $movementDTO = CreateOrUpdateMovementDTO::fromRequest(
                     $request,
-                    'date' => $date->format('d-m-Y'));
+                    ['date' => $date->format('d-m-Y')]
+                );
 
                 $movements[] = $this->repository->create($movementDTO->toArray());
             }
@@ -46,7 +47,6 @@ class MovementService
                 'description',
                 'type',
             ]),
-            'enterpriseID' => $request->get('enterprise_id'),
             'date' => $requestDate->format('d-m-Y'),
         ]);
 
@@ -64,7 +64,6 @@ class MovementService
                 'description',
                 'type',
             ]),
-            'enterpriseID' => $request->get('enterprise_id'),
             'date' => $requestDate->format('d-m-Y'),
         ]);
 
@@ -73,12 +72,10 @@ class MovementService
 
     public function export($request)
     {
-        $enterpriseID = $request->get('enterprise_id');
         $dateTime = now()->format('Ymd_His');
 
         $exportMovementDTO = FilterMovementDTO::fromRequest([
             ...$request->only(['period', 'category', 'type']),
-            'enterpriseID' => $enterpriseID,
         ]);
         $movements = $this->repository->getAllWithFilter($exportMovementDTO->toArray(), ['category']);
 

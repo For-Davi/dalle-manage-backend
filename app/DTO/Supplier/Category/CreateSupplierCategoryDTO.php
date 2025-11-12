@@ -3,6 +3,7 @@
 namespace App\DTO\Supplier\Category;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateSupplierCategoryDTO extends BaseDTO
 {
@@ -15,7 +16,7 @@ class CreateSupplierCategoryDTO extends BaseDTO
     {
         return new self(
             name: $data['name'],
-            enterprise_id: $data['enterpriseID']
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

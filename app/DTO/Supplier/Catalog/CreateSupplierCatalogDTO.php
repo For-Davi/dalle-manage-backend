@@ -3,6 +3,7 @@
 namespace App\DTO\Supplier\Catalog;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateSupplierCatalogDTO extends BaseDTO
 {
@@ -20,7 +21,7 @@ class CreateSupplierCatalogDTO extends BaseDTO
             price: $data['price'],
             product_variant_id: $data['productVariantID'],
             supplier_id: $data['supplierID'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
             description: $data['description'] ?? null,
         );
     }

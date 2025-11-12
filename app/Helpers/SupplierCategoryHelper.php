@@ -2,15 +2,16 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class SupplierCategoryHelper
 {
-    public static function existsCategory($enterpriseId, $name, $mode, $categoryId = null)
+    public static function existsCategory($name, $mode, $categoryId = null)
     {
         $existingCategory = DB::table('supplier_categories')
-            ->where('enterprise_id', $enterpriseId)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
             ->where('name', $name)
             ->first();
 

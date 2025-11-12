@@ -3,6 +3,7 @@
 namespace App\DTO\User;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class CreateUserDTO extends BaseDTO
@@ -22,7 +23,7 @@ class CreateUserDTO extends BaseDTO
             name: $data['name'],
             password: Hash::make($data['password']),
             email: $data['email'],
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id,
             department_id: $data['departmentId'],
             role_id: $data['roleId']
         );

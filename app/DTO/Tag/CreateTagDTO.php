@@ -3,6 +3,7 @@
 namespace App\DTO\Tag;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateTagDTO extends BaseDTO
 {
@@ -15,7 +16,7 @@ class CreateTagDTO extends BaseDTO
     {
         return new self(
             name: $data['name'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 }

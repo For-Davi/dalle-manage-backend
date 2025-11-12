@@ -3,6 +3,7 @@
 namespace App\DTO\User;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class FilterUserDTO extends BaseDTO
 {
@@ -21,7 +22,7 @@ class FilterUserDTO extends BaseDTO
             name: $data['name'] !== '' ? $data['name'] : null,
             email: $data['email'] !== '' ? $data['email'] : null,
             department_id: $data['department'],
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id,
             role_id: $data['role'],
             active: $data['active']
         );

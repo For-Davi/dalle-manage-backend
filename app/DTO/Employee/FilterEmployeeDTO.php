@@ -3,6 +3,7 @@
 namespace App\DTO\Employee;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class FilterEmployeeDTO extends BaseDTO
 {
@@ -29,7 +30,7 @@ class FilterEmployeeDTO extends BaseDTO
             active: $data['active'],
             has_login_access: $data['hasLoginAccess'],
             department_id: $data['department'],
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

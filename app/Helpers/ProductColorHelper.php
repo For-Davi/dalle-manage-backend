@@ -2,15 +2,16 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ProductColorHelper
 {
-    public static function existsColor($enterpriseId, $name, $mode, $colorId = null)
+    public static function existsColor($name, $mode, $colorId = null)
     {
         $existingColor = DB::table('product_colors')
-            ->where('enterprise_id', $enterpriseId)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
             ->where('name', $name)
             ->first();
 

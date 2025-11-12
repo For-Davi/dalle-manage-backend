@@ -19,7 +19,7 @@ class EnterpriseController
     public function show(Request $request)
     {
         try {
-            $enterprise = $this->repository->findById($request->get('enterprise_id'));
+            $enterprise = $this->repository->findById();
 
             return response()->json(['enterprise' => $enterprise], 200);
         } catch (\Exception $e) {
@@ -53,7 +53,7 @@ class EnterpriseController
     {
         try {
             DB::beginTransaction();
-            $enterprise = $this->repository->delete($request->get('enterprise_id'));
+            $enterprise = $this->repository->delete();
 
             if ($enterprise) {
                 $this->repository->delete($enterprise);

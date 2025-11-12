@@ -3,6 +3,7 @@
 namespace App\DTO\Product;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class FilterProductDTO extends BaseDTO
 {
@@ -22,7 +23,7 @@ class FilterProductDTO extends BaseDTO
             sku: $data['sku'],
             stockCritical: $data['stockCritical'],
             categoryID: $data['category'],
-            enterpriseID: $data['enterpriseID'],
+            enterpriseID: Auth::user()->enterprise_id,
             active: $data['active']
         );
     }

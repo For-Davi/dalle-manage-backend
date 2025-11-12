@@ -14,14 +14,12 @@ class ProductCategoryService
     public function create($request)
     {
         ProductCategoryHelper::existsCategory(
-            $request->get('enterprise_id'),
             $request->name,
             'create'
         );
 
         $categoryDTO = CreateProductCategoryDTO::fromRequest([
             ...$request->only(['name']),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($categoryDTO->toArray());
@@ -30,7 +28,6 @@ class ProductCategoryService
     public function update($request)
     {
         ProductCategoryHelper::existsCategory(
-            $request->get('enterprise_id'),
             $request->name,
             'update',
             $request->id

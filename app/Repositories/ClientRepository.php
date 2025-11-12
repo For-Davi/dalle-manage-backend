@@ -9,9 +9,9 @@ class ClientRepository
 {
     public function __construct(protected Client $model) {}
 
-    public function getAllByEnterprise($enterpriseId)
+    public function getAllByEnterprise()
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
+        return $this->model->get();
     }
 
     public function findById($id)

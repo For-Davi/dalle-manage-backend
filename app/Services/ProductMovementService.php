@@ -29,7 +29,6 @@ class ProductMovementService
                 'description',
             ]),
             'createdBY' => $request->user()->id,
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         $this->repository->create($movementDTO->toArray());

@@ -3,6 +3,7 @@
 namespace App\DTO\Transaction\Category;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateTransactionCategoryDTO extends BaseDTO
 {
@@ -15,7 +16,7 @@ class CreateTransactionCategoryDTO extends BaseDTO
     {
         return new self(
             name: $data['name'],
-            enterprise_id: $data['enterpriseID']
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

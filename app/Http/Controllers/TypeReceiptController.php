@@ -21,7 +21,7 @@ class TypeReceiptController
     public function index(Request $request)
     {
         try {
-            $types = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $types = $this->repository->getAllByEnterprise();
 
             return response()->json(['types' => $types], 200);
         } catch (\Exception $e) {
@@ -40,7 +40,7 @@ class TypeReceiptController
             if ($type) {
                 DB::commit();
 
-                $types = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $types = $this->repository->getAllByEnterprise();
 
                 return response()->json(['types' => $types, 'message' => 'Tipo de recebimento cadastrado'], 201);
             }
@@ -62,7 +62,7 @@ class TypeReceiptController
             if ($type) {
                 DB::commit();
 
-                $types = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $types = $this->repository->getAllByEnterprise();
 
                 return response()->json(['types' => $types, 'message' => 'Tipo de recebimento atualizado'], 200);
             }
@@ -84,7 +84,7 @@ class TypeReceiptController
 
             if ($type) {
                 DB::commit();
-                $types = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $types = $this->repository->getAllByEnterprise();
 
                 return response()->json(['types' => $types, 'message' => 'Tipo de recebimento excluído'], 200);
             }

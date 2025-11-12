@@ -22,7 +22,7 @@ class ReceiptController
     public function index(Request $request)
     {
         try {
-            $receipts = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $receipts = $this->repository->getAllByEnterprise();
 
             return response()->json(['receipts' => $receipts], 200);
         } catch (\Exception $e) {
@@ -54,7 +54,7 @@ class ReceiptController
             if ($receipt) {
                 DB::commit();
 
-                $receipts = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $receipts = $this->repository->getAllByEnterprise();
 
                 return response()->json(['receipts' => $receipts, 'message' => 'Recebimento cadastrado'], 201);
             }
@@ -75,7 +75,7 @@ class ReceiptController
 
             if ($receipt) {
                 DB::commit();
-                $receipts = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $receipts = $this->repository->getAllByEnterprise();
 
                 return response()->json(['receipts' => $receipts, 'message' => 'Recebimento atualizado'], 200);
             }
@@ -97,7 +97,7 @@ class ReceiptController
 
             if ($receipt) {
                 DB::commit();
-                $receipts = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $receipts = $this->repository->getAllByEnterprise();
 
                 return response()->json(['receipts' => $receipts, 'message' => 'Recebimento excluído'], 200);
             }

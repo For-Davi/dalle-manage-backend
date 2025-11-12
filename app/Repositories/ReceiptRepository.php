@@ -8,12 +8,9 @@ class ReceiptRepository
 {
     public function __construct(protected Receipts $model) {}
 
-    public function getAllByEnterprise($enterpriseId)
+    public function getAllByEnterprise()
     {
-        return $this->model
-            ->where('enterprise_id', $enterpriseId)
-            ->with('type')
-            ->get();
+        return $this->model->with('type')->get();
     }
 
     public function findById($id)

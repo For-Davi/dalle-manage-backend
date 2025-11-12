@@ -38,7 +38,6 @@ class ScheduleService
                         'description',
                         'type',
                     ]),
-                    'enterpriseID' => $request->get('enterprise_id'),
                     'date' => $date->format('d-m-Y'),
                 ]);
 
@@ -55,7 +54,6 @@ class ScheduleService
                 'description',
                 'type',
             ]),
-            'enterpriseID' => $request->get('enterprise_id'),
             'date' => $requestDate->format('d-m-Y'),
         ]);
 
@@ -73,7 +71,6 @@ class ScheduleService
                 'description',
                 'type',
             ]),
-            'enterpriseID' => $request->get('enterprise_id'),
             'date' => $requestDate->format('d-m-Y'),
         ]);
 
@@ -128,12 +125,10 @@ class ScheduleService
 
     public function export($request)
     {
-        $enterpriseID = $request->get('enterprise_id');
         $dateTime = now()->format('Ymd_His');
 
         $exportScheduleDTO = FilterScheduleDTO::fromRequest([
             ...$request->only(['period', 'category', 'type']),
-            'enterpriseID' => $enterpriseID,
         ]);
         $schedules = $this->repository->getAllWithFilter($exportScheduleDTO->toArray(), ['category']);
 

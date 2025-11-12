@@ -9,9 +9,9 @@ class SupplierCategoryRepository
 {
     public function __construct(protected SupplierCategory $model) {}
 
-    public function getAllByEnterprise($enterpriseId)
+    public function getAllByEnterprise()
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
+        return $this->model->get();
     }
 
     public function findById($id)
@@ -42,7 +42,6 @@ class SupplierCategoryRepository
 
         if ($category) {
             DB::table('suppliers')
-                ->where('enterprise_id', $category->enterprise_id)
                 ->where('supplier_category_id', $category->id)
                 ->update(['supplier_category_id' => null]);
 

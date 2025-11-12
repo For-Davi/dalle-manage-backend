@@ -3,6 +3,7 @@
 namespace App\DTO\Schedule;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateOrUpdateScheduleDTO extends BaseDTO
 {
@@ -23,7 +24,7 @@ class CreateOrUpdateScheduleDTO extends BaseDTO
             transaction_category_id: $data['transactionCategoryID'],
             value: $data['value'],
             description: $data['description'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 }

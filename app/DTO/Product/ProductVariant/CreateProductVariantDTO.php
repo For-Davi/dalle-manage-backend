@@ -3,6 +3,7 @@
 namespace App\DTO\Product\ProductVariant;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateProductVariantDTO extends BaseDTO
 {
@@ -39,7 +40,7 @@ class CreateProductVariantDTO extends BaseDTO
             offer: $data['offer'],
             stock_quantity: $data['stockQuantity'],
             min_stock_alert: $data['minStockAlert'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\EnterpriseScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -34,6 +35,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new EnterpriseScope);
     }
 
     public function image()

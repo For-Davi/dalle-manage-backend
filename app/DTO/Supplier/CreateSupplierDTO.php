@@ -3,6 +3,7 @@
 namespace App\DTO\Supplier;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateSupplierDTO extends BaseDTO
 {
@@ -49,7 +50,7 @@ class CreateSupplierDTO extends BaseDTO
             supplier_category_id: $data['categorySupplierId'],
             description: $data['description'],
             complement: $data['complement'],
-            enterprise_id: $data['enterpriseId']
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

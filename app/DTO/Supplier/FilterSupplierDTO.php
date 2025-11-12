@@ -3,6 +3,7 @@
 namespace App\DTO\Supplier;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class FilterSupplierDTO extends BaseDTO
 {
@@ -30,7 +31,7 @@ class FilterSupplierDTO extends BaseDTO
             country: $data['country'] !== '' ? $data['country'] : null,
             state: $data['state'] !== '' ? $data['state'] : null,
             city: $data['city'] !== '' ? $data['city'] : null,
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id,
             active: $data['active']
         );
     }

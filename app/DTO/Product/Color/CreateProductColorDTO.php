@@ -3,6 +3,7 @@
 namespace App\DTO\Product\Color;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateProductColorDTO extends BaseDTO
 {
@@ -17,7 +18,7 @@ class CreateProductColorDTO extends BaseDTO
         return new self(
             name: $data['name'],
             hex_color_code: $data['hexColorCode'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 }

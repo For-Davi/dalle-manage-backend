@@ -2,9 +2,9 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Auth;
 
 class DepartmentHelper
 {

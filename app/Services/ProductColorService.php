@@ -14,14 +14,12 @@ class ProductColorService
     public function create($request)
     {
         ProductColorHelper::existsColor(
-            $request->get('enterprise_id'),
             $request->name,
             'create'
         );
 
         $productColorDTO = CreateProductColorDTO::fromRequest([
             ...$request->only(['name', 'hexColorCode']),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($productColorDTO->toArray());
@@ -30,7 +28,6 @@ class ProductColorService
     public function update($request)
     {
         ProductColorHelper::existsColor(
-            $request->get('enterprise_id'),
             $request->name,
             'update',
             $request->id

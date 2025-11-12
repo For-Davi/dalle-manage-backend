@@ -3,6 +3,7 @@
 namespace App\DTO\Movement;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class FilterMovementDTO extends BaseDTO
 {
@@ -19,7 +20,7 @@ class FilterMovementDTO extends BaseDTO
             period: $data['period'],
             type: $data['type'],
             category: $data['category'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

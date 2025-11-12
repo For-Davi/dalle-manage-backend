@@ -10,9 +10,9 @@ class ScheduleRepository
 {
     public function __construct(protected Schedule $model) {}
 
-    public function getAllByEnterprise($enterpriseID, $onlyPeriodActual = false, array $relations = [])
+    public function getAllByEnterprise($onlyPeriodActual = false, array $relations = [])
     {
-        $query = $this->model->where('enterprise_id', $enterpriseID);
+        $query = $this->model->query();
 
         if (! empty($relations)) {
             $query->with($relations);
@@ -72,12 +72,11 @@ class ScheduleRepository
         return $query->get();
     }
 
-    public function getPeriods($enterpriseID)
+    public function getPeriods()
     {
         return $this->model
-            ->where('enterprise_id', $enterpriseID)
             ->selectRaw("
-            DISTINCT 
+            DISTINCT
             CONCAT(SUBSTRING(`date`, 4, 2), '-', SUBSTRING(`date`, 7, 4)) as period,
             CAST(SUBSTRING(`date`, 7, 4) AS UNSIGNED) as year_part,
             CAST(SUBSTRING(`date`, 4, 2) AS UNSIGNED) as month_part
