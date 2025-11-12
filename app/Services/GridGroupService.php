@@ -11,8 +11,6 @@ use App\Repositories\GridItemRepository;
 
 class GridGroupService
 {
-    protected ?int $enterpriseID = null;
-
     public function __construct(
         protected GridGroupRepository $repository,
         protected GridItemRepository $gridItemRepository
@@ -20,8 +18,6 @@ class GridGroupService
 
     public function create($request)
     {
-        $this->enterpriseID = $request->get('enterprise_id');
-
         $gridGroupDTO = CreateGridGroupDTO::fromRequest($request);
 
         $gridGroup = $this->repository->create($gridGroupDTO->toArray());
@@ -37,7 +33,6 @@ class GridGroupService
                 $gridItemDTO = CreateGridItemDTO::fromRequest([
                     'size' => $item['size'],
                     'order' => $item['order'],
-                    'enterpriseID' => $this->enterpriseID,
                     'gridGroupID' => $gridGroupID,
                 ]);
 
@@ -50,7 +45,6 @@ class GridGroupService
                     'size' => $item['size'],
                     'order' => $item['order'],
                     'active' => $item['active'],
-                    'enterpriseID' => $this->enterpriseID,
                     'gridGroupID' => $gridGroupID,
                 ]);
 
@@ -61,11 +55,7 @@ class GridGroupService
 
     public function update($request)
     {
-        $this->enterpriseID = $request->get('enterprise_id');
-
-        $gridGroupDTO = UpdateGridGroupDTO::fromRequest([
-            ...$request->only(['gridName', 'active']),
-        ]);
+        $gridGroupDTO = UpdateGridGroupDTO::fromRequest($request);
 
         $this->repository->update($request->id, $gridGroupDTO->toArray());
 

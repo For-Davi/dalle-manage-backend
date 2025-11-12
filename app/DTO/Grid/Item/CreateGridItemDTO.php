@@ -3,6 +3,7 @@
 namespace App\DTO\Grid\Item;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateGridItemDTO extends BaseDTO
 {
@@ -19,7 +20,7 @@ class CreateGridItemDTO extends BaseDTO
             size: $data['size'],
             order: $data['order'],
             grid_group_id: $data['gridGroupID'],
-            enterprise_id: $data['enterpriseID']
+            enterprise_id: Auth::user()->enterprise_id
         );
     }
 }

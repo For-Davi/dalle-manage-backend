@@ -16,7 +16,6 @@ class DepartmentService
         DepartmentHelper::existsDepartment(
             null,
             $request->input('name'),
-            $request->get('enterprise_id'),
             'create'
         );
 
@@ -30,7 +29,6 @@ class DepartmentService
         DepartmentHelper::existsDepartment(
             $request->input('id'),
             $request->input('name'),
-            $request->get('enterprise_id'),
             'update'
         );
 

@@ -29,16 +29,9 @@ class MovementService
                     $date->day($date->daysInMonth);
                 }
 
-                $movementDTO = CreateOrUpdateMovementDTO::fromRequest([
-                    ...$request->only([
-                        'value',
-                        'transactionCategoryID',
-                        'description',
-                        'type',
-                    ]),
-                    'enterpriseID' => $request->get('enterprise_id'),
-                    'date' => $date->format('d-m-Y'),
-                ]);
+                $movementDTO = CreateOrUpdateMovementDTO::fromRequest(
+                    $request,
+                    'date' => $date->format('d-m-Y'));
 
                 $movements[] = $this->repository->create($movementDTO->toArray());
             }

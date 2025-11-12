@@ -22,8 +22,8 @@ class UserStartDTO extends BaseDTO
             name: $data['name'],
             email: $data['email'],
             password: Hash::make($data['password']),
-            role_id: $data['roleId'],
-            enterprise_id: Auth::user()->enterprise_id,
+            role_id: $data['roleID'],
+            enterprise_id: $data['enterpriseID'],
         );
     }
 }

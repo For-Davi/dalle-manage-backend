@@ -12,19 +12,14 @@ class GridItemService
 
     public function create($request)
     {
-        $gridItemDTO = CreateGridItemDTO::fromRequest([
-            ...$request->only(['size', 'order', 'gridGroupID']),
-            'enterpriseID' => $request->get('enterprise_id'),
-        ]);
+        $gridItemDTO = CreateGridItemDTO::fromRequest($request);
 
         return $this->repository->create($gridItemDTO->toArray());
     }
 
     public function update($request)
     {
-        $gridItemDTO = UpdateGridItemDTO::fromRequest([
-            ...$request->only(['size', 'order', 'active']),
-        ]);
+        $gridItemDTO = UpdateGridItemDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $gridItemDTO->toArray());
     }

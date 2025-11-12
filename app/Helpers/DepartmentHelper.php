@@ -4,14 +4,15 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class DepartmentHelper
 {
-    public static function existsDepartment($id, $name, $enterpriseId, $mode)
+    public static function existsDepartment($id, $name, $mode)
     {
         $department = DB::table('departments')
             ->where('name', $name)
-            ->where('enterprise_id', $enterpriseId)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
             ->first();
 
         if ($mode === 'create') {

@@ -3,6 +3,7 @@
 namespace App\DTO\Movement;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class CreateOrUpdateMovementDTO extends BaseDTO
 {
@@ -18,12 +19,12 @@ class CreateOrUpdateMovementDTO extends BaseDTO
     public static function fromRequest($data): self
     {
         return new self(
-            date: $data['date'],
+            date: $data['date']->format('d-m-Y'),
             type: $data['type'],
             transaction_category_id: $data['transactionCategoryID'],
             value: $data['value'],
             description: $data['description'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
     }
 }
