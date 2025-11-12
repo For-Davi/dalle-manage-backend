@@ -9,7 +9,6 @@ class UpdateProductVariantDTO extends BaseDTO
     public function __construct(
         public readonly int $active,
         public readonly ?string $sku,
-        public readonly ?string $code,
         public readonly ?string $description,
         public readonly ?string $location,
         public readonly float $price,
@@ -22,7 +21,6 @@ class UpdateProductVariantDTO extends BaseDTO
     {
         return new self(
             active: $data['active'],
-            code: $data['code'],
             sku: $data['sku'],
             description: $data['description'],
             location: $data['location'],

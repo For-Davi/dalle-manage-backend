@@ -13,7 +13,6 @@ use App\DTO\Product\ProductVariant\CreateProductVariantDTO;
 use App\DTO\Product\ProductVariant\UpdateProductVariantDTO;
 use App\DTO\Product\UpdateProductBasicDTO;
 use App\Exports\Product\ProductExport;
-use App\Helpers\CodeHelper;
 use App\Helpers\ProductHelper;
 use App\Helpers\ProductLogHelper;
 use App\Helpers\SkuHelper;
@@ -158,17 +157,9 @@ class ProductService
             );
         }
 
-        if ($variant['code']) {
-            CodeHelper::existsCode(
-                $variant['code'],
-                'create',
-            );
-        }
-
         return CreateProductVariantDTO::fromRequest([
             'active' => $variant['active'],
             'sku' => $sku,
-            'code' => $variant['code'],
             'description' => $variant['description'],
             'offer' => $variant['offer'],
             'location' => $variant['location'],
@@ -221,16 +212,9 @@ class ProductService
                 $request->id
             );
         }
-        if ($request->code) {
-            CodeHelper::existsCode(
-                $request->code,
-                'update',
-                $request->id
-            );
-        }
 
         $productVariantDTO = UpdateProductVariantDTO::fromRequest([
-            ...$request->only(['active', 'sku', 'code', 'description', 'location', 'price', 'cost', 'offer', 'minStockAlert']),
+            ...$request->only(['active', 'sku', 'description', 'location', 'price', 'cost', 'offer', 'minStockAlert']),
         ]);
 
         return $this->productVariantRepository->update($request->id, $productVariantDTO->toArray());

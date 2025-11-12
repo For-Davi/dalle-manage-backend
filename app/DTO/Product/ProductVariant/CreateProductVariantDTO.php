@@ -10,7 +10,6 @@ class CreateProductVariantDTO extends BaseDTO
     public function __construct(
         public readonly int $active,
         public readonly ?string $sku,
-        public readonly ?string $code,
         public readonly ?string $description,
         public readonly ?string $location,
         public readonly int $enterprise_id,
@@ -29,7 +28,6 @@ class CreateProductVariantDTO extends BaseDTO
         return new self(
             active: $data['active'],
             sku: $data['sku'],
-            code: $data['code'],
             description: $data['description'],
             location: $data['location'],
             product_id: $data['productID'],

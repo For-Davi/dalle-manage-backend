@@ -9,7 +9,7 @@ class SupplierOrderItem extends Model
 {
     use Notifiable;
 
-    protected $table = 'supplier_orders';
+    protected $table = 'supplier_order_items';
 
     protected $fillable = [
         'supplier_order_id',

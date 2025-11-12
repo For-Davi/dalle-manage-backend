@@ -11,7 +11,7 @@ class SupplierOrderListResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'order_number' => $this->name,
+            'order_number' => $this->order_number,
             'status' => $this->status,
             'date_issue' => $this->date_issue,
         ];

@@ -19,7 +19,6 @@ class ProductVariant extends Model
         'stock_quantity',
         'min_stock_alert',
         'sku',
-        'code',
         'active',
         'grid_item_id',
         'enterprise_id',
@@ -32,6 +31,13 @@ class ProductVariant extends Model
     protected static function booted()
     {
         static::addGlobalScope(new EnterpriseScope);
+
+        static::created(function ($variant) {
+            if (empty($variant->code)) {
+                $variant->code = strval($variant->id);
+                $variant->saveQuietly();
+            }
+        });
     }
 
     public function setNameAttribute($value)

@@ -18,17 +18,21 @@ class SupplierOrderService
 
         $order = $this->repository->create($orderDTO->toArray());
 
-        $this->createOrderItems($order, $request->input('items'));
+        $this->createOrderItems($order, $request->items);
         $this->createOrderStatusHistory($order);
+
+        return $order;
     }
 
     public function update($request)
     {
         $orderDTO = UpdateSupplierOrderDTO::fromRequest($request);
 
-        $order = $this->repository->update($request->input('id'), $orderDTO->toArray());
+        $order = $this->repository->update($request->id, $orderDTO->toArray());
 
-        $this->syncOrderItems($order, $request->input('items'), $request->input('itemsToDelete'));
+        $this->syncOrderItems($order, $request->items, $request->itemsToDelete);
+
+        return $order;
     }
 
     private function syncOrderItems($order, array $items, array $itemsToDelete = []): void

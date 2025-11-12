@@ -14,14 +14,18 @@ class CreateSupplierOrderItemDTO extends BaseDTO
         public readonly float $total_cost,
     ) {}
 
-    public static function fromRequest($data): self
+    public static function fromRequest(array $data): self
     {
+        $quantity = (int) $data['quantityRequested'];
+        $unitCost = (float) $data['unitCost'];
+        $total = $quantity * $unitCost;
+
         return new self(
             supplier_order_id: $data['supplierOrderID'],
             product_variant_id: $data['productVariantID'],
-            quantity_requested: $data['quantityRequested'],
-            unit_cost: $data['unitCost'],
-            total_cost: $data['totalCost'],
+            quantity_requested: $quantity,
+            unit_cost: $unitCost,
+            total_cost: $total,
         );
     }
 }
