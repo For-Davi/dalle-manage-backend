@@ -26,7 +26,7 @@ class SaleController
             if ($sale) {
                 DB::commit();
 
-                return response()->json(['sale' => $sale, 'message' => 'Venda feita com sucesso'], 201);
+                return response()->json(['sale' => $sale, 'message' => 'Venda realizada'], 201);
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -44,7 +44,7 @@ class SaleController
 
             return response()->json(['couponData' => $couponData], 200);
         } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao os produtos da venda:', $e, $request);
+            ErrorLogger::log('Erro ao localizar os itens da venda:', $e, $request);
 
             return response()->json(['message' => $e->getMessage()], 500);
         }

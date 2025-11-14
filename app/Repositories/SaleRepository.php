@@ -35,7 +35,7 @@ class SaleRepository
 
         $firstProduct = $products[0]->load(['sale', 'sale.client', 'sale.enterprise']);
 
-        return $couponData = [
+        return [
             'sale' => $firstProduct->sale,
             'enterprise' => $firstProduct->sale->enterprise,
             'client' => $firstProduct->sale->client,

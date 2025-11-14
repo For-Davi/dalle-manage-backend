@@ -23,7 +23,7 @@ class CreateSaleDTO
             fees: $data['fees'],
             total: $data['totalValue'],
             change: $data['change'],
-            date: $data['date'],
+            date: now()->format('d-m-Y H:i:s'),
         );
     }
 

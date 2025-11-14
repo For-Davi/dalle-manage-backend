@@ -39,13 +39,8 @@ class SaleService
 
         $this->validateSale($request->input('saleData.products'));
 
-        $totalValue = $this->getTotalValue([
-            $request->input('saleData.totalPrice'),
-            $request->input('deliveryData.freightValue'),
-            $request->input('paymentData.fees'),
-        ]);
-
-        $sale = $this->createSale($request, $enterpriseID, $totalValue);
+        // Cria a venda
+        $sale = $this->createSale($request, $enterpriseID);
 
         // Criação do metódo de pagamentos
         $this->createSalePaymentsMethods($request->paymentData, $sale->id, $enterpriseID);
@@ -91,90 +86,92 @@ class SaleService
             SendCouponToEmailJob::dispatch($request->email, $couponData);
         }
 
-        return 'Caso o e-mail informado exista, o cupom será enviado.';
+        return 'O cupom será enviado ao e-mail informado';
     }
 
-    // Função da criação de pagamentos
-    private function createSalePaymentsMethods(array $payments, int $saleID, int $enterpriseID)
+    private function createSalePaymentsMethods(array $payments, int $saleID, int $enterpriseID): void
     {
-
         foreach ($payments['payment'] as $payment) {
-            // Validação do tipo de pagamento
-            SaleHelper::findReceipt($payment['receiptID']);
-            $paymentMethodID = SaleHelper::findPaymentMethodID($payment['paymentType'], $enterpriseID, $payment['receiptID']);
+            SaleHelper::existsReceipt($payment['receiptID']);
 
-            // Caso haja a quantidade de parcelas e o valor das parcelas ele salva, caso não haja ele coloca como nulo
-            if (($payment['installment']['value'] !== null && $payment['installment']['value'] >= 1 && $payment['installment']['value'] <= 12) && ($payment['installment']['amount'] !== null && $payment['installment']['amount'] !== '' && $payment['installment']['amount'] > 0)) {
-                $installmentValue = $payment['installment']['value'];
+            $paymentMethodID = SaleHelper::findPaymentMethodID(
+                $payment['paymentType'],
+                $enterpriseID,
+                $payment['receiptID']
+            );
 
-                $installmentAmount = $payment['installment']['amount'];
-            } else {
-                $installmentValue = null;
+            $installment = $payment['installment'] ?? ['value' => null, 'amount' => null];
 
-                $installmentAmount = null;
-            }
+            $isValidInstallment =
+                isset($installment['value'], $installment['amount']) &&
+                $installment['value'] >= 1 &&
+                $installment['value'] <= 12 &&
+                $installment['amount'] > 0;
+
+            $installments = $isValidInstallment ? $installment['value'] : null;
+            $amount = $isValidInstallment ? $installment['amount'] : $payment['value'];
 
             $salePaymentDTO = CreateSalePaymentDTO::fromRequest([
                 'saleID' => $saleID,
                 'paymentMethodID' => $paymentMethodID,
                 'receiptID' => $payment['receiptID'],
-                'installments' => $installmentValue,
-                'value' => $installmentAmount ? $installmentAmount : $payment['value'],
+                'installments' => $installments,
+                'value' => $amount,
             ]);
 
             $this->salePaymentsRepository->create($salePaymentDTO->toArray());
         }
     }
 
-    // Função da criação de entrega
     private function createSaleDelivery($deliveryData, int $saleID)
     {
-
         $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($deliveryData, $saleID);
-
         $this->saleDeliveryRepository->create($deliveryDTO->toArray());
     }
 
-    // Função da crição dos itens de venda
-    private function createSaleItens(array $products, int $saleID, int $enterpriseID)
+    private function createSaleItens(array $products, int $saleID, int $enterpriseID): void
     {
         foreach ($products['products'] as $product) {
-            $productVariant = $this->productVariantRepository->findById($product['productVariantID']);
+            $productVariant = $this->productVariantRepository
+                ->findById($product['productVariantID'])
+                ->loadMissing(['product']);
 
-            $productVariant->load(['product']);
+            $price = $product['offer'] ?? $product['price'];
+            $hasOffer = $price > 0 && isset($product['offer']);
+            $unitPrice = $hasOffer ? $product['offer'] : $product['price'];
+            $quantity = $product['newQuantity'] ?? 0;
 
-            $total = $product['offer'] !== null && $product['offer'] > 0 ? $product['offer'] * $product['newQuantity'] : $product['price'] * $product['newQuantity'];
+            $total = $unitPrice * $quantity;
 
             $saleItemDTO = CreateSaleItemDTO::fromRequest([
                 'saleID' => $saleID,
                 'productVariantID' => $productVariant->id,
                 'productName' => $productVariant->product->name,
                 'productSKU' => $productVariant->sku ?? null,
-                'productPrice' => $product['offer'] > 0 ? $product['offer'] : $product['price'],
-                'quantity' => $product['newQuantity'],
+                'productPrice' => $unitPrice,
+                'quantity' => $quantity,
                 'total' => $total,
             ]);
 
-            $productMovement = new Request([
+            $movementData = [
                 'reason' => 'sale',
                 'type' => 'out',
                 'documentNumber' => null,
                 'lotNumber' => null,
-                'quantity' => $product['newQuantity'],
+                'quantity' => $quantity,
                 'unitCost' => null,
                 'totalCost' => null,
                 'variantID' => $productVariant->id,
                 'supplierID' => null,
                 'description' => null,
                 'enterprise_id' => $enterpriseID,
-            ]);
+            ];
 
-            $this->productMovementService->create($productMovement);
+            $this->productMovementService->create(new Request($movementData));
             $this->saleItemRepository->create($saleItemDTO->toArray());
         }
     }
 
-    // Validação dos itens de venda
     private function validateSale($products)
     {
         foreach ($products as $product) {
@@ -185,7 +182,6 @@ class SaleService
         }
     }
 
-    // Soma do total da venda
     private function getTotalValue($values)
     {
         $total = 0;
@@ -196,20 +192,22 @@ class SaleService
         return $total;
     }
 
-    // Criação da venda
-    private function createSale($request, int $enterpriseID, float $totalValue)
+    private function createSale($request, int $enterpriseID)
     {
 
-        $date = now()->format('d-m-Y H:i:s');
+        $totalValue = $this->getTotalValue([
+            $request->input('saleData.totalPrice'),
+            $request->input('deliveryData.freightValue'),
+            $request->input('paymentData.fees'),
+        ]);
 
         $saleDTO = CreateSaleDTO::fromRequest([
             'enterpriseID' => $enterpriseID,
             'sellerID' => $request->sellerID,
-            'clientID' => $request->clientData ? $request->input('clientData.id') : null,
+            'clientID' => $request->clientData['id'] ?? null,
             'fees' => $request->input('paymentData.fees'),
             'totalValue' => $totalValue,
             'change' => $request->input('paymentData.change'),
-            'date' => $date,
         ]);
 
         return $this->saleRepository->create($saleDTO->toArray());
@@ -217,26 +215,7 @@ class SaleService
 
     private function updateClientData($clientData)
     {
-        $clientDTO = UpdateClientDTO::fromRequest([
-            'name' => $clientData['name'],
-            'email' => $clientData['email'],
-            'sex' => $clientData['sex'],
-            'phone' => $clientData['phone'],
-            'cpf' => $clientData['cpf'],
-            'cnpj' => $clientData['cnpj'],
-            'stateRegistration' => $clientData['stateRegistration'],
-            'municipalRegistration' => $clientData['municipalRegistration'],
-            'dateBirthday' => $clientData['dateBirthday'],
-            'cep' => $clientData['cep'],
-            'country' => $clientData['country'],
-            'state' => $clientData['state'],
-            'city' => $clientData['city'],
-            'neighborhood' => $clientData['neighborhood'],
-            'address' => $clientData['address'],
-            'number' => $clientData['number'],
-            'complement' => $clientData['complement'],
-            'description' => $clientData['description'],
-        ]);
+        $clientDTO = UpdateClientDTO::fromRequest($clientData);
 
         $this->clientRepository->update($clientData['id'], $clientDTO->toArray());
     }

@@ -35,7 +35,7 @@ class SaleHelper
         }
     }
 
-    public static function findReceipt($receiptId)
+    public static function existsReceipt($receiptId)
     {
         $existReceipt = DB::table('receipts')->where('id', $receiptId)->first();
 
