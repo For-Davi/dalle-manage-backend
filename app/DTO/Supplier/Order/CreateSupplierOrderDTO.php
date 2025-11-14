@@ -4,7 +4,6 @@ namespace App\DTO\Supplier\Order;
 
 use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class CreateSupplierOrderDTO extends BaseDTO
 {
@@ -23,12 +22,8 @@ class CreateSupplierOrderDTO extends BaseDTO
         return new self(
             supplier_id: $data['supplierID'],
             enterprise_id: Auth::user()->enterprise_id,
-            date_delivery_expected: !empty($data['dateDeliveryExpected'])
-                ? Carbon::createFromFormat('d/m/Y', $data['dateDeliveryExpected'])->format('Y-m-d')
-                : null,
-            date_issue: !empty($data['dateIssue'])
-                ? Carbon::createFromFormat('d/m/Y', $data['dateIssue'])->format('Y-m-d')
-                : null,
+            date_delivery_expected: $data['dateDeliveryExpected'],
+            date_issue: $data['dateIssue'],
             order_number: $data['orderNumber'] ?? null,
             created_by: Auth::user()->id,
             observation: $data['observation'] ?? null,

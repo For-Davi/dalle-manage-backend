@@ -14,6 +14,7 @@ class SupplierOrderListResource extends JsonResource
             'order_number' => $this->order_number,
             'status' => $this->status,
             'date_issue' => $this->date_issue,
+            'date_delivery_expected' => $this->date_delivery_expected,
         ];
     }
 }

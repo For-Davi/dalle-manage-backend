@@ -12,6 +12,7 @@ class ClientRepository
     public function getAllByEnterprise()
     {
         return $this->model->get();
+
     }
 
     public function findById($id)
