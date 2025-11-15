@@ -13,9 +13,15 @@ class SupplierOrderRepository
         return $this->model->all();
     }
 
-    public function findById($id)
+    public function findById($id, $relations = null)
     {
-        return $this->model->find($id);
+        $query = $this->model;
+
+        if (! empty($relations)) {
+            $query = $query->with($relations);
+        }
+
+        return $query->find($id);
     }
 
     public function create($data)

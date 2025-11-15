@@ -7,6 +7,7 @@ use App\DTO\Supplier\Order\Item\CreateSupplierOrderItemDTO;
 use App\DTO\Supplier\Order\Status\CreateSupplierOrderStatusHistoryDTO;
 use App\DTO\Supplier\Order\UpdateSupplierOrderDTO;
 use App\Repositories\SupplierOrderRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SupplierOrderService
 {
@@ -64,5 +65,20 @@ class SupplierOrderService
         $statusDTO = CreateSupplierOrderStatusHistoryDTO::start(orderID: $order->id);
 
         $order->status()->create($statusDTO->toArray());
+    }
+
+    public function export($request)
+    {
+        $dateTime = now()->format('Ymd_His');
+
+        $order = $this->repository->findById($request->orderID, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
+
+        $fileName = "order_{$dateTime}.xlsx";
+
+        $pdf = Pdf::loadView('exports.order-pdf', [
+            'order' => $order,
+        ]);
+
+        return $pdf->download($fileName);
     }
 }

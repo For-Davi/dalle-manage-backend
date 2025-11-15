@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Supplier\Order\CreateSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\DeleteSupplierOrderRequest;
+use App\Http\Requests\Supplier\Order\ExportSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\ShowSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\UpdateSupplierOrderRequest;
 use App\Http\Resources\Supplier\Order\SupplierOrderListResource;
@@ -36,7 +37,7 @@ class SupplierOrderController
     public function show(ShowSupplierOrderRequest $request)
     {
         try {
-            $order = $this->repository->findById($request->route('orderID'));
+            $order = $this->repository->findById($request->route('orderID'), ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
 
             return response()->json(['order' => $order], 200);
 
@@ -87,6 +88,18 @@ class SupplierOrderController
             ErrorLogger::log('Erro ao atualizar pedido:', $e, $request);
 
             return response()->json(['message' => 'Erro ao atualizar pedido'], 500);
+        }
+    }
+
+    public function export(ExportSupplierOrderRequest $request)
+    {
+        try {
+            return $this->service->export($request);
+        } catch (\Exception $e) {
+
+            ErrorLogger::log('Erro ao exportar pedido:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao exportar pedido'], 500);
         }
     }
 

@@ -40,6 +40,11 @@ class SupplierOrder extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function supplier()
+    {
+        return $this->belongsTo(User::class, 'supplier_id');
+    }
+
     public function items()
     {
         return $this->hasMany(SupplierOrderItem::class, 'supplier_order_id');

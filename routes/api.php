@@ -88,6 +88,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
             Route::get('/', [SupplierOrderController::class, 'index']);
             Route::get('/{orderID}', [SupplierOrderController::class, 'show']);
             Route::post('/', [SupplierOrderController::class, 'store']);
+            Route::post('/export', [SupplierOrderController::class, 'export']);
             Route::put('/', [SupplierOrderController::class, 'update']);
             Route::delete('/{orderID}', [SupplierOrderController::class, 'destroy']);
         });
