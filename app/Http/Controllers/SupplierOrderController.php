@@ -6,8 +6,10 @@ use App\Http\Requests\Supplier\Order\CreateSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\DeleteSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\ExportSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\ShowSupplierOrderRequest;
+use App\Http\Requests\Supplier\Order\UpdateSupplierOrderReceivedRequest;
 use App\Http\Requests\Supplier\Order\UpdateSupplierOrderRequest;
 use App\Http\Resources\Supplier\Order\SupplierOrderListResource;
+use App\Repositories\SupplierOrderItemRepository;
 use App\Repositories\SupplierOrderRepository;
 use App\Services\SupplierOrderService;
 use App\Utils\ErrorLogger;
@@ -18,7 +20,8 @@ class SupplierOrderController
 {
     public function __construct(
         private SupplierOrderService $service,
-        private SupplierOrderRepository $repository
+        private SupplierOrderRepository $repository,
+        private SupplierOrderItemRepository $orderItemrepository,
     ) {}
 
     public function index(Request $request)
@@ -45,6 +48,30 @@ class SupplierOrderController
             ErrorLogger::log('Erro ao buscar pedido:', $e, $request);
 
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function received(UpdateSupplierOrderReceivedRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+            $received = $this->service->received($request);
+
+            if ($received) {
+                DB::commit();
+
+                $item = $this->orderItemrepository->findById($request->items[0]['id']);
+
+                $order = $this->repository->findById($item->supplier_order_id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
+
+                return response()->json(['order' => $order, 'message' => 'Quantidade recebida de produtos atualizado no pedido'], 200);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            ErrorLogger::log('Erro ao atualizar quantidade recebida de item do pedido:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao atualizar quantidade recebida de item do pedido'], 500);
         }
     }
 

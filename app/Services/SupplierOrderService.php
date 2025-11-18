@@ -3,15 +3,20 @@
 namespace App\Services;
 
 use App\DTO\Supplier\Order\CreateSupplierOrderDTO;
+use App\DTO\Supplier\Order\CreateSupplierOrderReceivingDTO;
 use App\DTO\Supplier\Order\Item\CreateSupplierOrderItemDTO;
+use App\DTO\Supplier\Order\Item\UpdateSupplierOrderItemReceivedDTO;
 use App\DTO\Supplier\Order\Status\CreateSupplierOrderStatusHistoryDTO;
 use App\DTO\Supplier\Order\UpdateSupplierOrderDTO;
+use App\Helpers\SupplierOrderHelper;
+use App\Repositories\SupplierOrderItemRepository;
+use App\Repositories\SupplierOrderReceivingRepository;
 use App\Repositories\SupplierOrderRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class SupplierOrderService
 {
-    public function __construct(protected SupplierOrderRepository $repository) {}
+    public function __construct(protected SupplierOrderRepository $repository, protected SupplierOrderReceivingRepository $orderReceivingRepository, protected SupplierOrderItemRepository $orderItemRepository) {}
 
     public function create($request)
     {
@@ -34,6 +39,25 @@ class SupplierOrderService
         $this->syncOrderItems($order, $request->items, $request->itemsToDelete);
 
         return $order;
+    }
+
+    public function received($request)
+    {
+        foreach ($request->items as $item) {
+            SupplierOrderHelper::verifyQuantityReceived($item['id'], $item['received']);
+
+            $receivedDTO = UpdateSupplierOrderItemReceivedDTO::fromRequest($item);
+            $this->orderItemRepository->update($item['id'], $receivedDTO->toArray());
+
+            $receivingDTO = CreateSupplierOrderReceivingDTO::fromRequest([
+                'supplierOrderItemID' => $item['id'],
+                'quantityReceived' => $item['received'],
+                'receivingDate' => $request->dateReceived,
+            ]);
+            $this->orderReceivingRepository->create($receivingDTO->toArray());
+        }
+
+        return true;
     }
 
     private function syncOrderItems($order, array $items, array $itemsToDelete = []): void

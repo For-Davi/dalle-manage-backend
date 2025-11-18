@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class SupplierOrderReceivings extends Model
+class SupplierOrderReceiving extends Model
 {
     use Notifiable;
 
@@ -15,7 +15,7 @@ class SupplierOrderReceivings extends Model
         'supplier_order_item_id',
         'product_variant_id',
         'receiving_date',
-        'observation',
+        'quantity_received',
         'received_by',
     ];
 
@@ -26,6 +26,6 @@ class SupplierOrderReceivings extends Model
 
     public function received()
     {
-        return $this->belongsTo(User::class, 'received_id');
+        return $this->belongsTo(User::class, 'received_by');
     }
 }

@@ -34,7 +34,7 @@ class SupplierOrderItem extends Model
 
     public function receivings()
     {
-        return $this->hasMany(SupplierOrderReceivings::class, 'supplier_order_item_id');
+        return $this->hasMany(SupplierOrderReceiving::class, 'supplier_order_item_id');
     }
 
     public function variant()
