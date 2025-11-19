@@ -3,29 +3,17 @@
 namespace App\Repositories;
 
 use App\Models\Department;
+use App\Repositories\Base\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
-class DepartmentRepository
+class DepartmentRepository extends BaseRepository
 {
     public function __construct(
-        protected Department $model,
+        Department $model,
         protected UserRepository $userRepository,
         protected EmployeeRepository $employeeRepository
-    ) {}
-
-    public function getAll()
-    {
-        return $this->model->all();
-    }
-
-    public function getAllByEnterprise()
-    {
-        return $this->model->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
+    ) {
+        parent::__construct($model);
     }
 
     public function findByName($name, $enterpriseId)
@@ -34,23 +22,6 @@ class DepartmentRepository
             ->where(DB::raw('LOWER(name)'), '=', strtolower($name))
             ->where('enterprise_id', $enterpriseId)
             ->first();
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $department = $this->findById($id);
-        if ($department) {
-            $department->update($data);
-
-            return $department;
-        }
-
-        return null;
     }
 
     private function deleteChildren($id)
@@ -80,6 +51,7 @@ class DepartmentRepository
         if ($department) {
             $this->deleteChildren($department->id);
             $this->clearDepartmentUser($department->id);
+            $this->clearDepartmentEmployee($department->id);
 
             return $department->delete();
         }

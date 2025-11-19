@@ -3,35 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\ProductAdvanced;
+use App\Repositories\Base\BaseRepository;
 
-class ProductAdvancedRepository
+class ProductAdvancedRepository extends BaseRepository
 {
-    public function __construct(protected ProductAdvanced $model) {}
-
-    public function getAll()
+    public function __construct(ProductAdvanced $model)
     {
-        return $this->model->all();
-    }
-
-    public function findByProductID($id)
-    {
-        return $this->model->where('product_id', $id)->first();
-    }
-
-    public function create($data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $product = $this->findByProductID($id);
-        if ($product) {
-            $product->update($data);
-
-            return $product;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 }

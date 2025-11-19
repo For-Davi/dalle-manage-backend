@@ -7,6 +7,7 @@ use App\DTO\Supplier\Order\CreateSupplierOrderReceivingDTO;
 use App\DTO\Supplier\Order\Item\CreateSupplierOrderItemDTO;
 use App\DTO\Supplier\Order\Item\UpdateSupplierOrderItemReceivedDTO;
 use App\DTO\Supplier\Order\Status\CreateSupplierOrderStatusHistoryDTO;
+use App\DTO\Supplier\Order\Status\UpdateSupplierOrderStatusDTO;
 use App\DTO\Supplier\Order\UpdateSupplierOrderDTO;
 use App\Helpers\SupplierOrderHelper;
 use App\Repositories\SupplierOrderItemRepository;
@@ -37,6 +38,17 @@ class SupplierOrderService
         $order = $this->repository->update($request->id, $orderDTO->toArray());
 
         $this->syncOrderItems($order, $request->items, $request->itemsToDelete);
+
+        return $order;
+    }
+
+    public function updateStatus($request)
+    {
+        $orderDTO = UpdateSupplierOrderStatusDTO::fromRequest($request);
+
+        $order = $this->repository->update($request->id, $orderDTO->toArray());
+
+        $this->createOrderStatusHistory($order, $request->status);
 
         return $order;
     }
@@ -84,9 +96,12 @@ class SupplierOrderService
         $order->items()->createMany($itemsToInsert);
     }
 
-    private function createOrderStatusHistory($order): void
+    private function createOrderStatusHistory($order, $status = 'waiting'): void
     {
-        $statusDTO = CreateSupplierOrderStatusHistoryDTO::start(orderID: $order->id);
+        $statusDTO = CreateSupplierOrderStatusHistoryDTO::fromRequest([
+            'orderID' => $order->id,
+            'status' => $status,
+        ]);
 
         $order->status()->create($statusDTO->toArray());
     }

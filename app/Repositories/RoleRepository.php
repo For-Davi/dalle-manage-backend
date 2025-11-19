@@ -3,41 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\Role;
+use App\Repositories\Base\BaseRepository;
 
-class RoleRepository
+class RoleRepository extends BaseRepository
 {
-    public function __construct(protected Role $model) {}
-
-    public function getAll()
+    public function __construct(Role $model)
     {
-        return $this->model->all();
-    }
-
-    public function getAllByEnterprise()
-    {
-        return $this->model->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create($data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $role = $this->findById($id);
-        if ($role) {
-            $role->update($data);
-
-            return $role;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)

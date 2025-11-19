@@ -3,19 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\ProductImage;
+use App\Repositories\Base\BaseRepository;
 
-class ProductImageRepository
+class ProductImageRepository extends BaseRepository
 {
-    public function __construct(protected ProductImage $model) {}
-
-    public function getAll()
+    public function __construct(ProductImage $model)
     {
-        return $this->model->all();
-    }
-
-    public function getAllByProductID($productID)
-    {
-        return $this->model->where('product_id', $productID)->get();
+        parent::__construct($model);
     }
 
     public function getAllByImageID($imageID)
@@ -29,16 +23,6 @@ class ProductImageRepository
             ->where('product_id', $productID)
             ->where('image_id', $imageID)
             ->first();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create($data)
-    {
-        return $this->model->create($data);
     }
 
     public function deleteByProductID($productID)

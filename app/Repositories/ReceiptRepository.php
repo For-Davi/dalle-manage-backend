@@ -3,36 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\Receipts;
+use App\Repositories\Base\BaseRepository;
 
-class ReceiptRepository
+class ReceiptRepository extends BaseRepository
 {
-    public function __construct(protected Receipts $model) {}
-
-    public function getAllByEnterprise()
+    public function __construct(Receipts $model)
     {
-        return $this->model->with('type')->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $receipt = $this->findById($id);
-        if ($receipt) {
-            $receipt->update($data);
-
-            return $receipt;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)

@@ -91,6 +91,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
             Route::post('/export', [SupplierOrderController::class, 'export']);
             Route::put('/', [SupplierOrderController::class, 'update']);
             Route::put('/received', [SupplierOrderController::class, 'received']);
+            Route::put('/status', [SupplierOrderController::class, 'updateStatus']);
             Route::delete('/{orderID}', [SupplierOrderController::class, 'destroy']);
         });
 

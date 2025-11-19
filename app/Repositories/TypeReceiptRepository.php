@@ -3,36 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\TypeReceipt;
+use App\Repositories\Base\BaseRepository;
 
-class TypeReceiptRepository
+class TypeReceiptRepository extends BaseRepository
 {
-    public function __construct(protected TypeReceipt $model) {}
-
-    public function getAllByEnterprise()
+    public function __construct(TypeReceipt $model)
     {
-        return $this->model->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $type = $this->findById($id);
-        if ($type) {
-            $type->update($data);
-
-            return $type;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)

@@ -18,7 +18,7 @@ class NotificationController
     public function index(Request $request)
     {
         try {
-            $notifications = $this->repository->getAllByUserId($request->user()->id);
+            $notifications = $this->repository->getAllByUser();
 
             return response()->json(['notifications' => $notifications], 200);
         } catch (\Exception $e) {
@@ -56,7 +56,7 @@ class NotificationController
 
             if ($notification) {
                 DB::commit();
-                $notifications = $this->repository->getAllByUserId($request->user()->id);
+                $notifications = $this->repository->getAllByUser();
 
                 return response()->json(['notifications' => $notifications, 'message' => 'Notificação excluída'], 200);
             }

@@ -3,11 +3,15 @@
 namespace App\Repositories;
 
 use App\Models\GridGroup;
+use App\Repositories\Base\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
-class GridGroupRepository
+class GridGroupRepository extends BaseRepository
 {
-    public function __construct(protected GridGroup $model) {}
+    public function __construct(GridGroup $model)
+    {
+        parent::__construct($model);
+    }
 
     public function getAllByEnterprise($relations = null)
     {
@@ -18,28 +22,6 @@ class GridGroupRepository
         }
 
         return $query->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $gridGroup = $this->findById($id);
-        if ($gridGroup) {
-            $gridGroup->update($data);
-
-            return $gridGroup;
-        }
-
-        return null;
     }
 
     public function delete($id)

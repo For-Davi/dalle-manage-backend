@@ -37,7 +37,7 @@ class SupplierController
     public function list(Request $request)
     {
         try {
-            $suppliers = $this->repository->getAllByEnterprise(['id', 'name']);
+            $suppliers = $this->repository->getAllByEnterprise([], ['id', 'name']);
 
             return response()->json(['suppliers' => $suppliers], 200);
         } catch (\Exception $e) {

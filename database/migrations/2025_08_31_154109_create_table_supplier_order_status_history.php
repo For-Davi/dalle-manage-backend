@@ -11,8 +11,6 @@ return new class extends Migration
         Schema::create('supplier_order_status_history', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('supplier_order_id');
-            $table->string('status');
-            $table->text('notes')->nullable();
             $table->unsignedBigInteger('changed_by')->nullable();
             $table->timestamps();
             $table->foreign('supplier_order_id')->references('id')->on('supplier_orders');

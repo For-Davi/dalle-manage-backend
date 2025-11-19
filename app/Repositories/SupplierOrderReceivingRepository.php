@@ -3,35 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\SupplierOrderReceiving;
+use App\Repositories\Base\BaseRepository;
 
-class SupplierOrderReceivingRepository
+class SupplierOrderReceivingRepository extends BaseRepository
 {
-    public function __construct(protected SupplierOrderReceiving $model) {}
-
-    public function getAllByEnterprise()
+    public function __construct(SupplierOrderReceiving $model)
     {
-        return $this->model->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $receipt = $this->findById($id);
-        if ($receipt) {
-            $receipt->update($data);
-
-            return $receipt;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 }

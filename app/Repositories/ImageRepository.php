@@ -3,36 +3,14 @@
 namespace App\Repositories;
 
 use App\Models\Image;
+use App\Repositories\Base\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
-class ImageRepository
+class ImageRepository extends BaseRepository
 {
-    public function __construct(protected Image $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(Image $model)
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $image = $this->findById($id);
-        if ($image) {
-            $image->update($data);
-
-            return $image;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)

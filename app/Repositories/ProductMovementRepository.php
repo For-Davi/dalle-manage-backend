@@ -3,48 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\ProductMovement;
+use App\Repositories\Base\BaseRepository;
 
-class ProductMovementRepository
+class ProductMovementRepository extends BaseRepository
 {
-    public function __construct(protected ProductMovement $model) {}
-
-    public function getAllByEnterprise($enterpriseId, $relations = null)
+    public function __construct(ProductMovement $model)
     {
-        $query = $this->model->where('enterprise_id', $enterpriseId);
-
-        if ($relations) {
-            $query->with($relations);
-        }
-
-        return $query->get();
-    }
-
-    public function findById($id, $relations = null)
-    {
-        $query = $this->model;
-
-        if ($relations) {
-            $query = $query->with($relations);
-        }
-
-        return $query->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $movement = $this->findById($id);
-        if ($movement) {
-            $movement->update($data);
-
-            return $movement;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)

@@ -3,31 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\SupplierOrderItem;
+use App\Repositories\Base\BaseRepository;
 
-class SupplierOrderItemRepository
+class SupplierOrderItemRepository extends BaseRepository
 {
-    public function __construct(protected SupplierOrderItem $model) {}
-
-    public function findById($id, $relations = null)
+    public function __construct(SupplierOrderItem $model)
     {
-        $query = $this->model;
-
-        if (! empty($relations)) {
-            $query = $query->with($relations);
-        }
-
-        return $query->find($id);
-    }
-
-    public function update($id, array $data)
-    {
-        $item = $this->findById($id);
-        if ($item) {
-            $item->update($data);
-
-            return $item;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 }

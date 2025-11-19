@@ -3,12 +3,16 @@
 namespace App\Repositories;
 
 use App\Models\Movement;
+use App\Repositories\Base\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class MovementRepository
+class MovementRepository extends BaseRepository
 {
-    public function __construct(protected Movement $model) {}
+    public function __construct(Movement $model)
+    {
+        parent::__construct($model);
+    }
 
     public function getAllByEnterprise($onlyPeriodActual = false, array $relations = [])
     {
@@ -28,17 +32,6 @@ class MovementRepository
         }
 
         return $query->get();
-    }
-
-    public function findById($id, array $relations = [])
-    {
-        $query = $this->model;
-
-        if (! empty($relations)) {
-            $query = $query->with($relations);
-        }
-
-        return $query->find($id);
     }
 
     public function getAllWithFilter(array $filters, array $relations = [])
@@ -85,23 +78,6 @@ class MovementRepository
             ->orderBy('month_part', 'ASC')
             ->pluck('period')
             ->toArray();
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $movement = $this->findById($id);
-        if ($movement) {
-            $movement->update($data);
-
-            return $movement;
-        }
-
-        return null;
     }
 
     public function delete($id)

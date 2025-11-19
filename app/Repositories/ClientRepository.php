@@ -4,19 +4,13 @@ namespace App\Repositories;
 
 use App\DTO\Client\FilterClientDTO;
 use App\Models\Client;
+use App\Repositories\Base\BaseRepository;
 
-class ClientRepository
+class ClientRepository extends BaseRepository
 {
-    public function __construct(protected Client $model) {}
-
-    public function getAllByEnterprise()
+    public function __construct(Client $model)
     {
-        return $this->model->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 
     public function getAllWithFilter(FilterClientDTO $filters)
@@ -51,23 +45,6 @@ class ClientRepository
         }
 
         return $query->get();
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $client = $this->findById($id);
-        if ($client) {
-            $client->update($data);
-
-            return $client;
-        }
-
-        return null;
     }
 
     public function delete($id)

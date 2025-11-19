@@ -8,6 +8,7 @@ use App\Http\Requests\Supplier\Order\ExportSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\ShowSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\UpdateSupplierOrderReceivedRequest;
 use App\Http\Requests\Supplier\Order\UpdateSupplierOrderRequest;
+use App\Http\Requests\UpdateSupplierOrderStatusRequest;
 use App\Http\Resources\Supplier\Order\SupplierOrderListResource;
 use App\Repositories\SupplierOrderItemRepository;
 use App\Repositories\SupplierOrderRepository;
@@ -115,6 +116,28 @@ class SupplierOrderController
             ErrorLogger::log('Erro ao atualizar pedido:', $e, $request);
 
             return response()->json(['message' => 'Erro ao atualizar pedido'], 500);
+        }
+    }
+
+    public function updateStatus(UpdateSupplierOrderStatusRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+            $status = $this->service->updateStatus($request);
+
+            if ($status) {
+                DB::commit();
+
+                $order = $this->repository->findById($request->id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
+
+                return response()->json(['order' => $order, 'message' => 'Status de pedido atualizado'], 200);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            ErrorLogger::log('Erro ao atualizar status do pedido:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao atualizar status do pedido'], 500);
         }
     }
 

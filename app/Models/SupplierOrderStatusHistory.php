@@ -14,7 +14,6 @@ class SupplierOrderStatusHistory extends Model
     protected $fillable = [
         'supplier_order_id',
         'status',
-        'notes',
         'changed_by',
     ];
 }

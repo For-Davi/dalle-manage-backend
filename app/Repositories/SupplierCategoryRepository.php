@@ -3,37 +3,14 @@
 namespace App\Repositories;
 
 use App\Models\SupplierCategory;
+use App\Repositories\Base\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
-class SupplierCategoryRepository
+class SupplierCategoryRepository extends BaseRepository
 {
-    public function __construct(protected SupplierCategory $model) {}
-
-    public function getAllByEnterprise()
+    public function __construct(SupplierCategory $model)
     {
-        return $this->model->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $category = $this->findById($id);
-        if ($category) {
-            $category->update($data);
-
-            return $category;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)
