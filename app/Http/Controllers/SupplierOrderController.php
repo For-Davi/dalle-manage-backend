@@ -12,6 +12,7 @@ use App\Http\Requests\Supplier\Order\UpdateSupplierOrderStatusRequest;
 use App\Http\Resources\Supplier\Order\SupplierOrderListResource;
 use App\Repositories\SupplierOrderItemRepository;
 use App\Repositories\SupplierOrderRepository;
+use App\Repositories\SupplierOrderStatusHistoryRepository;
 use App\Services\SupplierOrderService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
@@ -22,7 +23,8 @@ class SupplierOrderController
     public function __construct(
         private SupplierOrderService $service,
         private SupplierOrderRepository $repository,
-        private SupplierOrderItemRepository $orderItemrepository,
+        private SupplierOrderItemRepository $orderItemRepository,
+        private SupplierOrderStatusHistoryRepository $orderStatusHistoryRepository
     ) {}
 
     public function index(Request $request)
@@ -35,6 +37,23 @@ class SupplierOrderController
             ErrorLogger::log('Erro ao buscar pedidos:', $e, $request);
 
             return response()->json(['message' => 'Erro ao buscar pedidos'], 500);
+        }
+    }
+
+    public function getHistory(ShowSupplierOrderRequest $request)
+    {
+        try {
+            $history = $this->orderStatusHistoryRepository->getAllByEnterprise(
+                [],
+                ['*'],
+                ['supplier_order_id' => $request->route('orderID')]
+            );
+
+            return response()->json(['history' => $history], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar histórico de pedido:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar histórico de pedido'], 500);
         }
     }
 
@@ -61,7 +80,7 @@ class SupplierOrderController
             if ($received) {
                 DB::commit();
 
-                $item = $this->orderItemrepository->findById($request->items[0]['id']);
+                $item = $this->orderItemRepository->findById($request->items[0]['id']);
 
                 $order = $this->repository->findById($item->supplier_order_id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
 

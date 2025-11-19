@@ -11,29 +11,8 @@ class TransactionCategoryFactory extends Factory
 
     public function definition()
     {
-        $categories = [
-            'Aluguel',
-            'Energia',
-            'Água',
-            'Internet',
-            'Combustível',
-            'Gás',
-            'Manutenção',
-            'Limpeza',
-            'Material de Escritório',
-            'Construção',
-            'Marketing',
-            'Transporte',
-            'Impostos',
-            'Segurança',
-            'Salários',
-            'Licenças de Software',
-            'Telefone',
-            'Compras',
-        ];
-
         return [
-            'name' => $this->faker->randomElement($categories),
+            'name' => null,
         ];
     }
 }

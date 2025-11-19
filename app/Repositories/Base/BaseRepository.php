@@ -36,12 +36,18 @@ abstract class BaseRepository
         return $record;
     }
 
-    public function getAllByEnterprise(array $relations = [], array $columns = ['*'])
+    public function getAllByEnterprise(array $relations = [], array $columns = ['*'], array $filters = [])
     {
         $query = $this->model->query();
 
         if (! empty($relations)) {
             $query->with($relations);
+        }
+
+        if (! empty($filters)) {
+            foreach ($filters as $field => $value) {
+                $query->where($field, $value);
+            }
         }
 
         return $query->get($columns);

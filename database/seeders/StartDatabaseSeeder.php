@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Enterprise;
 use App\Models\GridGroup;
+use App\Models\ProductCategory;
 use App\Models\ProductColor;
 use App\Models\Role;
 use App\Models\SettingAppearance;
@@ -27,6 +28,7 @@ class StartDatabaseSeeder extends Seeder
             ->create()
             ->each(function ($enterprise) {
 
+                // ------------------------------------------------------------
                 SettingSystem::factory()->create([
                     'enterprise_id' => $enterprise->id,
                 ]);
@@ -65,15 +67,41 @@ class StartDatabaseSeeder extends Seeder
                     'enterprise_id' => $enterprise->id,
                 ]);
 
-                TransactionCategory::factory()->count(8)->create([
-                    'enterprise_id' => $enterprise->id,
-                ]);
+                // ------------------------------------------------------------
+                $transactionCategories = [
+                    'Aluguel',
+                    'Energia',
+                    'Água',
+                    'Internet',
+                    'Combustível',
+                    'Gás',
+                    'Manutenção',
+                    'Limpeza',
+                    'Material de Escritório',
+                    'Construção',
+                    'Marketing',
+                    'Transporte',
+                    'Impostos',
+                    'Segurança',
+                    'Salários',
+                    'Licenças de Software',
+                    'Telefone',
+                    'Compras',
+                ];
+                foreach ($transactionCategories as $transactionCategory) {
+                    TransactionCategory::factory()->create([
+                        'name' => $transactionCategory,
+                        'enterprise_id' => $enterprise->id,
+                    ]);
+                }
 
+                // ------------------------------------------------------------
                 $supplierCategories = SupplierCategory::factory()
                     ->count(8)
                     ->create([
                         'enterprise_id' => $enterprise->id,
                     ]);
+                // ------------------------------------------------------------
 
                 Supplier::factory()
                     ->count(30)
@@ -82,11 +110,19 @@ class StartDatabaseSeeder extends Seeder
                         'supplier_category_id' => $supplierCategories->random()->id,
                     ]);
 
-                $groups = ['LETRAS', 'NÚMEROS', 'TAMANHO ÚNICO'];
-
-                foreach ($groups as $groupName) {
+                $gridGroups = ['LETRAS', 'NÚMEROS', 'TAMANHO ÚNICO'];
+                foreach ($gridGroups as $groupName) {
                     GridGroup::factory()->create([
                         'name' => $groupName,
+                        'enterprise_id' => $enterprise->id,
+                    ]);
+                }
+
+                // ------------------------------------------------------------
+                $productCategories = ['Blusa', 'Bermuda', 'Calçado'];
+                foreach ($productCategories as $productCategory) {
+                    ProductCategory::factory()->create([
+                        'name' => $productCategory,
                         'enterprise_id' => $enterprise->id,
                     ]);
                 }
