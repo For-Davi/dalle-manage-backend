@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Supplier\Order;
 
 use App\Enums\Supplier\Order\SupplierOrderStatus;
 use Illuminate\Foundation\Http\FormRequest;

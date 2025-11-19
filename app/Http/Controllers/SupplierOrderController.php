@@ -8,7 +8,7 @@ use App\Http\Requests\Supplier\Order\ExportSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\ShowSupplierOrderRequest;
 use App\Http\Requests\Supplier\Order\UpdateSupplierOrderReceivedRequest;
 use App\Http\Requests\Supplier\Order\UpdateSupplierOrderRequest;
-use App\Http\Requests\UpdateSupplierOrderStatusRequest;
+use App\Http\Requests\Supplier\Order\UpdateSupplierOrderStatusRequest;
 use App\Http\Resources\Supplier\Order\SupplierOrderListResource;
 use App\Repositories\SupplierOrderItemRepository;
 use App\Repositories\SupplierOrderRepository;
