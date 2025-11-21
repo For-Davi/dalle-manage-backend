@@ -16,4 +16,14 @@ class SupplierOrderStatusHistory extends Model
         'status',
         'changed_by',
     ];
+
+    public function changed()
+    {
+        return $this->belongsTo(User::class, 'changed_by');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(SupplierOrder::class, 'supplier_order_id');
+    }
 }

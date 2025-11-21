@@ -13,17 +13,6 @@ class GridGroupRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function getAllByEnterprise($relations = null)
-    {
-        $query = $this->model->query();
-
-        if ($relations) {
-            $query->with($relations);
-        }
-
-        return $query->get();
-    }
-
     public function delete($id)
     {
         $gridGroup = $this->findById($id);

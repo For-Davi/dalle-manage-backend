@@ -13,7 +13,6 @@ class ProductCategoryFactory extends Factory
     {
         return [
             'name' => null,
-            'active' => 1,
         ];
     }
 }

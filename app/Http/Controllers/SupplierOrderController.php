@@ -44,7 +44,7 @@ class SupplierOrderController
     {
         try {
             $history = $this->orderStatusHistoryRepository->getAllByEnterprise(
-                [],
+                ['order', 'changed'],
                 ['*'],
                 ['supplier_order_id' => $request->route('orderID')]
             );
