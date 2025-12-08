@@ -2,14 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Receipt\Type\CreateTypeReceiptRequest;
-use App\Http\Requests\Receipt\Type\DeleteTypeReceiptRequest;
-use App\Http\Requests\Receipt\Type\UpdateTypeReceiptRequest;
 use App\Repositories\TypeReceiptRepository;
 use App\Services\TypeReceiptService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TypeReceiptController
 {

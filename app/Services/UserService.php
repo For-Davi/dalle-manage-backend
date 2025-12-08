@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\Employee\StartEmployeeDTO;
 use App\DTO\Enterprise\EnterpriseStartDTO;
 use App\DTO\Image\CreateImageDTO;
+use App\DTO\Receipt\Type\CreateTypeReceiptDTO;
 use App\DTO\Role\RoleStartDTO;
 use App\DTO\Setting\Appearance\CreateSettingAppearanceDTO;
 use App\DTO\Setting\System\CreateSettingSystemDTO;
@@ -14,9 +15,9 @@ use App\DTO\User\UpdateUserDTO;
 use App\DTO\User\UpdateUserPasswordDTO;
 use App\DTO\User\UpdateUserProfilePhotoDTO;
 use App\DTO\User\UserStartDTO;
-use App\DTO\Receipt\Type\CreateTypeReceiptDTO;
 use App\Helpers\SellerHelper;
 use App\Helpers\UserHelper;
+use App\Http\Client\PaymentsHttpClient;
 use App\Jobs\SendInviteUserEmailJob;
 use App\Jobs\SendResetPasswordEmail;
 use App\Models\PasswordResetToken;
@@ -43,7 +44,8 @@ class UserService
         protected SettingAppearanceRepository $settingAppearanceRepository,
         protected SettingSystemRepository $settingSystemRepository,
         protected ImageRepository $imageRepository,
-        protected TypeReceiptRepository $typeReceiptRepository
+        protected TypeReceiptRepository $typeReceiptRepository,
+        protected PaymentsHttpClient $http,
     ) {}
 
     public function login($request)
@@ -54,8 +56,14 @@ class UserService
         UserHelper::checkPassword($user, $request->password);
         UserHelper::checkUserActive($user);
         UserHelper::clearTokenReset($user);
+        $this->resetRegisterPix($user->id);
 
         return $user;
+    }
+
+    private function resetRegisterPix($userID)
+    {
+        return $this->http->request('post', "/payment/pix/delete-register/{$userID}");
     }
 
     private function hasUser($user)
@@ -95,23 +103,24 @@ class UserService
 
         $this->settingSystemRepository->create($settingSystemDTO->toArray());
     }
+
     private function createTypesReceipt($enterpriseID)
     {
         $defaultTypes = [
-        'Dinheiro',
-        'Cartão de Crédito',
-        'Cartão de Débito',
-        'PIX',
-    ];
+            'Dinheiro',
+            'Cartão de Crédito',
+            'Cartão de Débito',
+            'PIX',
+        ];
 
-    foreach ($defaultTypes as $type) {
-        $typesReceiptDTO = CreateTypeReceiptDTO::fromRequest([
-            'name' => $type,
-            'enterpriseID' => $enterpriseID,
-        ]);
+        foreach ($defaultTypes as $type) {
+            $typesReceiptDTO = CreateTypeReceiptDTO::fromRequest([
+                'name' => $type,
+                'enterpriseID' => $enterpriseID,
+            ]);
 
-        $this->typeReceiptRepository->create($typesReceiptDTO->toArray());
-    }
+            $this->typeReceiptRepository->create($typesReceiptDTO->toArray());
+        }
     }
 
     private function createEmployee($employeeDTO)

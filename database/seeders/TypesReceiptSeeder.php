@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Enterprise;
 use App\Models\TypeReceipt;
 use Illuminate\Database\Seeder;
-use App\Models\Enterprise;
 
 class TypesReceiptSeeder extends Seeder
 {
@@ -12,20 +12,20 @@ class TypesReceiptSeeder extends Seeder
     {
         $enterprises = Enterprise::all();
 
-        foreach($enterprises as $enterprise){
+        foreach ($enterprises as $enterprise) {
             $types = [
                 'Dinheiro',
                 'Cartão de crédito',
                 'Cartão de débito',
                 'PIX',
-                'Transferência Bancária'
-            ]
+                'Transferência Bancária',
+            ];
         }
         foreach ($types as $type) {
-                TypeReceipt::create([
-                    'name' => $type,
-                    'enterprise_id' => $enterprise->id,
-                ]);
-            }
+            TypeReceipt::create([
+                'name' => $type,
+                'enterprise_id' => $enterprise->id,
+            ]);
+        }
     }
 }
