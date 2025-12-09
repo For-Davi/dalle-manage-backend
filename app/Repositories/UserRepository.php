@@ -133,7 +133,7 @@ class UserRepository
         DB::table('employees')->where('user_id', $userId)->update(['user_id' => null, 'has_login_access' => 0]);
     }
 
-    public function delete($id, $deleteEmployee)
+    public function delete($id, $deleteEmployee = null)
     {
         $user = $this->findById($id);
         if ($user) {
