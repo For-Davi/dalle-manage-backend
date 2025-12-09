@@ -42,6 +42,8 @@ class WebhookAsaasService
 
         PaymentMadeJob::dispatch();
 
+        \Log::info('passou por aqui');
+
         $subscription = $this->subscriptionRepository->findById($subscriptionID);
         $subscriptionName = SubscriptionName::from($subscription->name)->label();
 
