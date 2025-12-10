@@ -32,8 +32,6 @@ class CreditCardController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            dd('esadasd', $e);
-
             ErrorLogger::log('Erro ao processar pagamento de cartão de crédito:', $e, $request);
 
             return response()->json(['message' => 'Erro ao processar pagamento de cartão de crédito'], 500);
