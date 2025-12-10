@@ -3,36 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\TransactionCategory;
+use App\Repositories\Base\BaseRepository;
 
-class TransactionCategoryRepository
+class TransactionCategoryRepository extends BaseRepository
 {
-    public function __construct(protected TransactionCategory $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(TransactionCategory $model)
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $category = $this->findById($id);
-        if ($category) {
-            $category->update($data);
-
-            return $category;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)

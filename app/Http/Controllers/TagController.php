@@ -21,7 +21,7 @@ class TagController
     public function index(Request $request)
     {
         try {
-            $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $tags = $this->repository->getAllByEnterprise();
 
             return response()->json(['tags' => $tags], 200);
         } catch (\Exception $e) {
@@ -39,7 +39,7 @@ class TagController
 
             if ($tag) {
                 DB::commit();
-                $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $tags = $this->repository->getAllByEnterprise();
 
                 return response()->json(['tags' => $tags, 'message' => 'Tag cadastrada'], 201);
             }
@@ -61,7 +61,7 @@ class TagController
             if ($tag) {
                 DB::commit();
 
-                $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $tags = $this->repository->getAllByEnterprise();
 
                 return response()->json(['tags' => $tags, 'message' => 'Tag atualizada'], 200);
             }
@@ -83,7 +83,7 @@ class TagController
 
             if ($tag) {
                 DB::commit();
-                $tags = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $tags = $this->repository->getAllByEnterprise();
 
                 return response()->json(['tags' => $tags, 'message' => 'Tag excluída'], 200);
             }

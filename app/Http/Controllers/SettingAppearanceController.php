@@ -19,7 +19,7 @@ class SettingAppearanceController
     public function show(Request $request)
     {
         try {
-            $appearance = $this->repository->getByEnterprise($request->get('enterprise_id'));
+            $appearance = $this->repository->getByEnterprise();
 
             return response()->json(['appearance' => $appearance], 200);
         } catch (\Exception $e) {
@@ -38,7 +38,7 @@ class SettingAppearanceController
             if ($appearance) {
                 DB::commit();
 
-                $appearance = $this->repository->getByEnterprise($request->get('enterprise_id'));
+                $appearance = $this->repository->getByEnterprise();
 
                 return response()->json(['appearance' => $appearance, 'message' => 'Aparência atualizada'], 200);
             }

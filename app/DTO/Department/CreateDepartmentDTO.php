@@ -2,7 +2,10 @@
 
 namespace App\DTO\Department;
 
-class CreateDepartmentDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateDepartmentDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -15,16 +18,7 @@ class CreateDepartmentDTO
         return new self(
             name: $data['name'],
             parent_id: $data['parentId'],
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'enterprise_id' => $this->enterprise_id,
-            'parent_id' => $this->parent_id,
-        ];
     }
 }

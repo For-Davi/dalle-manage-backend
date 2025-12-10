@@ -2,7 +2,9 @@
 
 namespace App\DTO\Product\ProductImage;
 
-class CreateProductImageDTO
+use App\DTO\BaseDTO;
+
+class CreateProductImageDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $image_id,
@@ -15,13 +17,5 @@ class CreateProductImageDTO
             image_id: $data['imageID'],
             product_id: $data['productID'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'image_id' => $this->image_id,
-            'product_id' => $this->product_id,
-        ];
     }
 }

@@ -2,15 +2,16 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class SkuHelper
 {
-    public static function existsSKU($enterpriseId, $sku, $mode, $variantID = null)
+    public static function existsSKU($sku, $mode, $variantID = null)
     {
         $existingSku = DB::table('product_variants')
-            ->where('enterprise_id', $enterpriseId)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
             ->where('sku', $sku)
             ->first();
 

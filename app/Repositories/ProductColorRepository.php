@@ -3,36 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\ProductColor;
+use App\Repositories\Base\BaseRepository;
 
-class ProductColorRepository
+class ProductColorRepository extends BaseRepository
 {
-    public function __construct(protected ProductColor $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(ProductColor $model)
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $color = $this->findById($id);
-        if ($color) {
-            $color->update($data);
-
-            return $color;
-        }
-
-        return null;
+        parent::__construct($model);
     }
 
     public function delete($id)

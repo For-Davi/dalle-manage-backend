@@ -13,22 +13,7 @@ class EnterpriseService
 
     public function update($request)
     {
-        $enterpriseDTO = UpdateEnterpriseDTO::fromRequest([
-            ...$request->only([
-                'name',
-                'email',
-                'phone',
-                'cpf',
-                'cnpj',
-                'cep',
-                'state',
-                'city',
-                'neighborhood',
-                'address',
-                'numberAddress',
-                'complement',
-            ]),
-        ]);
+        $enterpriseDTO = UpdateEnterpriseDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $enterpriseDTO->toArray());
     }

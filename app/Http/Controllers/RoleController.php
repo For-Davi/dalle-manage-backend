@@ -14,7 +14,7 @@ class RoleController
     public function indexSelect(Request $request)
     {
         try {
-            $roles = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $roles = $this->repository->getAllByEnterprise();
 
             return response()->json(['roles' => RoleSelectResource::collection($roles)], 200);
         } catch (\Exception $e) {

@@ -18,7 +18,6 @@ class ReceiptService
                 'typesID',
                 'description',
             ]),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($receiptDTO->toArray());

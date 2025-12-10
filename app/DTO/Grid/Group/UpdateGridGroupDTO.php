@@ -2,7 +2,9 @@
 
 namespace App\DTO\Grid\Group;
 
-class UpdateGridGroupDTO
+use App\DTO\BaseDTO;
+
+class UpdateGridGroupDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -15,13 +17,5 @@ class UpdateGridGroupDTO
             name: $data['gridName'],
             active: $data['active'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'active' => $this->active,
-        ];
     }
 }

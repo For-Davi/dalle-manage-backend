@@ -19,7 +19,7 @@ class TypeReceiptController
     public function index(Request $request)
     {
         try {
-            $types = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $types = $this->repository->getAllByEnterprise();
 
             return response()->json(['types' => $types], 200);
         } catch (\Exception $e) {

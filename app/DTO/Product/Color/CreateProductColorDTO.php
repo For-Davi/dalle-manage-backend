@@ -2,7 +2,10 @@
 
 namespace App\DTO\Product\Color;
 
-class CreateProductColorDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateProductColorDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
@@ -15,16 +18,7 @@ class CreateProductColorDTO
         return new self(
             name: $data['name'],
             hex_color_code: $data['hexColorCode'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'hex_color_code' => $this->hex_color_code,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

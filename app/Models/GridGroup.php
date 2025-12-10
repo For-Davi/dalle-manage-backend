@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Scopes\EnterpriseScope;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
 class GridGroup extends Model
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
 
     protected $table = 'grid_groups';
 
@@ -16,6 +18,11 @@ class GridGroup extends Model
         'active',
         'enterprise_id',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new EnterpriseScope);
+    }
 
     public function items()
     {

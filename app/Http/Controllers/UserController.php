@@ -190,7 +190,7 @@ class UserController
     public function index(Request $request)
     {
         try {
-            $users = $this->repository->getAllByEnterprise($request->get('enterprise_id'), ['department', 'role']);
+            $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
             return response()->json(['users' => UserListResource::collection($users)], 200);
 
@@ -206,7 +206,6 @@ class UserController
         try {
             $userFilterDTO = FilterUserDTO::fromRequest([
                 ...$request->only(['name', 'email', 'role', 'department', 'active']),
-                'enterprise_id' => $request->get('enterprise_id'),
             ]);
             $users = $this->repository->getAllWithFilter($userFilterDTO);
 
@@ -242,7 +241,7 @@ class UserController
 
             if ($user) {
                 DB::commit();
-                $users = $this->repository->getAllByEnterprise($request->get('enterprise_id'), ['department', 'role']);
+                $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
                 return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro adicionado á sua organização'], 201);
             }
@@ -265,7 +264,7 @@ class UserController
             if ($user) {
                 DB::commit();
 
-                $users = $this->repository->getAllByEnterprise($request->get('enterprise_id'), ['department', 'role']);
+                $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
                 return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro atualizado'], 200);
             }
@@ -288,7 +287,7 @@ class UserController
             if ($user) {
                 DB::commit();
 
-                $users = $this->repository->getAllByEnterprise($request->get('enterprise_id'), ['department', 'role']);
+                $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
                 return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro excluído'], 200);
             }

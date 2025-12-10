@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\SettingAppearance;
+use Illuminate\Support\Facades\Auth;
 
 class SettingAppearanceRepository
 {
@@ -13,9 +14,9 @@ class SettingAppearanceRepository
         return $this->model->create($data);
     }
 
-    public function update($id, array $data)
+    public function update(array $data)
     {
-        $appearance = $this->getByEnterprise($id);
+        $appearance = $this->getByEnterprise(Auth::user()->enterprise_id);
         if ($appearance) {
             $appearance->update($data);
 
@@ -25,8 +26,8 @@ class SettingAppearanceRepository
         return null;
     }
 
-    public function getByEnterprise(int $enterpriseID)
+    public function getByEnterprise()
     {
-        return $this->model->where('enterprise_id', $enterpriseID)->first();
+        return $this->model->first();
     }
 }

@@ -4,27 +4,19 @@ namespace App\Repositories;
 
 use App\DTO\Product\FilterProductDTO;
 use App\Models\ProductVariant;
+use App\Repositories\Base\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
-class ProductVariantRepository
+class ProductVariantRepository extends BaseRepository
 {
-    public function __construct(protected ProductVariant $model) {}
-
-    public function getAllByEnterprise($enterpriseId, $relations = null)
+    public function __construct(ProductVariant $model)
     {
-        $query = $this->model->where('enterprise_id', $enterpriseId);
-
-        if ($relations) {
-            $query->with($relations);
-        }
-
-        return $query->get();
+        parent::__construct($model);
     }
 
-    public function getAllBySearch($enterpriseId, $value, $relations = null)
+    public function getAllBySearch($value, $relations = null)
     {
         $query = $this->model
-            ->where('product_variants.enterprise_id', $enterpriseId)
             ->leftJoin('products', 'products.id', '=', 'product_variants.product_id');
 
         if ($relations) {
@@ -78,16 +70,6 @@ class ProductVariantRepository
         return $query->get();
     }
 
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
     public function changeStockQuantity(int $variantID, string $type, float $quantity)
     {
         $variant = $this->findById($variantID);
@@ -102,18 +84,6 @@ class ProductVariantRepository
                 'stock_quantity' => $newStock,
             ]);
         }
-    }
-
-    public function update($id, array $data)
-    {
-        $variant = $this->findById($id);
-        if ($variant) {
-            $variant->update($data);
-
-            return $variant;
-        }
-
-        return null;
     }
 
     public function delete($id)

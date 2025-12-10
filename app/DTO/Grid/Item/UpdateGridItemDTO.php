@@ -2,7 +2,10 @@
 
 namespace App\DTO\Grid\Item;
 
-class UpdateGridItemDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class UpdateGridItemDTO extends BaseDTO
 {
     public function __construct(
         public string $size,
@@ -19,18 +22,7 @@ class UpdateGridItemDTO
             active: $data['active'],
             order: $data['order'],
             grid_group_id: $data['gridGroupID'],
-            enterprise_id: $data['enterpriseID']
+            enterprise_id: Auth::user()->enterprise_id
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'size' => $this->size,
-            'active' => $this->active,
-            'order' => $this->order,
-            'grid_group_id' => $this->grid_group_id,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

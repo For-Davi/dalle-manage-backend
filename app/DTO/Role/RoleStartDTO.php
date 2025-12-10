@@ -2,7 +2,9 @@
 
 namespace App\DTO\Role;
 
-class RoleStartDTO
+use App\DTO\BaseDTO;
+
+class RoleStartDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -17,14 +19,5 @@ class RoleStartDTO
             enterprise_id: $data['enterprise_id'],
             permissions: []
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'enterprise_id' => $this->enterprise_id,
-            'permissions' => json_encode($this->permissions),
-        ];
     }
 }

@@ -4,29 +4,18 @@ namespace App\Repositories;
 
 use App\DTO\Tag\FilterTagDTO;
 use App\Models\Tag;
+use App\Repositories\Base\BaseRepository;
 
-class TagRepository
+class TagRepository extends BaseRepository
 {
-    public function __construct(protected Tag $model) {}
-
-    public function getAll()
+    public function __construct(Tag $model)
     {
-        return $this->model->all();
-    }
-
-    public function getAllByEnterprise($enterpriseId)
-    {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 
     public function getAllWithFilter(FilterTagDTO $filters)
     {
-        $query = $this->model->where('enterprise_id', $filters->enterprise_id);
+        $query = $this->model->newQuery();
 
         if ($filters->name !== null) {
             $query->where('name', 'like', "%{$filters->name}%");
@@ -37,23 +26,6 @@ class TagRepository
         }
 
         return $query->get();
-    }
-
-    public function create($data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $tag = $this->findById($id);
-        if ($tag) {
-            $tag->update($data);
-
-            return $tag;
-        }
-
-        return null;
     }
 
     public function delete($id)

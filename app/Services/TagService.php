@@ -14,14 +14,12 @@ class TagService
     public function create($request)
     {
         TagHelper::existsTag(
-            $request->get('enterprise_id'),
             $request->name,
             'create'
         );
 
         $tagDTO = CreateTagDTO::fromRequest([
             ...$request->only(['name']),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($tagDTO->toArray());
@@ -30,7 +28,6 @@ class TagService
     public function update($request)
     {
         TagHelper::existsTag(
-            $request->get('enterprise_id'),
             $request->name,
             'update',
             $request->id

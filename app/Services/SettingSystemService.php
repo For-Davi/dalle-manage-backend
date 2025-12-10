@@ -19,6 +19,6 @@ class SettingSystemService
             ]),
         ]);
 
-        return $this->repository->update($request->get('enterprise_id'), $systemDTO->toArray());
+        return $this->repository->update($systemDTO->toArray());
     }
 }

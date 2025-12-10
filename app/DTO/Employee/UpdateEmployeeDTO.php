@@ -2,7 +2,9 @@
 
 namespace App\DTO\Employee;
 
-class UpdateEmployeeDTO
+use App\DTO\BaseDTO;
+
+class UpdateEmployeeDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -51,31 +53,5 @@ class UpdateEmployeeDTO
             active: $data['active'],
             department_id: $data['departmentId'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'sex' => $this->sex,
-            'phone' => $this->phone,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'state_registration' => $this->state_registration,
-            'municipal_registration' => $this->municipal_registration,
-            'date_birthday' => $this->date_birthday,
-            'cep' => $this->cep,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'neighborhood' => $this->neighborhood,
-            'address' => $this->address,
-            'number' => $this->number,
-            'complement' => $this->complement,
-            'description' => $this->description,
-            'active' => $this->active,
-            'department_id' => $this->department_id,
-        ];
     }
 }

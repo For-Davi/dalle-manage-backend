@@ -3,20 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\Notification;
+use App\Repositories\Base\BaseRepository;
 
-class NotificationRepository
+class NotificationRepository extends BaseRepository
 {
-    public function __construct(public Notification $model) {}
-
-    public function getAllByUserId($userID, array $relations = [])
+    public function __construct(Notification $model)
     {
-        $query = $this->model->where('user_id', $userID);
-
-        if (! empty($relations)) {
-            $query->with($relations);
-        }
-
-        return $query->orderBy('created_at', 'desc')->get();
+        parent::__construct($model);
     }
 
     public function markAsRead(int $notificationID): ?Notification

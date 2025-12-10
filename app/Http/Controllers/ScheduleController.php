@@ -26,7 +26,7 @@ class ScheduleController
     public function index(Request $request)
     {
         try {
-            $schedules = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+            $schedules = $this->repository->getAllByEnterprise(true, ['category']);
 
             return response()->json(['schedules' => $schedules], 200);
         } catch (\Exception $e) {
@@ -39,7 +39,7 @@ class ScheduleController
     public function indexPeriod(Request $request)
     {
         try {
-            $periods = $this->repository->getPeriods($request->get('enterprise_id'));
+            $periods = $this->repository->getPeriods();
 
             return response()->json(['periods' => $periods], 200);
         } catch (\Exception $e) {
@@ -68,7 +68,6 @@ class ScheduleController
         try {
             $scheduleFilterDTO = FilterScheduleDTO::fromRequest([
                 ...$request->only(['period', 'category', 'type']),
-                'enterpriseID' => $request->get('enterprise_id'),
             ]);
             $schedules = $this->repository->getAllWithFilter($scheduleFilterDTO->toArray(), ['category']);
 
@@ -89,7 +88,7 @@ class ScheduleController
             if ($schedule) {
                 DB::commit();
 
-                $schedules = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Agendamento inserido'], 201);
             }
@@ -123,7 +122,7 @@ class ScheduleController
             if ($schedule) {
                 DB::commit();
 
-                $schedules = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Agendamento atualizado'], 200);
             }
@@ -145,7 +144,7 @@ class ScheduleController
 
             if ($schedule) {
                 DB::commit();
-                $schedules = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Agendamento excluído'], 200);
             }
@@ -168,7 +167,7 @@ class ScheduleController
             if ($schedule) {
                 DB::commit();
 
-                $schedules = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Finalização concluída'], 200);
             }

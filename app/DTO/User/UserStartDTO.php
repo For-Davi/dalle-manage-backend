@@ -2,9 +2,10 @@
 
 namespace App\DTO\User;
 
+use App\DTO\BaseDTO;
 use Illuminate\Support\Facades\Hash;
 
-class UserStartDTO
+class UserStartDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -19,20 +20,9 @@ class UserStartDTO
         return new self(
             name: $data['name'],
             email: $data['email'],
-            enterprise_id: $data['enterpriseID'],
             password: Hash::make($data['password']),
-            role_id: $data['roleId']
+            role_id: $data['roleID'],
+            enterprise_id: $data['enterpriseID'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password,
-            'role_id' => $this->role_id,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

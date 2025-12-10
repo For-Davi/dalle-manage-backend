@@ -2,15 +2,16 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class TagHelper
 {
-    public static function existsTag($enterpriseId, $name, $mode, $tagID = null)
+    public static function existsTag($name, $mode, $tagID = null)
     {
         $existingTag = DB::table('tags')
-            ->where('enterprise_id', $enterpriseId)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
             ->where('name', $name)
             ->first();
 

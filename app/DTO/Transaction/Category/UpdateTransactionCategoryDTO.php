@@ -2,7 +2,9 @@
 
 namespace App\DTO\Transaction\Category;
 
-class UpdateTransactionCategoryDTO
+use App\DTO\BaseDTO;
+
+class UpdateTransactionCategoryDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -13,12 +15,5 @@ class UpdateTransactionCategoryDTO
         return new self(
             name: $data['name'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
     }
 }

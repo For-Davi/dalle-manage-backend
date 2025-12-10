@@ -13,7 +13,6 @@ use App\DTO\Product\ProductVariant\CreateProductVariantDTO;
 use App\DTO\Product\ProductVariant\UpdateProductVariantDTO;
 use App\DTO\Product\UpdateProductBasicDTO;
 use App\Exports\Product\ProductExport;
-use App\Helpers\CodeHelper;
 use App\Helpers\ProductHelper;
 use App\Helpers\ProductLogHelper;
 use App\Helpers\SkuHelper;
@@ -30,16 +29,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductService
 {
-    protected ?int $enterpriseID = null;
-
     public function __construct(protected ProductRepository $repository, protected ProductTagRepository $productTagRepository, protected ProductAdvancedRepository $productAdvancedRepository, protected ImageRepository $imageRepository, protected ProductImageRepository $productImageRepository, protected ProductVariantRepository $productVariantRepository, protected ProductColorRepository $productColorRepository) {}
 
     public function create($request)
     {
-        $this->enterpriseID = $request->get('enterprise_id');
-
         ProductHelper::existsProduct(
-            $request->get('enterprise_id'),
             $request->input('basic.name'),
             'create'
         );
@@ -49,7 +43,6 @@ class ProductService
             'type' => $request->input('basic.type'),
             'description' => $request->input('basic.description'),
             'categoryID' => $request->input('basic.categoryID'),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         // Cria o produto
@@ -70,7 +63,6 @@ class ProductService
                     'url' => $path,
                     'name' => $image->getClientOriginalName(),
                     'size' => $image->getSize(),
-                    'enterpriseID' => $this->enterpriseID,
                 ]);
 
                 $imageSaved = $this->imageRepository->create($imageDTO->toArray());
@@ -160,16 +152,7 @@ class ProductService
         $sku = $this->getSku($colorID, $variant['sku']);
         if ($sku !== null) {
             SkuHelper::existsSKU(
-                $this->enterpriseID,
                 $this->getSku($colorID, $variant['sku']),
-                'create',
-            );
-        }
-
-        if ($variant['code']) {
-            CodeHelper::existsCode(
-                $this->enterpriseID,
-                $variant['code'],
                 'create',
             );
         }
@@ -177,7 +160,6 @@ class ProductService
         return CreateProductVariantDTO::fromRequest([
             'active' => $variant['active'],
             'sku' => $sku,
-            'code' => $variant['code'],
             'description' => $variant['description'],
             'offer' => $variant['offer'],
             'location' => $variant['location'],
@@ -188,7 +170,6 @@ class ProductService
             'stockQuantity' => $variant['stockQuantity'],
             'minStockAlert' => $variant['minStockAlert'],
             'productID' => $productID,
-            'enterpriseID' => $this->enterpriseID,
         ]);
     }
 
@@ -223,28 +204,17 @@ class ProductService
 
     public function updateVariant($request)
     {
-        $this->enterpriseID = $request->get('enterprise_id');
-
         $sku = $this->getSku($request->colorID, $request->sku);
         if ($sku !== null) {
             SkuHelper::existsSKU(
-                $this->enterpriseID,
                 $this->getSku($request->colorID, $request->sku),
-                'update',
-                $request->id
-            );
-        }
-        if ($request->code) {
-            CodeHelper::existsCode(
-                $this->enterpriseID,
-                $request->code,
                 'update',
                 $request->id
             );
         }
 
         $productVariantDTO = UpdateProductVariantDTO::fromRequest([
-            ...$request->only(['active', 'sku', 'code', 'description', 'location', 'price', 'cost', 'offer', 'minStockAlert']),
+            ...$request->only(['active', 'sku', 'description', 'location', 'price', 'cost', 'offer', 'minStockAlert']),
         ]);
 
         return $this->productVariantRepository->update($request->id, $productVariantDTO->toArray());
@@ -252,10 +222,7 @@ class ProductService
 
     public function updateBasic($request)
     {
-        $this->enterpriseID = $request->get('enterprise_id');
-
         ProductHelper::existsProduct(
-            $request->get('enterprise_id'),
             $request->input('name'),
             'update',
             $request->input('productID')
@@ -325,8 +292,6 @@ class ProductService
 
     public function updateMedia($request)
     {
-        $this->enterpriseID = $request->get('enterprise_id');
-
         $this->deleteImages($request);
         $this->saveNewImages($request);
 
@@ -387,7 +352,6 @@ class ProductService
                 'url' => $path,
                 'name' => $image->getClientOriginalName(),
                 'size' => $image->getSize(),
-                'enterpriseID' => $this->enterpriseID,
             ]);
 
             $imageSaved = $this->imageRepository->create($imageDTO->toArray());
@@ -403,12 +367,10 @@ class ProductService
 
     public function export($request)
     {
-        $enterpriseID = $request->get('enterprise_id');
         $dateTime = now()->format('Ymd_His');
 
         $exportProductDTO = FilterProductDtO::fromRequest([
             ...$request->only(['name', 'sku', 'category', 'active', 'stockCritical']),
-            'enterpriseID' => $enterpriseID,
         ]);
 
         $products = $this->productVariantRepository->getAllWithFilter($exportProductDTO);

@@ -3,13 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\Feedback;
+use App\Repositories\Base\BaseRepository;
 
-class FeedbackRepository
+class FeedbackRepository extends BaseRepository
 {
-    public function __construct(protected Feedback $model) {}
-
-    public function create(array $data)
+    public function __construct(Feedback $model)
     {
-        return $this->model->create($data);
+        parent::__construct($model);
     }
 }

@@ -2,7 +2,10 @@
 
 namespace App\DTO\Movement;
 
-class FilterMovementDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class FilterMovementDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $period,
@@ -17,17 +20,7 @@ class FilterMovementDTO
             period: $data['period'],
             type: $data['type'],
             category: $data['category'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'period' => $this->period,
-            'type' => $this->type,
-            'category' => $this->category,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

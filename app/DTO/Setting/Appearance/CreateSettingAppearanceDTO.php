@@ -2,7 +2,9 @@
 
 namespace App\DTO\Setting\Appearance;
 
-class CreateSettingAppearanceDTO
+use App\DTO\BaseDTO;
+
+class CreateSettingAppearanceDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $enterprise_id,
@@ -41,26 +43,5 @@ class CreateSettingAppearanceDTO
             side_menu_color_code_not_selected_icon: null,
             side_menu_color_code_selected_icon: null,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'enterprise_id' => $this->enterprise_id,
-            'title_page_color_default' => $this->title_page_color_default,
-            'navbar_color_default' => $this->navbar_color_default,
-            'navbar_icon_color_default' => $this->navbar_icon_color_default,
-            'side_menu_color_default_not_selected_item' => $this->side_menu_color_default_not_selected_item,
-            'side_menu_color_default_selected_item' => $this->side_menu_color_default_selected_item,
-            'side_menu_color_default_not_selected_icon' => $this->side_menu_color_default_not_selected_icon,
-            'side_menu_color_default_selected_icon' => $this->side_menu_color_default_selected_icon,
-            'title_page_color_code' => $this->title_page_color_code,
-            'navbar_color_code' => $this->navbar_color_code,
-            'navbar_icon_color_code' => $this->navbar_icon_color_code,
-            'side_menu_color_code_not_selected_item' => $this->side_menu_color_code_not_selected_item,
-            'side_menu_color_code_selected_item' => $this->side_menu_color_code_selected_item,
-            'side_menu_color_code_not_selected_icon' => $this->side_menu_color_code_not_selected_icon,
-            'side_menu_color_code_selected_icon' => $this->side_menu_color_code_selected_icon,
-        ];
     }
 }

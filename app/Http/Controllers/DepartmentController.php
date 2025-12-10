@@ -21,7 +21,7 @@ class DepartmentController
     public function index(Request $request)
     {
         try {
-            $departments = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $departments = $this->repository->getAllByEnterprise();
 
             return response()->json(['departments' => $departments], 200);
         } catch (\Exception $e) {
@@ -40,7 +40,7 @@ class DepartmentController
             if ($department) {
                 DB::commit();
 
-                $departments = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $departments = $this->repository->getAllByEnterprise();
 
                 return response()->json(['departments' => $departments, 'message' => 'Departamento cadastrado'], 201);
             }
@@ -62,7 +62,7 @@ class DepartmentController
             if ($department) {
                 DB::commit();
 
-                $departments = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $departments = $this->repository->getAllByEnterprise();
 
                 return response()->json(['departments' => $departments, 'message' => 'Departamento atualizado'], 200);
             }
@@ -84,7 +84,7 @@ class DepartmentController
 
             if ($department) {
                 DB::commit();
-                $departments = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $departments = $this->repository->getAllByEnterprise();
 
                 return response()->json(['departments' => $departments, 'message' => 'Departamento excluído'], 200);
             }

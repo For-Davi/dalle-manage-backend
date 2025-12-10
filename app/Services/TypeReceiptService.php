@@ -14,14 +14,12 @@ class TypeReceiptService
     public function create($request)
     {
         TypeReceiptHelper::existsType(
-            $request->get('enterprise_id'),
             $request->name,
             'create'
         );
 
         $typesDTO = CreateTypeReceiptDTO::fromRequest([
             ...$request->only(['name']),
-            'enterpriseID' => $request->get('enterprise_id'),
         ]);
 
         return $this->repository->create($typesDTO->toArray());
@@ -30,7 +28,6 @@ class TypeReceiptService
     public function update($request)
     {
         TypeReceiptHelper::existsType(
-            $request->get('enterprise_id'),
             $request->name,
             'update',
             $request->id

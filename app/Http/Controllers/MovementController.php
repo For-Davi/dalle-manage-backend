@@ -25,7 +25,7 @@ class MovementController
     public function index(Request $request)
     {
         try {
-            $movements = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+            $movements = $this->repository->getAllByEnterprise(true, ['category']);
 
             return response()->json(['movements' => $movements], 200);
         } catch (\Exception $e) {
@@ -38,7 +38,7 @@ class MovementController
     public function indexPeriod(Request $request)
     {
         try {
-            $periods = $this->repository->getPeriods($request->get('enterprise_id'));
+            $periods = $this->repository->getPeriods();
 
             return response()->json(['periods' => $periods], 200);
         } catch (\Exception $e) {
@@ -67,7 +67,6 @@ class MovementController
         try {
             $movementFilterDTO = FilterMovementDTO::fromRequest([
                 ...$request->only(['period', 'category', 'type']),
-                'enterpriseID' => $request->get('enterprise_id'),
             ]);
             $movements = $this->repository->getAllWithFilter($movementFilterDTO->toArray(), ['category']);
 
@@ -88,7 +87,7 @@ class MovementController
             if ($movement) {
                 DB::commit();
 
-                $movements = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+                $movements = $this->repository->getAllByEnterprise(true, ['category']);
 
                 return response()->json(['movements' => $movements, 'message' => 'Movimentação inserida'], 201);
             }
@@ -122,7 +121,7 @@ class MovementController
             if ($movement) {
                 DB::commit();
 
-                $movements = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+                $movements = $this->repository->getAllByEnterprise(true, ['category']);
 
                 return response()->json(['movements' => $movements, 'message' => 'Movimentação atualizada'], 200);
             }
@@ -144,7 +143,7 @@ class MovementController
 
             if ($movement) {
                 DB::commit();
-                $movements = $this->repository->getAllByEnterprise($request->get('enterprise_id'), true, ['category']);
+                $movements = $this->repository->getAllByEnterprise(true, ['category']);
 
                 return response()->json(['movements' => $movements, 'message' => 'Movimentação excluída'], 200);
             }

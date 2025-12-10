@@ -21,7 +21,7 @@ class TransactionCategoryController
     public function index(Request $request)
     {
         try {
-            $categories = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $categories = $this->repository->getAllByEnterprise();
 
             return response()->json(['categories' => $categories], 200);
         } catch (\Exception $e) {
@@ -40,7 +40,7 @@ class TransactionCategoryController
             if ($category) {
                 DB::commit();
 
-                $categories = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $categories = $this->repository->getAllByEnterprise();
 
                 return response()->json(['categories' => $categories, 'message' => 'Categoria cadastrada'], 201);
             }
@@ -62,7 +62,7 @@ class TransactionCategoryController
             if ($category) {
                 DB::commit();
 
-                $categories = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $categories = $this->repository->getAllByEnterprise();
 
                 return response()->json(['categories' => $categories, 'message' => 'Categoria atualizada'], 200);
             }
@@ -84,7 +84,7 @@ class TransactionCategoryController
 
             if ($category) {
                 DB::commit();
-                $categories = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $categories = $this->repository->getAllByEnterprise();
 
                 return response()->json(['categories' => $categories, 'message' => 'Categoria excluída'], 200);
             }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\EnterpriseScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
@@ -18,7 +19,6 @@ class ProductVariant extends Model
         'stock_quantity',
         'min_stock_alert',
         'sku',
-        'code',
         'active',
         'grid_item_id',
         'enterprise_id',
@@ -27,6 +27,18 @@ class ProductVariant extends Model
         'color_id',
         'offer',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new EnterpriseScope);
+
+        static::created(function ($variant) {
+            if (empty($variant->code)) {
+                $variant->code = strval($variant->id);
+                $variant->saveQuietly();
+            }
+        });
+    }
 
     public function setNameAttribute($value)
     {

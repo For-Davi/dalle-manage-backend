@@ -2,7 +2,10 @@
 
 namespace App\DTO\Supplier;
 
-class CreateSupplierDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateSupplierDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -47,32 +50,7 @@ class CreateSupplierDTO
             supplier_category_id: $data['categorySupplierId'],
             description: $data['description'],
             complement: $data['complement'],
-            enterprise_id: $data['enterpriseId']
+            enterprise_id: Auth::user()->enterprise_id
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'state_registration' => $this->state_registration,
-            'municipal_registration' => $this->municipal_registration,
-            'phone' => $this->phone,
-            'site' => $this->site,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'cep' => $this->cep,
-            'neighborhood' => $this->neighborhood,
-            'address' => $this->address,
-            'number' => $this->number,
-            'supplier_category_id' => $this->supplier_category_id,
-            'description' => $this->description,
-            'complement' => $this->complement,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

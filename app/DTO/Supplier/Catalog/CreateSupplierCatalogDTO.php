@@ -2,7 +2,10 @@
 
 namespace App\DTO\Supplier\Catalog;
 
-class CreateSupplierCatalogDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateSupplierCatalogDTO extends BaseDTO
 {
     public function __construct(
         public float $price,
@@ -18,19 +21,8 @@ class CreateSupplierCatalogDTO
             price: $data['price'],
             product_variant_id: $data['productVariantID'],
             supplier_id: $data['supplierID'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
             description: $data['description'] ?? null,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'price' => $this->price,
-            'product_variant_id' => $this->product_variant_id,
-            'supplier_id' => $this->supplier_id,
-            'enterprise_id' => $this->enterprise_id,
-            'description' => $this->description,
-        ];
     }
 }

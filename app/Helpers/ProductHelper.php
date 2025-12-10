@@ -2,15 +2,16 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ProductHelper
 {
-    public static function existsProduct($enterpriseId, $name, $mode, $productID = null)
+    public static function existsProduct($name, $mode, $productID = null)
     {
         $existingProduct = DB::table('products')
-            ->where('enterprise_id', $enterpriseId)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
             ->where('name', $name)
             ->first();
 

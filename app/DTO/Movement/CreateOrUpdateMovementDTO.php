@@ -2,7 +2,11 @@
 
 namespace App\DTO\Movement;
 
-class CreateOrUpdateMovementDTO
+use App\DTO\BaseDTO;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+
+class CreateOrUpdateMovementDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $date,
@@ -13,27 +17,32 @@ class CreateOrUpdateMovementDTO
         public readonly string $enterprise_id,
     ) {}
 
-    public static function fromRequest($data): self
+    public static function fromRequest($request, array $overrides = []): self
     {
+        $data = [
+            'date' => $request->date ?? null,
+            'type' => $request->type,
+            'transactionCategoryID' => $request->transactionCategoryID ?? null,
+            'value' => $request->value,
+            'description' => $request->description,
+        ];
+
+        $data = array_merge($data, $overrides);
+
+        $date = $data['date'];
+        if (is_string($date)) {
+            $date = str_contains($date, '/')
+                ? Carbon::createFromFormat('d/m/Y', $date)
+                : Carbon::parse($date);
+        }
+
         return new self(
-            date: $data['date'],
+            date: $date->format('Y-m-d'),
             type: $data['type'],
             transaction_category_id: $data['transactionCategoryID'],
             value: $data['value'],
             description: $data['description'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'date' => $this->date,
-            'type' => $this->type,
-            'transaction_category_id' => $this->transaction_category_id,
-            'value' => $this->value,
-            'description' => $this->description,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

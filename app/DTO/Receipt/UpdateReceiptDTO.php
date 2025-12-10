@@ -2,7 +2,9 @@
 
 namespace App\DTO\Receipt;
 
-class UpdateReceiptDTO
+use App\DTO\BaseDTO;
+
+class UpdateReceiptDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $identifier,
@@ -19,15 +21,5 @@ class UpdateReceiptDTO
             active: $data['active'],
             description: $data['description'] ?? null
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'identifier' => $this->identifier,
-            'type_receipt_id' => $this->type_receipt_id,
-            'active' => $this->active,
-            'description' => $this->description,
-        ];
     }
 }

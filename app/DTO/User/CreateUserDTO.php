@@ -2,9 +2,11 @@
 
 namespace App\DTO\User;
 
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class CreateUserDTO
+class CreateUserDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -21,21 +23,9 @@ class CreateUserDTO
             name: $data['name'],
             password: Hash::make($data['password']),
             email: $data['email'],
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id,
             department_id: $data['departmentId'],
             role_id: $data['roleId']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password,
-            'role_id' => $this->role_id,
-            'enterprise_id' => $this->enterprise_id,
-            'department_id' => $this->department_id,
-        ];
     }
 }

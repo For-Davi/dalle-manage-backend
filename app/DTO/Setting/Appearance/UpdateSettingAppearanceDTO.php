@@ -2,7 +2,9 @@
 
 namespace App\DTO\Setting\Appearance;
 
-class UpdateSettingAppearanceDTO
+use App\DTO\BaseDTO;
+
+class UpdateSettingAppearanceDTO extends BaseDTO
 {
     public function __construct(
         public int $title_page_color_default,
@@ -39,25 +41,5 @@ class UpdateSettingAppearanceDTO
             side_menu_color_code_not_selected_icon: $data['sideMenuColorCodeNotSelectedIcon'],
             side_menu_color_code_selected_icon: $data['sideMenuColorCodeSelectedIcon'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'title_page_color_default' => $this->title_page_color_default,
-            'navbar_color_default' => $this->navbar_color_default,
-            'navbar_icon_color_default' => $this->navbar_icon_color_default,
-            'side_menu_color_default_not_selected_item' => $this->side_menu_color_default_not_selected_item,
-            'side_menu_color_default_selected_item' => $this->side_menu_color_default_selected_item,
-            'side_menu_color_default_not_selected_icon' => $this->side_menu_color_default_not_selected_icon,
-            'side_menu_color_default_selected_icon' => $this->side_menu_color_default_selected_icon,
-            'title_page_color_code' => $this->title_page_color_code,
-            'navbar_color_code' => $this->navbar_color_code,
-            'navbar_icon_color_code' => $this->navbar_icon_color_code,
-            'side_menu_color_code_not_selected_item' => $this->side_menu_color_code_not_selected_item,
-            'side_menu_color_code_selected_item' => $this->side_menu_color_code_selected_item,
-            'side_menu_color_code_not_selected_icon' => $this->side_menu_color_code_not_selected_icon,
-            'side_menu_color_code_selected_icon' => $this->side_menu_color_code_selected_icon,
-        ];
     }
 }

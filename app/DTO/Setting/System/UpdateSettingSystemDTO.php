@@ -2,7 +2,9 @@
 
 namespace App\DTO\Setting\System;
 
-class UpdateSettingSystemDTO
+use App\DTO\BaseDTO;
+
+class UpdateSettingSystemDTO extends BaseDTO
 {
     public function __construct(
         public int $send_notification_stock_critical,
@@ -13,12 +15,5 @@ class UpdateSettingSystemDTO
         return new self(
             send_notification_stock_critical: $data['sendNotificationStockCritical'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'send_notification_stock_critical' => $this->send_notification_stock_critical,
-        ];
     }
 }

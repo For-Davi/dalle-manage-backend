@@ -21,6 +21,7 @@ use App\Http\Controllers\SettingSystemController;
 use App\Http\Controllers\SupplierCatalogController;
 use App\Http\Controllers\SupplierCategoryController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupplierOrderController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
@@ -33,7 +34,7 @@ Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/verify', [UserController::class, 'verify']);
 Route::post('/newPassword', [UserController::class, 'newPassword']);
 
-Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group(function () {
+Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('department')->group(function () {
         Route::get('/', [DepartmentController::class, 'index']);
@@ -84,6 +85,18 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
             Route::delete('/{categoryID}', [SupplierCategoryController::class, 'destroy']);
         });
 
+        Route::prefix('order')->group(function () {
+            Route::get('/', [SupplierOrderController::class, 'index']);
+            Route::get('/history/{orderID}', [SupplierOrderController::class, 'getHistory']);
+            Route::get('/{orderID}', [SupplierOrderController::class, 'show']);
+            Route::post('/', [SupplierOrderController::class, 'store']);
+            Route::post('/export', [SupplierOrderController::class, 'export']);
+            Route::put('/', [SupplierOrderController::class, 'update']);
+            Route::put('/received', [SupplierOrderController::class, 'received']);
+            Route::put('/status', [SupplierOrderController::class, 'updateStatus']);
+            Route::delete('/{orderID}', [SupplierOrderController::class, 'destroy']);
+        });
+
         Route::prefix('catalog')->group(function () {
             Route::get('/{supplierID}', [SupplierCatalogController::class, 'index']);
             Route::get('/variant/{variantID}', [SupplierCatalogController::class, 'getByVariant']);
@@ -93,6 +106,7 @@ Route::middleware(['auth:sanctum', 'token.expiration', 'set.enterprise'])->group
         });
 
         Route::get('/', [SupplierController::class, 'index']);
+        Route::get('/list-select', [SupplierController::class, 'list']);
         Route::get('/{supplierID}', [SupplierController::class, 'show']);
         Route::post('/', [SupplierController::class, 'store']);
         Route::post('/filter', [SupplierController::class, 'filter']);

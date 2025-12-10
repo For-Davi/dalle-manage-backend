@@ -2,12 +2,14 @@
 
 namespace App\DTO\Product\ProductVariant;
 
-class CreateProductVariantDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateProductVariantDTO extends BaseDTO
 {
     public function __construct(
         public readonly int $active,
         public readonly ?string $sku,
-        public readonly ?string $code,
         public readonly ?string $description,
         public readonly ?string $location,
         public readonly int $enterprise_id,
@@ -26,7 +28,6 @@ class CreateProductVariantDTO
         return new self(
             active: $data['active'],
             sku: $data['sku'],
-            code: $data['code'],
             description: $data['description'],
             location: $data['location'],
             product_id: $data['productID'],
@@ -37,27 +38,7 @@ class CreateProductVariantDTO
             offer: $data['offer'],
             stock_quantity: $data['stockQuantity'],
             min_stock_alert: $data['minStockAlert'],
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'active' => $this->active,
-            'sku' => $this->sku,
-            'code' => $this->code,
-            'description' => $this->description,
-            'location' => $this->location,
-            'product_id' => $this->product_id,
-            'grid_item_id' => $this->grid_item_id,
-            'color_id' => $this->color_id,
-            'price' => $this->price,
-            'cost' => $this->cost,
-            'offer' => $this->offer,
-            'stock_quantity' => $this->stock_quantity,
-            'min_stock_alert' => $this->min_stock_alert,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

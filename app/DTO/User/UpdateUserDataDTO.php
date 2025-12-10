@@ -2,7 +2,9 @@
 
 namespace App\DTO\User;
 
-class UpdateUserDataDTO
+use App\DTO\BaseDTO;
+
+class UpdateUserDataDTO extends BaseDTO
 {
     public function __construct(
         public ?string $name,
@@ -15,13 +17,5 @@ class UpdateUserDataDTO
             name: $data['name'],
             email: $data['email'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-        ];
     }
 }

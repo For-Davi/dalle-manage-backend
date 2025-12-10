@@ -3,19 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\ProductTag;
+use App\Repositories\Base\BaseRepository;
 
-class ProductTagRepository
+class ProductTagRepository extends BaseRepository
 {
-    public function __construct(protected ProductTag $model) {}
-
-    public function getAll()
+    public function __construct(ProductTag $model)
     {
-        return $this->model->all();
-    }
-
-    public function getAllByProductID($productID)
-    {
-        return $this->model->where('product_id', $productID)->get();
+        parent::__construct($model);
     }
 
     public function getAllByTagID($tagID)
@@ -29,16 +23,6 @@ class ProductTagRepository
             ->where('product_id', $productID)
             ->where('tag_id', $tagID)
             ->first();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create($data)
-    {
-        return $this->model->create($data);
     }
 
     public function deleteByProductID($productID)

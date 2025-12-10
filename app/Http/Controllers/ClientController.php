@@ -24,7 +24,7 @@ class ClientController
     public function index(Request $request)
     {
         try {
-            $clients = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $clients = $this->repository->getAllByEnterprise();
 
             return response()->json(['clients' => $clients], 200);
         } catch (\Exception $e) {
@@ -53,7 +53,6 @@ class ClientController
         try {
             $clientFilterDTO = FilterClientDTO::fromRequest([
                 ...$request->only(['name', 'email', 'cpf', 'cnpj', 'country', 'state', 'city']),
-                'enterprise_id' => $request->get('enterprise_id'),
             ]);
             $clients = $this->repository->getAllWithFilter($clientFilterDTO);
 
@@ -74,7 +73,7 @@ class ClientController
             if ($client) {
                 DB::commit();
 
-                $clients = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $clients = $this->repository->getAllByEnterprise();
 
                 return response()->json(['clients' => $clients, 'message' => 'Cliente cadastrado'], 201);
             }
@@ -96,7 +95,7 @@ class ClientController
             if ($supplier) {
                 DB::commit();
 
-                $clients = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $clients = $this->repository->getAllByEnterprise();
 
                 return response()->json(['clients' => $clients, 'message' => 'Cliente atualizado'], 200);
             }
@@ -118,7 +117,7 @@ class ClientController
 
             if ($client) {
                 DB::commit();
-                $clients = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $clients = $this->repository->getAllByEnterprise();
 
                 return response()->json(['clients' => $clients, 'message' => 'Cliente excluído'], 200);
             }

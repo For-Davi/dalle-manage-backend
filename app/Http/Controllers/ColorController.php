@@ -21,7 +21,7 @@ class ColorController
     public function index(Request $request)
     {
         try {
-            $colors = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+            $colors = $this->repository->getAllByEnterprise();
 
             return response()->json(['colors' => $colors], 200);
         } catch (\Exception $e) {
@@ -39,7 +39,7 @@ class ColorController
 
             if ($color) {
                 DB::commit();
-                $colors = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $colors = $this->repository->getAllByEnterprise();
 
                 return response()->json(['colors' => $colors, 'message' => 'Cor cadastrada'], 201);
             }
@@ -61,7 +61,7 @@ class ColorController
             if ($color) {
                 DB::commit();
 
-                $colors = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $colors = $this->repository->getAllByEnterprise();
 
                 return response()->json(['colors' => $colors, 'message' => 'Cor atualizada'], 200);
             }
@@ -83,7 +83,7 @@ class ColorController
 
             if ($color) {
                 DB::commit();
-                $colors = $this->repository->getAllByEnterprise($request->get('enterprise_id'));
+                $colors = $this->repository->getAllByEnterprise();
 
                 return response()->json(['colors' => $colors, 'message' => 'Cor excluída'], 200);
             }

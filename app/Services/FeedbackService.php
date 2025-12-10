@@ -27,21 +27,14 @@ class FeedbackService
                     'url' => $path,
                     'name' => $image->getClientOriginalName(),
                     'size' => $image->getSize(),
-                    'enterpriseID' => $request->get('enterprise_id'),
                 ]);
 
                 $savedImage = $this->imageRepository->create($imageDTO->toArray());
             }
         }
 
-        $user = auth()->user();
-        $enterpriseName = $user->enterprise->name ?? 'Sem empresa';
-
         $feedbackDTO = CreateFeedbackDTO::fromRequest([
             'text' => $request->text,
-            'enterprise_name' => $enterpriseName,
-            'user_name' => $user->name,
-            'user_email' => $user->email,
             'image_id' => $savedImage === null ? null : $savedImage->id,
         ]);
 

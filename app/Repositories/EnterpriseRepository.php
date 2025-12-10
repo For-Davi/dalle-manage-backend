@@ -3,51 +3,20 @@
 namespace App\Repositories;
 
 use App\Models\Enterprise;
+use App\Repositories\Base\BaseRepository;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class EnterpriseRepository
+class EnterpriseRepository extends BaseRepository
 {
-    public function __construct(protected Enterprise $model) {}
-
-    public function getAll()
+    public function __construct(Enterprise $model)
     {
-        return $this->model->all();
+        parent::__construct($model);
     }
 
-    public function findById($id)
+    public function delete()
     {
-        return $this->model->find($id);
-    }
-
-    public function findByCpf($cpf)
-    {
-        return $this->model->where('cpf', $cpf)->first();
-    }
-
-    public function findByCnpj($cnpj)
-    {
-        return $this->model->where('cnpj', $cnpj)->first();
-    }
-
-    public function create($data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $enterprise = $this->findById($id);
-        if ($enterprise) {
-            $enterprise->update($data);
-
-            return $enterprise;
-        }
-
-        return null;
-    }
-
-    public function delete($id)
-    {
+        $id = Auth::user()->enterpise_id;
         $enterprise = $this->findById($id);
         if ($enterprise) {
             // CLIENTS

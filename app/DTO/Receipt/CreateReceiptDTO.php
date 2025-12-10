@@ -2,7 +2,10 @@
 
 namespace App\DTO\Receipt;
 
-class CreateReceiptDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class CreateReceiptDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $identifier,
@@ -16,18 +19,8 @@ class CreateReceiptDTO
         return new self(
             identifier: $data['identifier'],
             type_receipt_id: $data['typesID'] ?? null,
-            enterprise_id: $data['enterpriseID'],
+            enterprise_id: Auth::user()->enterprise_id,
             description: $data['description']
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'identifier' => $this->identifier,
-            'type_receipt_id' => $this->type_receipt_id,
-            'enterprise_id' => $this->enterprise_id,
-            'description' => $this->description,
-        ];
     }
 }

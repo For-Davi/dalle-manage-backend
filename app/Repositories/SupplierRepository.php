@@ -4,19 +4,13 @@ namespace App\Repositories;
 
 use App\DTO\Supplier\FilterSupplierDTO;
 use App\Models\Supplier;
+use App\Repositories\Base\BaseRepository;
 
-class SupplierRepository
+class SupplierRepository extends BaseRepository
 {
-    public function __construct(protected Supplier $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(Supplier $model)
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 
     public function getAllWithFilter(FilterSupplierDTO $filters)
@@ -59,23 +53,6 @@ class SupplierRepository
         }
 
         return $query->get();
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $supplier = $this->findById($id);
-        if ($supplier) {
-            $supplier->update($data);
-
-            return $supplier;
-        }
-
-        return null;
     }
 
     public function delete($id)

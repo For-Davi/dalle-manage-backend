@@ -144,7 +144,7 @@ class UserService
         $userDTO = UserStartDTO::fromRequest([
             ...$request->only(['name', 'password', 'email']),
             'enterpriseID' => $enterprise->id,
-            'roleId' => $role->id,
+            'roleID' => $role->id,
         ]);
 
         return $this->createUser($userDTO->toArray());
@@ -196,13 +196,12 @@ class UserService
     {
         $userDTO = CreateUserDTO::fromRequest([
             ...$request->only(['name', 'password', 'email', 'roleId', 'departmentId']),
-            'enterprise_id' => $request->get('enterprise_id'),
         ]);
 
         $user = $this->createUser($userDTO->toArray());
 
         $admin = $request->user();
-        $enterprise = $this->enterpriseRepository->findById($request->get('enterprise_id'));
+        $enterprise = $this->enterpriseRepository->findById();
         $token = app('auth.password.broker')->createToken($user);
 
         $this->setTypePassword($user->email, 'invite');
@@ -218,7 +217,6 @@ class UserService
                 ]),
                 'userId' => $user->id,
                 'hasLoginAccess' => 1,
-                'enterpriseId' => $request->get('enterprise_id'),
             ]);
 
             $this->createEmployee($employeeDTO->toArray());
@@ -279,7 +277,6 @@ class UserService
                 'url' => $path,
                 'name' => $image->getClientOriginalName(),
                 'size' => $image->getSize(),
-                'enterpriseID' => $request->get('enterprise_id'),
             ]);
 
             $savedImage = $this->imageRepository->create($imageDTO->toArray());

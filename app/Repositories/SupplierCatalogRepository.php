@@ -3,27 +3,16 @@
 namespace App\Repositories;
 
 use App\Models\SupplierCatalog;
+use App\Repositories\Base\BaseRepository;
 
-class SupplierCatalogRepository
+class SupplierCatalogRepository extends BaseRepository
 {
-    public function __construct(protected SupplierCatalog $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(SupplierCatalog $model)
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
+        parent::__construct($model);
     }
 
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update(int $supplierId, int $productVariantId, array $data)
+    public function updateBySupplierAndVariant(int $supplierId, int $productVariantId, array $data)
     {
         $item = $this->model
             ->where('supplier_id', $supplierId)

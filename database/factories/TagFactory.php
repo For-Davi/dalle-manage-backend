@@ -1,0 +1,33 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Tag;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class TagFactory extends Factory
+{
+    protected $model = Tag::class;
+
+    public function definition()
+    {
+        $tags = [
+            'Versão',
+            'Inverno',
+            'Primavera',
+            'Verão',
+            'Outono',
+            'Padrão',
+            'Promoção',
+            'Beta',
+            'Ativo',
+            'Prioridade',
+            'Especial',
+            'Limitado',
+        ];
+
+        return [
+            'name' => $this->faker->randomElement($tags),
+        ];
+    }
+}

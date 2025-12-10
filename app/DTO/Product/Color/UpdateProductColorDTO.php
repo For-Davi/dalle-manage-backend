@@ -2,7 +2,9 @@
 
 namespace App\DTO\Product\Color;
 
-class UpdateProductColorDTO
+use App\DTO\BaseDTO;
+
+class UpdateProductColorDTO extends BaseDTO
 {
     public function __construct(
         public readonly string $name,
@@ -17,14 +19,5 @@ class UpdateProductColorDTO
             hex_color_code: $data['hexColorCode'],
             active: $data['active'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'hex_color_code' => $this->hex_color_code,
-            'active' => $this->active,
-        ];
     }
 }

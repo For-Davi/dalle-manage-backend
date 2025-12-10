@@ -2,7 +2,9 @@
 
 namespace App\DTO\Supplier\Catalog;
 
-class UpdateSupplierCatalogDTO
+use App\DTO\BaseDTO;
+
+class UpdateSupplierCatalogDTO extends BaseDTO
 {
     public function __construct(
         public float $price,
@@ -19,15 +21,5 @@ class UpdateSupplierCatalogDTO
             supplier_id: $data['supplierID'],
             description: $data['description'] ?? null,
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'price' => $this->price,
-            'product_variant_id' => $this->product_variant_id,
-            'supplier_id' => $this->supplier_id,
-            'description' => $this->description,
-        ];
     }
 }

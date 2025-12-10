@@ -3,16 +3,20 @@
 namespace App\Repositories;
 
 use App\Models\Movement;
+use App\Repositories\Base\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class MovementRepository
+class MovementRepository extends BaseRepository
 {
-    public function __construct(protected Movement $model) {}
-
-    public function getAllByEnterprise($enterpriseID, $onlyPeriodActual = false, array $relations = [])
+    public function __construct(Movement $model)
     {
-        $query = $this->model->where('enterprise_id', $enterpriseID);
+        parent::__construct($model);
+    }
+
+    public function getAllByEnterprise($onlyPeriodActual = false, array $relations = [])
+    {
+        $query = $this->model->query();
 
         if (! empty($relations)) {
             $query->with($relations);
@@ -28,17 +32,6 @@ class MovementRepository
         }
 
         return $query->get();
-    }
-
-    public function findById($id, array $relations = [])
-    {
-        $query = $this->model;
-
-        if (! empty($relations)) {
-            $query = $query->with($relations);
-        }
-
-        return $query->find($id);
     }
 
     public function getAllWithFilter(array $filters, array $relations = [])
@@ -72,12 +65,11 @@ class MovementRepository
         return $query->get();
     }
 
-    public function getPeriods($enterpriseID)
+    public function getPeriods()
     {
         return $this->model
-            ->where('enterprise_id', $enterpriseID)
             ->selectRaw("
-            DISTINCT 
+            DISTINCT
             CONCAT(SUBSTRING(`date`, 4, 2), '-', SUBSTRING(`date`, 7, 4)) as period,
             CAST(SUBSTRING(`date`, 7, 4) AS UNSIGNED) as year_part,
             CAST(SUBSTRING(`date`, 4, 2) AS UNSIGNED) as month_part
@@ -86,23 +78,6 @@ class MovementRepository
             ->orderBy('month_part', 'ASC')
             ->pluck('period')
             ->toArray();
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $movement = $this->findById($id);
-        if ($movement) {
-            $movement->update($data);
-
-            return $movement;
-        }
-
-        return null;
     }
 
     public function delete($id)

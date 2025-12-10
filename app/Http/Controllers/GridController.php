@@ -30,7 +30,7 @@ class GridController
     public function index(Request $request)
     {
         try {
-            $gridGroups = $this->gridGroupRepository->getAllByEnterprise($request->get('enterprise_id'), 'items');
+            $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
             return response()->json(['grids' => $gridGroups], 200);
         } catch (\Exception $e) {
@@ -75,7 +75,7 @@ class GridController
             if ($grid) {
                 DB::commit();
 
-                $gridGroups = $this->gridGroupRepository->getAllByEnterprise($request->get('enterprise_id'), 'items');
+                $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
                 return response()->json(['grids' => $gridGroups, 'message' => 'Grade de tamanhos cadastrada'], 201);
             }
@@ -97,7 +97,7 @@ class GridController
             if ($item) {
                 DB::commit();
 
-                $gridGroups = $this->gridGroupRepository->getAllByEnterprise($request->get('enterprise_id'), 'items');
+                $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
                 return response()->json(['gridGroups' => $gridGroups, 'message' => 'Grade de tamanhos cadastrada'], 201);
             }
@@ -118,7 +118,7 @@ class GridController
 
             if ($grid) {
                 DB::commit();
-                $gridGroups = $this->gridGroupRepository->getAllByEnterprise($request->get('enterprise_id'), 'items');
+                $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
                 return response()->json(['grids' => $gridGroups, 'message' => 'Grade de tamanhos atualizada'], 200);
             }
@@ -139,7 +139,7 @@ class GridController
 
             if ($item) {
                 DB::commit();
-                $gridGroups = $this->gridGroupRepository->getAllByEnterprise($request->get('enterprise_id'), 'items');
+                $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
                 return response()->json(['gridGroups' => $gridGroups, 'message' => 'Grade de tamanhos atualizada'], 200);
             }
@@ -161,7 +161,7 @@ class GridController
 
             if ($grid) {
                 DB::commit();
-                $gridGroups = $this->gridGroupRepository->getAllByEnterprise($request->get('enterprise_id'), 'items');
+                $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
                 return response()->json(['grids' => $gridGroups, 'message' => 'Grade de tamanhos excluída'], 200);
             }
@@ -183,7 +183,7 @@ class GridController
 
             if ($grid) {
                 DB::commit();
-                $gridGroups = $this->gridGroupRepository->getAllByEnterprise($request->get('enterprise_id'), 'items');
+                $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
                 return response()->json(['gridGroups' => $gridGroups, 'message' => 'Item da grade excluído'], 200);
             }

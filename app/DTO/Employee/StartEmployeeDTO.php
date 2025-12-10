@@ -2,7 +2,10 @@
 
 namespace App\DTO\Employee;
 
-class StartEmployeeDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class StartEmployeeDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
@@ -19,21 +22,9 @@ class StartEmployeeDTO
             name: $data['name'],
             email: $data['email'],
             department_id: $data['departmentId'],
-            enterprise_id: $data['enterpriseId'],
+            enterprise_id: Auth::user()->enterprise_id,
             has_login_access: $data['hasLoginAccess'],
             user_id: $data['userId'],
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'department_id' => $this->department_id,
-            'user_id' => $this->user_id,
-            'enterprise_id' => $this->enterprise_id,
-            'has_login_access' => $this->has_login_access,
-        ];
     }
 }

@@ -4,20 +4,14 @@ namespace App\Repositories;
 
 use App\DTO\Employee\FilterEmployeeDTO;
 use App\Models\Employee;
+use App\Repositories\Base\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
-class EmployeeRepository
+class EmployeeRepository extends BaseRepository
 {
-    public function __construct(protected Employee $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(Employee $model)
     {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 
     public function getAllWithFilter(FilterEmployeeDTO $filters)
@@ -56,23 +50,6 @@ class EmployeeRepository
         }
 
         return $query->get();
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        $employee = $this->findById($id);
-        if ($employee) {
-            $employee->update($data);
-
-            return $employee;
-        }
-
-        return null;
     }
 
     public function clearDepartment($departmentId)

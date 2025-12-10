@@ -2,7 +2,10 @@
 
 namespace App\DTO\Client;
 
-class FilterClientDTO
+use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
+
+class FilterClientDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $name,
@@ -25,21 +28,7 @@ class FilterClientDTO
             country: $data['country'] !== '' ? $data['country'] : null,
             state: $data['state'] !== '' ? $data['state'] : null,
             city: $data['city'] !== '' ? $data['city'] : null,
-            enterprise_id: $data['enterprise_id'],
+            enterprise_id: Auth::user()->enterprise_id
         );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'cpf' => $this->cpf,
-            'cnpj' => $this->cnpj,
-            'country' => $this->country,
-            'state' => $this->state,
-            'city' => $this->city,
-            'enterprise_id' => $this->enterprise_id,
-        ];
     }
 }

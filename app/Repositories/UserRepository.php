@@ -5,26 +5,14 @@ namespace App\Repositories;
 use App\DTO\User\FilterUserDTO;
 use App\DTO\User\UpdateUserProfilePhotoDTO;
 use App\Models\User;
+use App\Repositories\Base\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
-class UserRepository
+class UserRepository extends BaseRepository
 {
-    public function __construct(public User $model) {}
-
-    public function getAll()
+    public function __construct(User $model)
     {
-        return $this->model->all();
-    }
-
-    public function getAllByEnterprise($enterpriseId, array $relations = [])
-    {
-        $query = $this->model->where('enterprise_id', $enterpriseId);
-
-        if (! empty($relations)) {
-            $query->with($relations);
-        }
-
-        return $query->get();
+        parent::__construct($model);
     }
 
     public function getAllWithFilter(FilterUserDTO $filters)
@@ -54,36 +42,14 @@ class UserRepository
         return $query->get();
     }
 
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
     public function findByEmail($email)
     {
         return $this->model->where('email', $email)->first();
     }
 
-    public function update($id, array $data)
-    {
-        $user = $this->findById($id);
-        if ($user) {
-            $user->update($data);
-
-            return $user;
-        }
-
-        return null;
-    }
-
     public function clearDepartment($departmentId)
     {
         $this->model->where('department_id', $departmentId)->update(['department_id' => null]);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
     }
 
     public function updateMember($id, array $data)
