@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
+use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PixController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductMovementController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingAppearanceController;
 use App\Http\Controllers\SettingSystemController;
+use App\Http\Controllers\SubscriptionControlller;
 use App\Http\Controllers\SupplierCatalogController;
 use App\Http\Controllers\SupplierCategoryController;
 use App\Http\Controllers\SupplierController;
@@ -26,6 +29,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WebhookAsaasController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
@@ -33,6 +37,10 @@ Route::post('/register', [UserController::class, 'register']);
 Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/verify', [UserController::class, 'verify']);
 Route::post('/newPassword', [UserController::class, 'newPassword']);
+
+Route::middleware(['webhook.asaas'])->group(function () {
+    Route::post('/send-webhook', [WebhookAsaasController::class, 'update']);
+});
 
 Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
@@ -259,4 +267,14 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
     });
+
+    Route::prefix('subscription')->group(function () {
+        Route::get('/', [SubscriptionControlller::class, 'index']);
+
+        Route::prefix('payment')->group(function () {
+            Route::post('pix/', [PixController::class, 'store']);
+            Route::post('credit-card/', [CreditCardController::class, 'store']);
+        });
+    });
+
 });

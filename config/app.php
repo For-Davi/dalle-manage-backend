@@ -33,4 +33,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'dalle_payments_url' => env('DALLE_PAYMENTS_URL'),
+    'dalle_payments_access_token' => env('DALLE_PAYMENTS_ACCESS_TOKEN'),
+    'payment_receipt' => env('PAYMENT_RECEIPT'),
 ];

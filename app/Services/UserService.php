@@ -17,6 +17,7 @@ use App\DTO\User\UpdateUserProfilePhotoDTO;
 use App\DTO\User\UserStartDTO;
 use App\Helpers\SellerHelper;
 use App\Helpers\UserHelper;
+use App\Http\Client\PaymentsHttpClient;
 use App\Jobs\SendInviteUserEmailJob;
 use App\Jobs\SendResetPasswordEmail;
 use App\Models\PasswordResetToken;
@@ -43,7 +44,8 @@ class UserService
         protected SettingAppearanceRepository $settingAppearanceRepository,
         protected SettingSystemRepository $settingSystemRepository,
         protected ImageRepository $imageRepository,
-        protected TypeReceiptRepository $typeReceiptRepository
+        protected TypeReceiptRepository $typeReceiptRepository,
+        protected PaymentsHttpClient $http,
     ) {}
 
     public function login($request)
@@ -54,8 +56,14 @@ class UserService
         UserHelper::checkPassword($user, $request->password);
         UserHelper::checkUserActive($user);
         UserHelper::clearTokenReset($user);
+        $this->resetRegisterPix($user->id);
 
         return $user;
+    }
+
+    private function resetRegisterPix($userID)
+    {
+        return $this->http->request('post', "/payment/pix/delete-register/{$userID}");
     }
 
     private function hasUser($user)

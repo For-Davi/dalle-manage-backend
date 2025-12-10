@@ -28,6 +28,7 @@ class Enterprise extends Model
         'number_address',
         'active',
         'seller_id',
+        'expired_date',
     ];
 
     public function setSellerCodeAttribute($value)
