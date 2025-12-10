@@ -2,14 +2,13 @@
 
 namespace App\Repositories;
 
-use App\DTO\Receipt\FilterReceiptDTO;
 use App\Models\TypeReceipt;
 
 class TypeReceiptRepository
 {
     public function __construct(protected TypeReceipt $model) {}
 
-    public function getAllWithFilter(FilterReceiptDTO $filters)
+    public function getAllWithFilter($filters)
     {
         $query = $this->model->where('enterprise_id', $filters->enterpriseID);
 
