@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Enums\Supplier\Order\SupplierOrderStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -23,6 +24,27 @@ class SupplierOrderHelper
             if ($received > $remaining) {
                 throw ValidationException::withMessages([
                     'received' => ['A quantidade informada de recebimento de um item ultrapassa o que ainda falta a receber'],
+                ]);
+            }
+        }
+    }
+
+    public static function verifyStatusAndRoles($status, $orderID)
+    {
+        if ($status === SupplierOrderStatus::PARTIAL_FINISHED->value) {
+
+            $items = DB::table('supplier_order_items')
+                ->select('quantity_received')
+                ->where('supplier_order_id', $orderID)
+                ->get();
+
+            $noneReceived = $items->every(function ($item) {
+                return intval($item->quantity_received) === 0;
+            });
+
+            if ($noneReceived) {
+                throw ValidationException::withMessages([
+                    'received' => ['Não é possível finalizar parcialmente o pedido, pois nenhum item foi recebido.'],
                 ]);
             }
         }

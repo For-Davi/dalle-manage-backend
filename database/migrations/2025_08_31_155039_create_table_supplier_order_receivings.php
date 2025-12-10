@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('supplier_order_item_id');
             $table->integer('quantity_received');
+            $table->integer('quantity_stocked')->default(0);
             $table->date('receiving_date');
             $table->text('observation')->nullable();
             $table->unsignedBigInteger('received_by')->nullable();

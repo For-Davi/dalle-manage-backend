@@ -9,6 +9,7 @@ use App\DTO\Supplier\Order\Item\UpdateSupplierOrderItemReceivedDTO;
 use App\DTO\Supplier\Order\Status\CreateSupplierOrderStatusHistoryDTO;
 use App\DTO\Supplier\Order\Status\UpdateSupplierOrderStatusDTO;
 use App\DTO\Supplier\Order\UpdateSupplierOrderDTO;
+use App\Enums\Supplier\Order\SupplierOrderStatus;
 use App\Helpers\SupplierOrderHelper;
 use App\Repositories\SupplierOrderItemRepository;
 use App\Repositories\SupplierOrderReceivingRepository;
@@ -44,11 +45,16 @@ class SupplierOrderService
 
     public function updateStatus($request)
     {
-        $orderDTO = UpdateSupplierOrderStatusDTO::fromRequest($request);
+        SupplierOrderHelper::verifyStatusAndRoles($request->status, $request->id);
 
+        $orderDTO = UpdateSupplierOrderStatusDTO::fromRequest($request);
         $order = $this->repository->update($request->id, $orderDTO->toArray());
 
         $this->createOrderStatusHistory($order, $request->status);
+
+        if ($request->status === SupplierOrderStatus::PARTIAL_FINISHED->value) {
+            $this->reviewStock($request->id);
+        }
 
         return $order;
     }
@@ -104,6 +110,11 @@ class SupplierOrderService
         ]);
 
         $order->status()->create($statusDTO->toArray());
+    }
+
+    private function reviewStock(int $orderID): void
+    {
+        $order = $this->repository->findById($orderID);
     }
 
     public function export($request)

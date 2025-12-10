@@ -16,6 +16,7 @@ class SupplierOrderReceiving extends Model
         'product_variant_id',
         'receiving_date',
         'quantity_received',
+        'quantity_stocked',
         'received_by',
     ];
 
