@@ -64,9 +64,7 @@ class SupplierController
     public function filter(FilterSupplierRequest $request)
     {
         try {
-            $supplierFilterDTO = FilterSupplierDTO::fromRequest([
-                ...$request->only(['name', 'email', 'cpf', 'cnpj', 'active', 'country', 'state', 'city', 'category']),
-            ]);
+            $supplierFilterDTO = FilterSupplierDTO::fromRequest($request);
             $suppliers = $this->repository->getAllWithFilter($supplierFilterDTO);
 
             return response()->json(['suppliers' => $suppliers], 200);

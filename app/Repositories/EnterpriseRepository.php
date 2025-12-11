@@ -14,6 +14,17 @@ class EnterpriseRepository extends BaseRepository
         parent::__construct($model);
     }
 
+    public function findMyEnterprise(): ?Enterprise
+    {
+        $query = $this->model->query();
+
+        if (! empty($relations)) {
+            $query->with($relations);
+        }
+
+        return $query->where('id', Auth::user()->enterprise_id)->first();
+    }
+
     public function delete()
     {
         $id = Auth::user()->enterpise_id;

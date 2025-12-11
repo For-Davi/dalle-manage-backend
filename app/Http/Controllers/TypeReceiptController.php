@@ -5,14 +5,12 @@ namespace App\Http\Controllers;
 use App\DTO\Receipt\FilterReceiptDTO;
 use App\Http\Requests\Receipt\FilterReceiptRequest;
 use App\Repositories\TypeReceiptRepository;
-use App\Services\TypeReceiptService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
 
 class TypeReceiptController
 {
     public function __construct(
-        private TypeReceiptService $service,
         private TypeReceiptRepository $repository
     ) {}
 
@@ -32,10 +30,7 @@ class TypeReceiptController
     public function filter(FilterReceiptRequest $request)
     {
         try {
-            $typeReceiptFilterDTO = FilterReceiptDTO::fromRequest([
-                ...$request->only(['active']),
-                'enterpriseID' => $request->get('enterprise_id'),
-            ]);
+            $typeReceiptFilterDTO = FilterReceiptDTO::fromRequest($request);
             $types = $this->repository->getAllWithFilter($typeReceiptFilterDTO);
 
             return response()->json(['types' => $types], 200);

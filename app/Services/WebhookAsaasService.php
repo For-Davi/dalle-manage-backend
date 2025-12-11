@@ -18,7 +18,7 @@ class WebhookAsaasService
         protected SendNotification $notification
     ) {}
 
-    public function update(array $request): bool
+    public function update($request): bool
     {
         [$project, $userPart, $subscriptionPart, $monthQuantityPart] = explode('|', $request['payment']['externalReference']);
 

@@ -18,7 +18,7 @@ class FilterClientDTO extends BaseDTO
         public readonly ?int $enterprise_id,
     ) {}
 
-    public static function fromRequest(array $data): self
+    public static function fromRequest($data): self
     {
         return new self(
             name: $data['name'] !== '' ? $data['name'] : null,

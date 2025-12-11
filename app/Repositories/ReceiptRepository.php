@@ -15,7 +15,7 @@ class ReceiptRepository extends BaseRepository
 
     public function getAllWithFilter(FilterReceiptDTO $filters)
     {
-        $query = $this->model->where('enterprise_id', $filters->enterpriseID);
+        $query = $this->model->query();
 
         if ($filters->active !== null) {
             $query->where('active', $filters->active)->with('type');

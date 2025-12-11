@@ -51,10 +51,7 @@ class ReceiptController
     public function filter(FilterReceiptRequest $request)
     {
         try {
-            $receiptFilterDTO = FilterReceiptDTO::fromRequest([
-                ...$request->only(['active']),
-                'enterpriseID' => $request->get('enterprise_id'),
-            ]);
+            $receiptFilterDTO = FilterReceiptDTO::fromRequest($request);
             $receipts = $this->repository->getAllWithFilter($receiptFilterDTO);
 
             return response()->json(['receipts' => $receipts], 200);

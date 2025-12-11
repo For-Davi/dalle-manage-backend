@@ -204,9 +204,7 @@ class UserController
     public function filter(FilterUserRequest $request)
     {
         try {
-            $userFilterDTO = FilterUserDTO::fromRequest([
-                ...$request->only(['name', 'email', 'role', 'department', 'active']),
-            ]);
+            $userFilterDTO = FilterUserDTO::fromRequest($request);
             $users = $this->repository->getAllWithFilter($userFilterDTO);
 
             return response()->json(['users' => UserListResource::collection($users)], 200);

@@ -51,9 +51,7 @@ class ClientController
     public function filter(FilterClientRequest $request)
     {
         try {
-            $clientFilterDTO = FilterClientDTO::fromRequest([
-                ...$request->only(['name', 'email', 'cpf', 'cnpj', 'country', 'state', 'city']),
-            ]);
+            $clientFilterDTO = FilterClientDTO::fromRequest($request);
             $clients = $this->repository->getAllWithFilter($clientFilterDTO);
 
             return response()->json(['clients' => $clients], 200);

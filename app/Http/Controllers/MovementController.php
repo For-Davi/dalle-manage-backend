@@ -65,9 +65,7 @@ class MovementController
     public function filter(FilterMovementRequest $request)
     {
         try {
-            $movementFilterDTO = FilterMovementDTO::fromRequest([
-                ...$request->only(['period', 'category', 'type']),
-            ]);
+            $movementFilterDTO = FilterMovementDTO::fromRequest($request);
             $movements = $this->repository->getAllWithFilter($movementFilterDTO->toArray(), ['category']);
 
             return response()->json(['movements' => $movements], 200);

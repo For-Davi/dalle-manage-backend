@@ -19,7 +19,7 @@ class EnterpriseController
     public function show(Request $request)
     {
         try {
-            $enterprise = $this->repository->findById();
+            $enterprise = $this->repository->findMyEnterprise();
 
             return response()->json(['enterprise' => $enterprise], 200);
         } catch (\Exception $e) {

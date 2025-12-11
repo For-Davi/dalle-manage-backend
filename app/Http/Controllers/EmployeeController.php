@@ -95,9 +95,7 @@ class EmployeeController
     public function filter(FilterEmployeeRequest $request)
     {
         try {
-            $employeeFilterDTO = FilterEmployeeDTO::fromRequest([
-                ...$request->only(['name', 'email', 'sex', 'cpf', 'cnpj', 'active', 'department', 'hasLoginAccess']),
-            ]);
+            $employeeFilterDTO = FilterEmployeeDTO::fromRequest($request);
             $employees = $this->repository->getAllWithFilter($employeeFilterDTO);
 
             return response()->json(['employees' => EmployeeTableResource::collection($employees)], 200);
