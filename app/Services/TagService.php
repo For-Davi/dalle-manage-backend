@@ -18,9 +18,7 @@ class TagService
             'create'
         );
 
-        $tagDTO = CreateTagDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $tagDTO = CreateTagDTO::fromRequest($request);
 
         return $this->repository->create($tagDTO->toArray());
     }
@@ -33,9 +31,7 @@ class TagService
             $request->id
         );
 
-        $tagDTO = UpdateTagDTO::fromRequest([
-            ...$request->only(['name', 'active']),
-        ]);
+        $tagDTO = UpdateTagDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $tagDTO->toArray());
     }

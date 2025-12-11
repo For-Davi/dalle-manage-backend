@@ -49,7 +49,7 @@ class CreateProductMovementDTO extends BaseDTO
             total_cost: (float) ($data['totalCost'] ?? 0),
             product_variant_id: $data['variantID'],
             supplier_id: $data['supplierID'],
-            created_by: $data['createdBY'],
+            created_by: Auth::user()->id,
             enterprise_id: Auth::user()->enterprise_id,
             description: $data['description'],
         );

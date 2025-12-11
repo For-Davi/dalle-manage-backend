@@ -74,9 +74,7 @@ class MovementService
     {
         $dateTime = now()->format('Ymd_His');
 
-        $exportMovementDTO = FilterMovementDTO::fromRequest([
-            ...$request->only(['period', 'category', 'type']),
-        ]);
+        $exportMovementDTO = FilterMovementDTO::fromRequest($request);
         $movements = $this->repository->getAllWithFilter($exportMovementDTO->toArray(), ['category']);
 
         if ($request->format === 'excel') {

@@ -15,18 +15,14 @@ class SupplierCatalogService
     {
         SupplierCatalogHelper::existsBond($request->productVariantID, $request->supplierID);
 
-        $catalogDTO = CreateSupplierCatalogDTO::fromRequest([
-            ...$request->only(['productVariantID', 'price', 'supplierID', 'description']),
-        ]);
+        $catalogDTO = CreateSupplierCatalogDTO::fromRequest($request);
 
         return $this->repository->create($catalogDTO->toArray());
     }
 
     public function update($request)
     {
-        $catalogDTO = UpdateSupplierCatalogDTO::fromRequest([
-            ...$request->only(['productVariantID', 'price', 'supplierID', 'description']),
-        ]);
+        $catalogDTO = UpdateSupplierCatalogDTO::fromRequest($request);
 
         return $this->repository->updateBySupplierAndVariant(
             $catalogDTO->supplier_id,

@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Enums\SubscriptionName;
+use App\Enums\Subscription\Subscription;
 use App\Jobs\PaymentMadeJob;
 use App\Notification\SendNotification;
 use App\Repositories\EnterpriseRepository;
 use App\Repositories\SubscriptionRepository;
 use App\Repositories\UserRepository;
-use Carbon\Carbon;
 
 class WebhookAsaasService
 {
@@ -19,13 +18,9 @@ class WebhookAsaasService
         protected SendNotification $notification
     ) {}
 
-    public function update($request)
+    public function update(array $request): bool
     {
-        $parts = explode('|', $request['payment']['externalReference']);
-        $projectName = $parts[0];
-        $userPart = $parts[1];
-        $subscriptionPart = $parts[2];
-        $monthQuantityPart = $parts[3];
+        [$project, $userPart, $subscriptionPart, $monthQuantityPart] = explode('|', $request['payment']['externalReference']);
 
         $userID = (int) str_replace('user_', '', $userPart);
         $subscriptionID = (int) str_replace('subscription_', '', $subscriptionPart);
@@ -33,7 +28,9 @@ class WebhookAsaasService
 
         $user = $this->userRepository->findById($userID);
 
-        $expiredDate = Carbon::now('America/Sao_Paulo')->addMonths($monthQuantity)->format('Y-m-d H:i:s');
+        $expiredDate = now('America/Sao_Paulo')
+            ->addMonths($monthQuantity)
+            ->toDateTimeString();
 
         $this->enterpriseRepository->update($user->enterprise_id, [
             'subscription_id' => $subscriptionID,
@@ -42,18 +39,21 @@ class WebhookAsaasService
 
         PaymentMadeJob::dispatch();
 
-        \Log::info('passou por aqui');
-
         $subscription = $this->subscriptionRepository->findById($subscriptionID);
-        $subscriptionName = SubscriptionName::from($subscription->name)->label();
+        $subscriptionName = Subscription::from($subscription->name)->label();
 
         $this->notification->notifyAllUsersByEnterprise(
             $user->enterprise_id,
-            '💲Assinatura Renovada',
-            "O usuário **{$user->name}** renovou a assinatura com sucesso!
-           Detalhes da Renovação:
-           • **Plano:** {$subscriptionName}
-           • **Novo Vencimento:** {$expiredDate}"
+            '💲 Assinatura Renovada',
+            sprintf(
+                "O usuário **%s** renovou a assinatura com sucesso!\n".
+                "Detalhes da Renovação:\n".
+                "• **Plano:** %s\n".
+                '• **Novo Vencimento:** %s',
+                $user->name,
+                $subscriptionName,
+                $expiredDate
+            )
         );
 
         return true;

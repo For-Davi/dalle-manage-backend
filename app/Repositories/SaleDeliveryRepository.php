@@ -3,24 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\SaleDelivery;
+use App\Repositories\Base\BaseRepository;
 
-class SaleDeliveryRepository
+class SaleDeliveryRepository extends BaseRepository
 {
-    public function __construct(protected SaleDelivery $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(SaleDelivery $model)
     {
-        return $this->model
-            ->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
+        parent::__construct($model);
     }
 }

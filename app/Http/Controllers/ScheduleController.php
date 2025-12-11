@@ -26,7 +26,7 @@ class ScheduleController
     public function index(Request $request)
     {
         try {
-            $schedules = $this->repository->getAllByEnterprise(true, ['category']);
+            $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
             return response()->json(['schedules' => $schedules], 200);
         } catch (\Exception $e) {
@@ -88,7 +88,7 @@ class ScheduleController
             if ($schedule) {
                 DB::commit();
 
-                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
+                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Agendamento inserido'], 201);
             }
@@ -122,7 +122,7 @@ class ScheduleController
             if ($schedule) {
                 DB::commit();
 
-                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
+                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Agendamento atualizado'], 200);
             }
@@ -144,7 +144,7 @@ class ScheduleController
 
             if ($schedule) {
                 DB::commit();
-                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
+                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Agendamento excluído'], 200);
             }
@@ -167,7 +167,7 @@ class ScheduleController
             if ($schedule) {
                 DB::commit();
 
-                $schedules = $this->repository->getAllByEnterprise(true, ['category']);
+                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
                 return response()->json(['schedules' => $schedules, 'message' => 'Finalização concluída'], 200);
             }

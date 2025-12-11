@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\SupplierType;
+use App\Enums\Supplier\SupplierType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

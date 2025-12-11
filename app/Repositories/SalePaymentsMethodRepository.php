@@ -3,24 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\SalePaymentMethod;
+use App\Repositories\Base\BaseRepository;
 
-class SalePaymentsMethodRepository
+class SalePaymentsMethodRepository extends BaseRepository
 {
-    public function __construct(protected SalePaymentMethod $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(SalePaymentMethod $model)
     {
-        return $this->model
-            ->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
+        parent::__construct($model);
     }
 }

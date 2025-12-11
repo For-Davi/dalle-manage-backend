@@ -3,18 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\Subscription;
+use App\Repositories\Base\BaseRepository;
 
-class SubscriptionRepository
+class SubscriptionRepository extends BaseRepository
 {
-    public function __construct(protected Subscription $model) {}
-
-    public function getAll()
+    public function __construct(Subscription $model)
     {
-        return $this->model->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 }

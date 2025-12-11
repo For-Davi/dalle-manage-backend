@@ -3,6 +3,7 @@
 namespace App\DTO\User;
 
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Hash;
 
 class UpdateUserPasswordDTO extends BaseDTO
 {
@@ -13,7 +14,7 @@ class UpdateUserPasswordDTO extends BaseDTO
     public static function fromRequest($data): self
     {
         return new self(
-            password: $data['newPassword'],
+            password: Hash::make($data['newPassword']),
         );
     }
 }

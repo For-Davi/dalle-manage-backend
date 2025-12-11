@@ -18,9 +18,7 @@ class ProductCategoryService
             'create'
         );
 
-        $categoryDTO = CreateProductCategoryDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $categoryDTO = CreateProductCategoryDTO::fromRequest($request);
 
         return $this->repository->create($categoryDTO->toArray());
     }
@@ -33,9 +31,7 @@ class ProductCategoryService
             $request->id
         );
 
-        $categoryDTO = UpdateProductCategoryDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $categoryDTO = UpdateProductCategoryDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $categoryDTO->toArray());
     }

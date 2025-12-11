@@ -12,57 +12,14 @@ class SupplierService
 
     public function create($request)
     {
-        $supplierDTO = CreateSupplierDTO::fromRequest([
-            ...$request->only([
-                'name',
-                'email',
-                'cpf',
-                'cnpj',
-                'stateRegistration',
-                'municipalRegistration',
-                'phone',
-                'site',
-                'country',
-                'state',
-                'city',
-                'cep',
-                'neighborhood',
-                'address',
-                'number',
-                'categorySupplierId',
-                'description',
-                'complement',
-            ]),
-        ]);
+        $supplierDTO = CreateSupplierDTO::fromRequest($request);
 
         return $this->repository->create($supplierDTO->toArray());
     }
 
     public function update($request)
     {
-        $supplierDTO = UpdateSupplierDTO::fromRequest([
-            ...$request->only([
-                'name',
-                'email',
-                'cpf',
-                'cnpj',
-                'stateRegistration',
-                'municipalRegistration',
-                'phone',
-                'site',
-                'country',
-                'state',
-                'city',
-                'cep',
-                'neighborhood',
-                'address',
-                'number',
-                'categorySupplierId',
-                'description',
-                'active',
-                'complement',
-            ]),
-        ]);
+        $supplierDTO = UpdateSupplierDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $supplierDTO->toArray());
     }

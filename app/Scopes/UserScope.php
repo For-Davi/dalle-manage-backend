@@ -9,10 +9,18 @@ use Illuminate\Support\Facades\Auth;
 
 class UserScope implements Scope
 {
-    public function apply(Builder $builder, Model $model)
+    /**
+     * Apply the scope to a given Eloquent query builder.
+     *
+     * @param  Builder<Model>  $builder
+     */
+    public function apply(Builder $builder, Model $model): void
     {
         if (Auth::check()) {
-            $builder->where($model->getTable().'.user_id', Auth::user()->id);
+            $builder->where(
+                $model->getTable().'.user_id',
+                Auth::id()
+            );
         }
     }
 }

@@ -25,7 +25,7 @@ class MovementController
     public function index(Request $request)
     {
         try {
-            $movements = $this->repository->getAllByEnterprise(true, ['category']);
+            $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
             return response()->json(['movements' => $movements], 200);
         } catch (\Exception $e) {
@@ -87,7 +87,7 @@ class MovementController
             if ($movement) {
                 DB::commit();
 
-                $movements = $this->repository->getAllByEnterprise(true, ['category']);
+                $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
                 return response()->json(['movements' => $movements, 'message' => 'Movimentação inserida'], 201);
             }
@@ -121,7 +121,7 @@ class MovementController
             if ($movement) {
                 DB::commit();
 
-                $movements = $this->repository->getAllByEnterprise(true, ['category']);
+                $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
                 return response()->json(['movements' => $movements, 'message' => 'Movimentação atualizada'], 200);
             }
@@ -143,7 +143,7 @@ class MovementController
 
             if ($movement) {
                 DB::commit();
-                $movements = $this->repository->getAllByEnterprise(true, ['category']);
+                $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
                 return response()->json(['movements' => $movements, 'message' => 'Movimentação excluída'], 200);
             }

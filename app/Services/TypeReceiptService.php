@@ -18,9 +18,7 @@ class TypeReceiptService
             'create'
         );
 
-        $typesDTO = CreateTypeReceiptDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $typesDTO = CreateTypeReceiptDTO::fromRequest($request);
 
         return $this->repository->create($typesDTO->toArray());
     }
@@ -33,9 +31,7 @@ class TypeReceiptService
             $request->id
         );
 
-        $typesDTO = UpdateTypeReceiptDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $typesDTO = UpdateTypeReceiptDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $typesDTO->toArray());
     }

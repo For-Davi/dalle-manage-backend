@@ -53,6 +53,11 @@ abstract class BaseRepository
         return $query->get($columns);
     }
 
+    public function getAll()
+    {
+        return $this->model->get();
+    }
+
     public function getAllByUser(array $relations = [])
     {
         $query = $this->model->query();

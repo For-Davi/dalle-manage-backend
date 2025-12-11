@@ -38,12 +38,7 @@ class ProductService
             'create'
         );
 
-        $productDTO = CreateProductDTO::fromRequest([
-            'name' => $request->input('basic.name'),
-            'type' => $request->input('basic.type'),
-            'description' => $request->input('basic.description'),
-            'categoryID' => $request->input('basic.categoryID'),
-        ]);
+        $productDTO = CreateProductDTO::fromRequest($request);
 
         // Cria o produto
         $product = $this->repository->create($productDTO->toArray());
@@ -213,9 +208,7 @@ class ProductService
             );
         }
 
-        $productVariantDTO = UpdateProductVariantDTO::fromRequest([
-            ...$request->only(['active', 'sku', 'description', 'location', 'price', 'cost', 'offer', 'minStockAlert']),
-        ]);
+        $productVariantDTO = UpdateProductVariantDTO::fromRequest($request);
 
         return $this->productVariantRepository->update($request->id, $productVariantDTO->toArray());
     }
@@ -228,9 +221,7 @@ class ProductService
             $request->input('productID')
         );
 
-        $productBasicDTO = UpdateProductBasicDTO::fromRequest([
-            ...$request->only(['name', 'type', 'category', 'description']),
-        ]);
+        $productBasicDTO = UpdateProductBasicDTO::fromRequest($request);
 
         $result = $this->repository->update($request->productID, $productBasicDTO->toArray());
 
@@ -266,16 +257,7 @@ class ProductService
 
     public function updateAdvanced($request)
     {
-        $productAdvancedDTO = UpdateProductAdvancedDTO::fromRequest([
-            ...$request->only([
-                'active',
-                'allowCoupon',
-                'allowDiscount',
-                'discountMaxPercentage',
-                'hasCommission',
-                'commissionPercentage',
-            ]),
-        ]);
+        $productAdvancedDTO = UpdateProductAdvancedDTO::fromRequest($request);
 
         $result = $this->productAdvancedRepository->update($request->productID, $productAdvancedDTO->toArray());
 

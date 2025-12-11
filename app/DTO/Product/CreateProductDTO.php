@@ -18,10 +18,10 @@ class CreateProductDTO extends BaseDTO
     public static function fromRequest($data): self
     {
         return new self(
-            name: $data['name'],
-            type: $data['type'],
-            description: $data['description'],
-            product_category_id: $data['categoryID'],
+            name: $data['basic']['name'],
+            type: $data['basic']['type'],
+            description: $data['basic']['description'],
+            product_category_id: $data['basic']['categoryID'],
             enterprise_id: Auth::user()->enterprise_id
         );
     }

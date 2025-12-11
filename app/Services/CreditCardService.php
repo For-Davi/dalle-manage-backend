@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Client\PaymentsHttpClient;
 use App\Repositories\SubscriptionRepository;
+use Illuminate\Support\Facades\Auth;
 
 class CreditCardService
 {
@@ -14,7 +15,7 @@ class CreditCardService
         $subscription = $this->subscriptionRepository->findById($request->subscriptionID);
 
         $data = [
-            'userID' => auth()->user()->id,
+            'userID' => Auth::user()->id,
             'subscriptionID' => $subscription->id,
             'monthQuantity' => 1,
             'value' => $subscription->price,

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Enums;
+namespace App\Enums\Subscription;
 
-enum SubscriptionName: string
+enum Subscription: string
 {
     case free = 'free';
     case basic = 'basic';

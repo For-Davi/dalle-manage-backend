@@ -3,10 +3,14 @@
 namespace App\Repositories;
 
 use App\Models\TypeReceipt;
+use App\Repositories\Base\BaseRepository;
 
-class TypeReceiptRepository
+class TypeReceiptRepository extends BaseRepository
 {
-    public function __construct(protected TypeReceipt $model) {}
+    public function __construct(TypeReceipt $model)
+    {
+        parent::__construct($model);
+    }
 
     public function getAllWithFilter($filters)
     {
@@ -17,20 +21,5 @@ class TypeReceiptRepository
         }
 
         return $query->get();
-    }
-
-    public function getAllByEnterprise($enterpriseId)
-    {
-        return $this->model->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
     }
 }

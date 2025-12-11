@@ -14,7 +14,7 @@ class MovementRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function getAllByEnterprise($onlyPeriodActual = false, array $relations = [])
+    public function getAllByEnterpriseAndPeriod($onlyPeriodActual = false, array $relations = [])
     {
         $query = $this->model->query();
 

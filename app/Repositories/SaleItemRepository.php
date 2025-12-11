@@ -3,29 +3,17 @@
 namespace App\Repositories;
 
 use App\Models\SaleItem;
+use App\Repositories\Base\BaseRepository;
 
-class SaleItemRepository
+class SaleItemRepository extends BaseRepository
 {
-    public function __construct(protected SaleItem $model) {}
-
-    public function getAllByEnterprise($enterpriseId)
+    public function __construct(SaleItem $model)
     {
-        return $this->model
-            ->where('enterprise_id', $enterpriseId)->get();
-    }
-
-    public function findById($id)
-    {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 
     public function findBySaleId($id)
     {
         return $this->model->where('sale_id', $id)->get();
-    }
-
-    public function create(array $data)
-    {
-        return $this->model->create($data);
     }
 }

@@ -18,9 +18,7 @@ class SupplierCategoryService
             'create'
         );
 
-        $categoryDTO = CreateSupplierCategoryDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $categoryDTO = CreateSupplierCategoryDTO::fromRequest($request);
 
         return $this->repository->create($categoryDTO->toArray());
     }
@@ -33,9 +31,7 @@ class SupplierCategoryService
             $request->id
         );
 
-        $categoryDTO = UpdateSupplierCategoryDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $categoryDTO = UpdateSupplierCategoryDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $categoryDTO->toArray());
     }

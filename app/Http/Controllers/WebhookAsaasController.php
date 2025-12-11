@@ -18,8 +18,6 @@ class WebhookAsaasController
         try {
             DB::beginTransaction();
 
-            \Log::info(['dados q chegaram do payments' => $request->all()]);
-
             $result = $this->service->update($request);
 
             if ($result) {

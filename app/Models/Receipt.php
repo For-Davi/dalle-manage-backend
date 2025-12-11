@@ -6,7 +6,7 @@ use App\Scopes\EnterpriseScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Receipts extends Model
+class Receipt extends Model
 {
     use Notifiable;
 

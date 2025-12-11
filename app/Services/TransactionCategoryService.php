@@ -18,9 +18,7 @@ class TransactionCategoryService
             'create'
         );
 
-        $categoryDTO = CreateTransactionCategoryDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $categoryDTO = CreateTransactionCategoryDTO::fromRequest($request);
 
         return $this->repository->create($categoryDTO->toArray());
     }
@@ -33,9 +31,7 @@ class TransactionCategoryService
             $request->id
         );
 
-        $categoryDTO = UpdateTransactionCategoryDTO::fromRequest([
-            ...$request->only(['name']),
-        ]);
+        $categoryDTO = UpdateTransactionCategoryDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $categoryDTO->toArray());
     }

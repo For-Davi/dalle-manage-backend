@@ -13,11 +13,7 @@ class SettingSystemService
 
     public function update($request)
     {
-        $systemDTO = UpdateSettingSystemDTO::fromRequest([
-            ...$request->only([
-                'sendNotificationStockCritical',
-            ]),
-        ]);
+        $systemDTO = UpdateSettingSystemDTO::fromRequest($request);
 
         return $this->repository->update($systemDTO->toArray());
     }

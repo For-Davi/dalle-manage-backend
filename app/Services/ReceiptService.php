@@ -12,27 +12,14 @@ class ReceiptService
 
     public function create($request)
     {
-        $receiptDTO = CreateReceiptDTO::fromRequest([
-            ...$request->only([
-                'identifier',
-                'typesID',
-                'description',
-            ]),
-        ]);
+        $receiptDTO = CreateReceiptDTO::fromRequest($request);
 
         return $this->repository->create($receiptDTO->toArray());
     }
 
     public function update($request)
     {
-        $receiptDTO = UpdateReceiptDTO::fromRequest([
-            ...$request->only([
-                'identifier',
-                'typesID',
-                'active',
-                'description',
-            ]),
-        ]);
+        $receiptDTO = UpdateReceiptDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $receiptDTO->toArray());
     }

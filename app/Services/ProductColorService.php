@@ -18,9 +18,7 @@ class ProductColorService
             'create'
         );
 
-        $productColorDTO = CreateProductColorDTO::fromRequest([
-            ...$request->only(['name', 'hexColorCode']),
-        ]);
+        $productColorDTO = CreateProductColorDTO::fromRequest($request);
 
         return $this->repository->create($productColorDTO->toArray());
     }
@@ -33,9 +31,7 @@ class ProductColorService
             $request->id
         );
 
-        $productColorDTO = UpdateProductColorDTO::fromRequest([
-            ...$request->only(['name', 'active', 'hexColorCode']),
-        ]);
+        $productColorDTO = UpdateProductColorDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $productColorDTO->toArray());
     }

@@ -13,24 +13,7 @@ class SettingAppearanceService
 
     public function update($request)
     {
-        $appearanceDTO = UpdateSettingAppearanceDTO::fromRequest([
-            ...$request->only([
-                'titlePageColorDefault',
-                'navbarColorDefault',
-                'navbarIconColorDefault',
-                'sideMenuColorDefaultNotSelectedItem',
-                'sideMenuColorDefaultSelectedItem',
-                'sideMenuColorDefaultNotSelectedIcon',
-                'sideMenuColorDefaultSelectedIcon',
-                'titlePageColorCode',
-                'navbarColorCode',
-                'navbarIconColorCode',
-                'sideMenuColorCodeNotSelectedItem',
-                'sideMenuColorCodeSelectedItem',
-                'sideMenuColorCodeNotSelectedIcon',
-                'sideMenuColorCodeSelectedIcon',
-            ]),
-        ]);
+        $appearanceDTO = UpdateSettingAppearanceDTO::fromRequest($request);
 
         return $this->repository->update($appearanceDTO->toArray());
     }
