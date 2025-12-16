@@ -48,7 +48,7 @@ class ProductController
     public function show(ShowProductRequest $request)
     {
         try {
-            $product = $this->repository->findById($request->route('productID'), [
+            $product = $this->repository->findById((int)$request->route('productID'), [
                 'variants.gridItem.gridGroup',
                 'variants.color',
                 'tags',

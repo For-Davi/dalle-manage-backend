@@ -28,6 +28,6 @@ class SaleItem extends Model
 
     public function product()
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 }

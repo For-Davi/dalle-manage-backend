@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\EnterpriseScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
@@ -21,6 +22,16 @@ class Sale extends Model
         'date',
     ];
 
+    public function payment()
+    {
+        return $this->hasMany(SalePaymentMethod::class, 'sale_id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(SaleItem::class, 'sale_id');
+    }
+
     public function enterprise()
     {
         return $this->belongsTo(Enterprise::class);
@@ -34,5 +45,10 @@ class Sale extends Model
     public function seller()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new EnterpriseScope);
     }
 }

@@ -14,6 +14,7 @@ use App\Services\MovementService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Laravel\Reverb\Loggers\Log;
 
 class MovementController
 {
@@ -81,6 +82,7 @@ class MovementController
     {
         try {
             DB::beginTransaction();
+
             $movement = $this->service->create($request);
             if ($movement) {
                 DB::commit();

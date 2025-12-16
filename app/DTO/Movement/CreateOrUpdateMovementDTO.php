@@ -20,11 +20,11 @@ class CreateOrUpdateMovementDTO extends BaseDTO
     public static function fromRequest($request, array $overrides = []): self
     {
         $data = [
-            'date' => $request->date ?? null,
-            'type' => $request->type,
-            'transactionCategoryID' => $request->transactionCategoryID ?? null,
-            'value' => $request->value,
-            'description' => $request->description,
+            'date' => $request['date'] ?? null,
+            'type' => $request['type'],
+            'transactionCategoryID' => $request['transactionCategoryID'] ?? null,
+            'value' => $request['value'],
+            'description' => $request['description'],
         ];
 
         $data = array_merge($data, $overrides);

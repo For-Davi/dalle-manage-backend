@@ -19,6 +19,7 @@ use App\Repositories\SaleRepository;
 use App\Repositories\UserRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SaleService
 {
@@ -35,7 +36,7 @@ class SaleService
 
     public function create($request)
     {
-        $enterpriseID = $request->get('enterprise_id');
+        $enterpriseID = Auth::user()->enterprise_id;
 
         $this->validateSale($request->input('saleData.products'));
 
@@ -192,7 +193,7 @@ class SaleService
         return $total;
     }
 
-    private function createSale($request, int $enterpriseID)
+    private function createSale($request, $enterpriseID)
     {
 
         $totalValue = $this->getTotalValue([

@@ -14,7 +14,7 @@ class CreateProductMovementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reason' => 'required|string|in:return,loss,transfer_in,transfer_out,adjustment_in,adjustment_out,production,internal_use',
+            'reason' => 'required|string|in:sell,buy,return,loss,transfer_in,transfer_out,adjustment_in,adjustment_out,production,internal_use',
             'type' => 'required|in:in,out',
             'documentNumber' => 'nullable|string|max:255',
             'lotNumber' => 'nullable|string|max:255',

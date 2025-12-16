@@ -24,13 +24,13 @@ class SalePaymentMethod extends Model
         return $this->belongsTo(Sale::class);
     }
 
-    public function payment()
+    public function type()
     {
-        return $this->hasMany(TypeReceipt::class);
+        return $this->belongsTo(TypeReceipt::class, 'payment_method_id');
     }
 
     public function receipt()
     {
-        return $this->belongsTo(Receipts::class);
+        return $this->belongsTo(Receipt::class);
     }
 }

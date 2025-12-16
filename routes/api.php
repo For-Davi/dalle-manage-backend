@@ -30,6 +30,7 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
@@ -277,4 +278,8 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         });
     });
 
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'index']);
+        Route::post('/filter', [DashboardController::class, 'filter']);
+    });
 });
