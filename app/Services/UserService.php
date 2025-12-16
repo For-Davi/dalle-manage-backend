@@ -64,6 +64,10 @@ class UserService
 
     private function resetRegisterPix($userID)
     {
+        if (app()->environment('local')) {
+            return;
+        }
+
         return $this->http->request('post', "/payment/pix/delete-register/{$userID}");
     }
 
