@@ -57,7 +57,7 @@ class DashboardService
         $products = $this->getProductsInfo($saleItems);
         $sellers = $this->getSellerInfo($sales);
 
-        return [
+        $data = [
             'sales_made' => $salesMade,
             'sales_made_today' => $salesMadeToday,
             'sales_value' => $salesValue,
@@ -71,6 +71,10 @@ class DashboardService
             'products' => $products,
             'sellers' => $sellers,
         ];
+
+        Log::info(['data' => $data]);
+
+        return $data;
     }
     // public function getInfoFilter()
     // {
