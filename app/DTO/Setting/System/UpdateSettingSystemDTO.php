@@ -10,7 +10,7 @@ class UpdateSettingSystemDTO extends BaseDTO
         public int $send_notification_stock_critical,
     ) {}
 
-    public static function fromRequest(array $data): self
+    public static function fromRequest($data): self
     {
         return new self(
             send_notification_stock_critical: $data['sendNotificationStockCritical'],
