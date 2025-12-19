@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CreditCardController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
@@ -30,7 +31,6 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
-use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);

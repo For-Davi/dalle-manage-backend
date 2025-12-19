@@ -8,7 +8,6 @@ use App\Exports\Movement\MovementsExport;
 use App\Repositories\MovementRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use Laravel\Reverb\Loggers\Log;
 
 class MovementService
 {
@@ -17,8 +16,6 @@ class MovementService
     public function create($request)
     {
         $requestDate = Carbon::createFromFormat('d/m/Y', $request->date);
-
-        // Log::info(['type' => $request->type]);
 
         if ($request->quantity > 1) {
             $movements = [];
@@ -31,8 +28,6 @@ class MovementService
                 if ($day > $date->daysInMonth) {
                     $date->day($date->daysInMonth);
                 }
-
-                dd('request', $request->type);
 
                 $movementDTO = CreateOrUpdateMovementDTO::fromRequest(
                     $request,

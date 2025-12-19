@@ -19,46 +19,60 @@ class SaleRepository extends BaseRepository
         return $this->saleItemRepository->findBySaleId($id);
     }
 
-    public function getTodayData()
-    {   
-        $sales = DB::table('sales')->where('date', Carbon::now('America/Sao_Paulo')->format('d-m-Y'));
-
-        return $sales;
-    }
-
-    public function getSalesBetweenDates(string $startDate, string $endDate)
-{
-    return $this->getAllByEnterprise()
-        ->filter(function ($sale) use ($startDate, $endDate) {
-            $saleDate = Carbon::createFromFormat('d-m-Y H:i:s', $sale->date);
-            return $saleDate->between(
-                Carbon::createFromFormat('d-m-Y', $startDate)->startOfDay(),
-                Carbon::createFromFormat('d-m-Y', $endDate)->endOfDay()
-            );
-        });
-}
-
-        public function getAllWithFilter(array $filters, array $relations = [])
+    public function getAllWithFilter(array $filters)
     {
-        $query = $this->model->where('enterprise_id', $filters['enterprise_id']);
+        $tz = 'America/Sao_Paulo';
+        $query = $this->model
+            ->where('enterprise_id', $filters['enterprise_id']);
 
-        if (empty($filters['period'])) {
-            $now = Carbon::now('America/Sao_Paulo');
-            $month = str_pad($now->month, 2, '0', STR_PAD_LEFT);
-            $year = $now->year;
-        } else {
-            [$month, $year] = explode('/', $filters['period']);
-            $month = str_pad($month, 2, '0', STR_PAD_LEFT);
+        if (! empty($filters['start_date']) && ! empty($filters['end_date'])) {
+
+            [$startMonth, $startYear] = explode('-', $filters['start_date']);
+            [$endMonth, $endYear] = explode('-', $filters['end_date']);
+
+            $start = Carbon::createFromDate($startYear, $startMonth, 1, $tz)
+                ->startOfMonth()
+                ->format('d-m-Y H:i:s');
+
+            $end = Carbon::createFromDate($endYear, $endMonth, 1, $tz)
+                ->endOfMonth()
+                ->format('d-m-Y H:i:s');
+
+            $query->whereRaw(
+                "STR_TO_DATE(date, '%d-%m-%Y %H:%i:%s')
+             BETWEEN STR_TO_DATE(?, '%d-%m-%Y %H:%i:%s')
+             AND STR_TO_DATE(?, '%d-%m-%Y %H:%i:%s')",
+                [$start, $end]
+            );
         }
 
-        $query->where(DB::raw('SUBSTRING(`date`, 4, 2)'), '=', $month)
-            ->where(DB::raw('SUBSTRING(`date`, 7, 4)'), '=', $year);
+        if (! empty($filters['seller'])) {
+            $query->where('seller_id', $filters['seller']);
+        }
 
-        if (! empty($relations)) {
-            $query->with($relations);
+        if (! empty($filters['product'])) {
+            $query->whereHas('items', fn ($q) => $q->where('product_name', $filters['product'])
+            );
+        }
+
+        if (! empty($filters['category'])) {
+            $query->whereHas('items.product.product', fn ($q) => $q->where('product_category_id', (int) $filters['category'])
+            );
+        }
+
+        if (! empty($filters['type_receipt'])) {
+            $query->whereHas('payment', fn ($q) => $q->where('payment_method_id', $filters['type_receipt'])
+            );
         }
 
         return $query->get();
+    }
+
+    public function getTodayData()
+    {
+        $sales = DB::table('sales')->where('date', Carbon::now('America/Sao_Paulo')->format('d-m-Y'));
+
+        return $sales;
     }
 
     public function getCouponInfos($id)

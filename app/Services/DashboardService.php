@@ -2,18 +2,18 @@
 
 namespace App\Services;
 
-use App\Repositories\SaleRepository;
-use App\Repositories\MovementRepository;
-use App\Repositories\SaleItemRepository;
+use App\DTO\Dashboard\FilterDashboardDTO;
 use App\Repositories\ClientRepository;
 use App\Repositories\EmployeeRepository;
+use App\Repositories\GridGroupRepository;
+use App\Repositories\MovementRepository;
 use App\Repositories\ProductVariantRepository;
 use App\Repositories\ReceiptRepository;
+use App\Repositories\SaleItemRepository;
+use App\Repositories\SaleRepository;
 use App\Repositories\SupplierRepository;
 use App\Repositories\UserRepository;
-use App\Repositories\GridGroupRepository;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 class DashboardService
 {
@@ -28,38 +28,39 @@ class DashboardService
         protected SupplierRepository $supplierRepository,
         protected UserRepository $userRepository,
         protected GridGroupRepository $gridGroupRepository
-        ) {}
+    ) {}
 
     public function getInfo()
     {
         $sales = $this->saleRepository->getAllByEnterprise();
         $movements = $this->movementRepository->getAllByEnterprise();
-        $salesToday = $sales->where('date', Carbon::now('America/Sao_Paulo')->format('d-m-Y'));
 
         $sales->load([
-        'items.product.product.category', 
-        'payment.type',
-    ]);
-    
-        $saleItems = $sales->flatMap(fn($sale) => $sale->items);
-        $salePayments = $sales->flatMap(fn($sale) => $sale->payment);
+            'items.product.product.category',
+            'payment.type',
+        ]);
+
+        $saleItems = $sales->flatMap(fn ($sale) => $sale->items);
+        $salePayments = $sales->flatMap(fn ($sale) => $sale->payment);
 
         $salesMade = $sales->count();
-        $salesMadeToday = $salesToday->count();
         $salesValue = $this->getTotalValue($sales, 'total', null, null, 'change');
         $movementsEntryValue = $this->getTotalValue($movements, 'value', 'type', 'entry');
         $movementsOutValue = $this->getTotalValue($movements, 'value', 'type', 'out');
-        $mediumTicket = $salesValue/$salesMade;
+        if ($salesMade !== 0) {
+            $mediumTicket = $salesValue / $salesMade;
+        } else {
+            $mediumTicket = 0;
+        }
         $categoriesMostSold = $this->getCategoriesMostSold($saleItems);
         $receiptsValue = $this->getTypeReceiptsValue($salePayments);
         $records = $this->getAllRecords();
-        $salesMonthsInfo = $this->getSalesAllMonth();
+        $salesMonthsInfo = $this->getSalesAllMonth(null, null, $sales);
         $products = $this->getProductsInfo($saleItems);
         $sellers = $this->getSellerInfo($sales);
 
         $data = [
             'sales_made' => $salesMade,
-            'sales_made_today' => $salesMadeToday,
             'sales_value' => $salesValue,
             'movements_entry_value' => $movementsEntryValue,
             'movements_out_value' => $movementsOutValue,
@@ -72,87 +73,140 @@ class DashboardService
             'sellers' => $sellers,
         ];
 
-        Log::info(['data' => $data]);
+        return $data;
+    }
+
+    public function getInfoFilter($request)
+    {
+        $filterDashboardDTO = FilterDashboardDTO::fromRequest($request);
+
+        $sales = $this->saleRepository->getAllWithFilter($filterDashboardDTO->toArray());
+        $movements = $this->movementRepository->getAllByEnterprise();
+
+        $saleItems = $sales->flatMap(fn ($sale) => $sale->items);
+        $salePayments = $sales->flatMap(fn ($sale) => $sale->payment);
+        $salesMade = $sales->count();
+        $salesValue = $this->getTotalValue($sales, 'total', null, null, 'change');
+        $movementsEntryValue = $this->getTotalValue($movements, 'value', 'type', 'entry');
+        $movementsOutValue = $this->getTotalValue($movements, 'value', 'type', 'out');
+
+        if ($salesMade !== 0) {
+            $mediumTicket = $salesValue / $salesMade;
+        } else {
+            $mediumTicket = 0;
+        }
+
+        $categoriesMostSold = $this->getCategoriesMostSold($saleItems);
+        $receiptsValue = $this->getTypeReceiptsValue($salePayments, 'payment_method_id', $filterDashboardDTO->type_receipt);
+        $records = $this->getAllRecords();
+        $salesMonthsInfo = $this->getSalesAllMonth($filterDashboardDTO->start_date, $filterDashboardDTO->end_date, $sales);
+
+        if ($filterDashboardDTO->category && $filterDashboardDTO->product) {
+            $products = $this->getProductsInfo($saleItems, 'product_name', 'product_category_id', $filterDashboardDTO->product, $filterDashboardDTO->category);
+        } elseif ($filterDashboardDTO->category) {
+            $products = $this->getProductsInfo($saleItems, null, 'product_category_id', null, $filterDashboardDTO->category);
+        } elseif ($filterDashboardDTO->product) {
+            $products = $this->getProductsInfo($saleItems, 'product_name', null, $filterDashboardDTO->product, null);
+        } else {
+            $products = $this->getProductsInfo($saleItems);
+        }
+
+        $sellers = $this->getSellerInfo($sales);
+
+        $data = [
+            'sales_made' => $salesMade,
+            'sales_value' => $salesValue,
+            'movements_entry_value' => $movementsEntryValue,
+            'movements_out_value' => $movementsOutValue,
+            'medium_ticket' => $mediumTicket,
+            'categories_most_sold' => $categoriesMostSold,
+            'receipts_value' => $receiptsValue,
+            'records' => $records,
+            'sales_months_info' => $salesMonthsInfo,
+            'products' => $products,
+            'sellers' => $sellers,
+        ];
 
         return $data;
     }
-    // public function getInfoFilter()
-    // {
 
-    // }
-    
     private function getTotalValue($array, $field, $fieldCondition = null, $condition = null, $subtractionField = null)
     {
         $total = 0;
-        foreach($array as $data){
-            if ($condition !== null && $fieldCondition !== null) {
-            if ($data->$fieldCondition === $condition) {
-                if($subtractionField !== null){
-                    $total += $data->$field-$data->$subtractionField;
-                }
-                 $total += $data->$field;
+        foreach ($array as $data) {
+            if ($fieldCondition !== null && $condition !== null && $condition !== $data->$fieldCondition) {
+                continue;
+            }
+            if ($subtractionField !== null) {
+                $total += $data->$field - $data->$subtractionField;
+            } else {
+                $total += $data->$field;
             }
         }
-        if($subtractionField !== null){
-                    $total += $data->$field-$data->$subtractionField;
-                }
-        $total += $data->$field;
-        }
+
         return $total;
-    } 
+    }
+
     private function getCategoriesMostSold($items)
     {
         $categories = [];
 
-        foreach($items as $item){
+        foreach ($items as $item) {
             $variant = $item->product;
 
             $product = optional($variant)->product;
 
             $category = optional($product)->category;
 
-            if($category){
+            if ($category) {
                 $quantity = $item->quantity;
                 $catID = $category->id;
-                 if (!isset($categories[$catID])) {
+                if (! isset($categories[$catID])) {
 
-                $categories[$catID] = [
-                    'id' => $catID,
-                    'name' => $category->name,
-                    'total_quantity' => 0
-                ];
-            }
-             $categories[$catID]['total_quantity'] += $quantity;
+                    $categories[$catID] = [
+                        'id' => $catID,
+                        'name' => $category->name,
+                        'total_quantity' => 0,
+                    ];
+                }
+                $categories[$catID]['total_quantity'] += $quantity;
             }
         }
 
         return collect($categories)->sortByDesc('total_quantity')->take(5)->values()->all();
     }
-    private function getTypeReceiptsValue($payments)
+
+    private function getTypeReceiptsValue($payments, $fieldCondition = null, $filter = null)
     {
         $receipt = [];
-        foreach($payments as $payment){
+        foreach ($payments as $payment) {
             $type = $payment->type;
-            if($type){
+            if ($fieldCondition !== null && $filter !== null) {
+                if ($filter !== $payment->$fieldCondition) {
+                    continue;
+                }
+            }
+            if ($type) {
                 $typeID = $type->id;
                 $quantity = $payment->value;
-                if($payment->installments){
-                    $quantity = $payment->installments*$payment->value;
+                if ($payment->installments) {
+                    $quantity = $payment->installments * $payment->value;
                 }
 
-                if (!isset($receipt[$typeID])) {
-                $receipt[$typeID] = [
-                    'id' => $typeID,
-                    'name' => $type->name,
-                    'total_quantity' => 0
-                ];
-            }
-            $receipt[$typeID]['total_quantity'] += $quantity;
+                if (! isset($receipt[$typeID])) {
+                    $receipt[$typeID] = [
+                        'id' => $typeID,
+                        'name' => $type->name,
+                        'total_quantity' => 0,
+                    ];
+                }
+                $receipt[$typeID]['total_quantity'] += $quantity;
             }
         }
 
         return $receipt;
     }
+
     private function getAllRecords()
     {
         $clients = $this->clientRepository->getAllByEnterprise();
@@ -165,151 +219,154 @@ class DashboardService
         $movements = $this->movementRepository->getAllByEnterprise();
 
         return [
-        [
-            'name' => 'Clientes',
-            'quantity' => $clients->count()
-        ],
-        [
-            'name' => 'Funcionários',
-            'quantity' => $employees->count()
-        ],
-        [
-            'name' => 'Produtos',
-            'quantity' => $products->count()
-        ],
-        [
-            'name' => 'Grades',
-            'quantity' => $grids->count()
-        ],
-        [
-            'name' => 'Recebimentos',
-            'quantity' => $receipts->count()
-        ],
-        [
-            'name' => 'Fornecedores',
-            'quantity' => $suppliers->count()
-        ],
-        [
-            'name' => 'Usuários',
-            'quantity' => $users->count()
-        ],
-        [
-            'name' => 'Movimentações',
-            'quantity' => $movements->count()
-        ],
-    ];
+            [
+                'name' => 'Clientes',
+                'quantity' => $clients->count(),
+            ],
+            [
+                'name' => 'Funcionários',
+                'quantity' => $employees->count(),
+            ],
+            [
+                'name' => 'Produtos',
+                'quantity' => $products->count(),
+            ],
+            [
+                'name' => 'Grades',
+                'quantity' => $grids->count(),
+            ],
+            [
+                'name' => 'Recebimentos',
+                'quantity' => $receipts->count(),
+            ],
+            [
+                'name' => 'Fornecedores',
+                'quantity' => $suppliers->count(),
+            ],
+            [
+                'name' => 'Usuários',
+                'quantity' => $users->count(),
+            ],
+            [
+                'name' => 'Movimentações',
+                'quantity' => $movements->count(),
+            ],
+        ];
     }
+
     private function getSellerInfo($sales)
     {
         $sellersQuantity = [];
-    $sellersValue = [];
+        $sellersValue = [];
 
-    foreach($sales as $sale){
-        $seller = $sale->seller;
+        foreach ($sales as $sale) {
+            $seller = $sale->seller;
 
-        if($seller){
-        $sellerName = $seller->name;
-        $saleSellerValue = $sale->total - $sale->change;
+            if ($seller) {
+                $sellerName = $seller->name;
+                $saleSellerValue = $sale->total - $sale->change;
 
-        if(!isset($sellersQuantity[$sellerName])){
-            $sellersQuantity[$sellerName] = 0;
+                if (! isset($sellersQuantity[$sellerName])) {
+                    $sellersQuantity[$sellerName] = 0;
+                }
+                if (! isset($sellersValue[$sellerName])) {
+                    $sellersValue[$sellerName] = 0.0;
+                }
+
+                $sellersQuantity[$sellerName] += 1;
+                $sellersValue[$sellerName] += $saleSellerValue;
+            }
         }
-        if(!isset($sellersValue[$sellerName])){
-            $sellersValue[$sellerName] = 0.0;
-        }
 
-        $sellersQuantity[$sellerName] += 1;
-        $sellersValue[$sellerName] += $saleSellerValue;   
-        }
+        return [
+            'labels' => array_keys($sellersQuantity),
+            'quantity' => array_values($sellersQuantity),
+            'value' => array_values($sellersValue),
+        ];
     }
 
-    return [
-        'labels' => array_keys($sellersQuantity),
-        'quantity' => array_values($sellersQuantity),
-        'value' => array_values($sellersValue),
-    ];
-    }
+    private function getProductsInfo($items, $firstConditionField = null, $secondConditionField = null, $firstFilter = null, $secondFilter = null)
+    {
+        $productsQuantity = [];
+        $productsValue = [];
 
-    private function getProductsInfo($items)
-{
-    $productsQuantity = [];
-    $productsValue = [];
+        foreach ($items as $item) {
+            if ($firstFilter !== null && $firstConditionField !== null) {
+                if (($item->$firstConditionField ?? null) !== $firstFilter) {
+                    continue;
+                }
+            }
+            if ($secondFilter !== null && $secondConditionField !== null) {
+                if (($item->product->product->$secondConditionField ?? null) !== $secondFilter) {
+                    continue;
+                }
+            }
+            $productName = $item->product_name;
+            $productQuantity = $item->quantity;
+            $productValue = $item->total;
 
-    foreach($items as $item){
-        $productName = $item->product_name;
-        $productQuantity = $item->quantity;
-        $productValue = $item->total;
+            if (! isset($productsQuantity[$productName])) {
+                $productsQuantity[$productName] = 0;
+            }
+            if (! isset($productsValue[$productName])) {
+                $productsValue[$productName] = 0.0;
+            }
 
-        if(!isset($productsQuantity[$productName])){
-            $productsQuantity[$productName] = 0;
+            $productsQuantity[$productName] += $productQuantity;
+            $productsValue[$productName] += $productValue;
         }
-        if(!isset($productsValue[$productName])){
-            $productsValue[$productName] = 0.0;
+
+        return [
+            'labels' => array_keys($productsQuantity),
+            'quantity' => array_values($productsQuantity),
+            'value' => array_values($productsValue),
+        ];
+    }
+
+    private function getSalesAllMonth(?string $startDate, ?string $endDate, $sales)
+    {
+        $tz = 'America/Sao_Paulo';
+
+        if (! $startDate || ! $endDate) {
+            $now = Carbon::now($tz);
+            $start = $now->copy()->startOfYear();
+            $end = $now->copy()->endOfYear();
+        } else {
+            $start = Carbon::createFromFormat('m-Y', $startDate)->startOfMonth();
+            $end = Carbon::createFromFormat('m-Y', $endDate)->endOfMonth();
         }
 
-        $productsQuantity[$productName] += $productQuantity;
-        $productsValue[$productName] += $productValue;
-    }
+        $years = range($start->year, $end->year);
 
-    return [
-        'labels' => array_keys($productsQuantity),
-        'quantity' => array_values($productsQuantity),
-        'value' => array_values($productsValue),
-    ];
-}
+        $quantity = [];
+        $total = [];
 
-    private function getSalesAllMonth(?string $startDate = null, ?string $endDate = null)
-{
-    $tz = 'America/Sao_Paulo';
+        foreach ($years as $year) {
+            $quantity[$year] = [
+                'label' => (string) $year,
+                'data' => array_fill(0, 12, 0),
+            ];
 
-    if (!$startDate || !$endDate) {
-        $now = Carbon::now($tz);
-        $start = $now->copy()->startOfYear();
-        $end   = $now->copy()->endOfYear();
-    } else {
-        $start = Carbon::createFromFormat('d-m-Y', $startDate)->startOfMonth();
-        $end   = Carbon::createFromFormat('d-m-Y', $endDate)->endOfMonth();
-    }
-
-    $years = range($start->year, $end->year);
-
-    $quantity = [];
-    $total = [];
-
-    foreach ($years as $year) {
-    $quantity[$year] = [
-        'label' => (string) $year,
-        'data'  => array_fill(0, 12, 0),
-    ];
-
-    $total[$year] = [
-        'label' => (string) $year,
-        'data'  => array_fill(0, 12, 0.0),
-    ];
-}
-
-    $sales = $this->saleRepository->getSalesBetweenDates(
-        $start->format('d-m-Y'),
-        $end->format('d-m-Y')
-    );
-
-    foreach ($sales as $sale) {
-        $date = Carbon::createFromFormat('d-m-Y H:i:s', $sale->date, $tz);
-        $year = $date->year;
-        $monthIndex = $date->month - 1;
-
-        if (isset($quantity[$year])) {
-            $quantity[$year]['data'][$monthIndex]++;
-            $total[$year]['data'][$monthIndex] += (float) $sale->total;
+            $total[$year] = [
+                'label' => (string) $year,
+                'data' => array_fill(0, 12, 0.0),
+            ];
         }
+
+        foreach ($sales as $sale) {
+            $date = Carbon::parse($sale->date, $tz);
+            $year = $date->year;
+            $monthIndex = $date->month - 1;
+
+            if (isset($quantity[$year])) {
+                $quantity[$year]['data'][$monthIndex]++;
+                $total[$year]['data'][$monthIndex] += (float) $sale->total - $sale->change;
+            }
+        }
+
+        return [
+            'quantity' => $quantity,
+            'total' => $total,
+        ];
     }
-
-    return [
-        'quantity' => $quantity,
-        'total' => $total,
-    ];
-}
-
-
-
 }

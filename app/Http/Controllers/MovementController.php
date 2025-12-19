@@ -14,7 +14,6 @@ use App\Services\MovementService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Laravel\Reverb\Loggers\Log;
 
 class MovementController
 {
