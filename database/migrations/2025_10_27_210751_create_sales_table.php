@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('fees', 10, 2);
             $table->decimal('total', 10, 2);
             $table->decimal('change', 10, 2);
-            $table->string('date');
+            $table->dateTime('date');
             $table->timestamps();
         });
     }

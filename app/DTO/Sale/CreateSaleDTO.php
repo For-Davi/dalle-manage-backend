@@ -2,6 +2,8 @@
 
 namespace App\DTO\Sale;
 
+use Carbon\Carbon;
+
 class CreateSaleDTO
 {
     public function __construct(
@@ -23,7 +25,7 @@ class CreateSaleDTO
             fees: $data['fees'],
             total: $data['totalValue'],
             change: $data['change'],
-            date: now()->format('d-m-Y H:i:s'),
+            date: Carbon::now('America/Sao_Paulo')->format('Y-m-d H:i:s'),
         );
     }
 

@@ -14,6 +14,7 @@ use App\Repositories\SaleRepository;
 use App\Repositories\SupplierRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardService
 {
@@ -32,8 +33,19 @@ class DashboardService
 
     public function getInfo()
     {
-        $sales = $this->saleRepository->getAllByEnterprise();
-        $movements = $this->movementRepository->getAllByEnterprise();
+        $currentYear = now('America/Sao_Paulo')->year;
+
+        $sales = $this->saleRepository->getAllWithFilter([
+            'start_date' => "01/01/{$currentYear}",
+            'end_date' => "31/12/{$currentYear}",
+            'enterprise_id' => Auth::user()->enterprise_id,
+        ]);
+
+        $movements = $this->movementRepository->getMovementForDashboard([
+            'start_date' => "01/01/{$currentYear}",
+            'end_date' => "31/12/{$currentYear}",
+            'enterprise_id' => Auth::user()->enterprise_id,
+        ]);
 
         $sales->load([
             'items.product.product.category',
@@ -55,7 +67,7 @@ class DashboardService
         $categoriesMostSold = $this->getCategoriesMostSold($saleItems);
         $receiptsValue = $this->getTypeReceiptsValue($salePayments);
         $records = $this->getAllRecords();
-        $salesMonthsInfo = $this->getSalesAllMonth(null, null, $sales);
+        $salesMonthsInfo = $this->getSalesAllMonth($sales);
         $products = $this->getProductsInfo($saleItems);
         $sellers = $this->getSellerInfo($sales);
 
@@ -81,7 +93,7 @@ class DashboardService
         $filterDashboardDTO = FilterDashboardDTO::fromRequest($request);
 
         $sales = $this->saleRepository->getAllWithFilter($filterDashboardDTO->toArray());
-        $movements = $this->movementRepository->getAllByEnterprise();
+        $movements = $this->movementRepository->getMovementForDashboard($filterDashboardDTO->toArray());
 
         $saleItems = $sales->flatMap(fn ($sale) => $sale->items);
         $salePayments = $sales->flatMap(fn ($sale) => $sale->payment);
@@ -99,7 +111,7 @@ class DashboardService
         $categoriesMostSold = $this->getCategoriesMostSold($saleItems);
         $receiptsValue = $this->getTypeReceiptsValue($salePayments, 'payment_method_id', $filterDashboardDTO->type_receipt);
         $records = $this->getAllRecords();
-        $salesMonthsInfo = $this->getSalesAllMonth($filterDashboardDTO->start_date, $filterDashboardDTO->end_date, $sales);
+        $salesMonthsInfo = $this->getSalesAllMonth($sales);
 
         if ($filterDashboardDTO->category && $filterDashboardDTO->product) {
             $products = $this->getProductsInfo($saleItems, 'product_name', 'product_category_id', $filterDashboardDTO->product, $filterDashboardDTO->category);
@@ -323,20 +335,23 @@ class DashboardService
         ];
     }
 
-    private function getSalesAllMonth(?string $startDate, ?string $endDate, $sales)
+    private function getSalesAllMonth($sales)
     {
+        if ($sales->isEmpty()) {
+            return [
+                'quantity' => [],
+                'total' => [],
+            ];
+        }
+        $sales = $sales->sortBy('date');
+
         $tz = 'America/Sao_Paulo';
 
-        if (! $startDate || ! $endDate) {
-            $now = Carbon::now($tz);
-            $start = $now->copy()->startOfYear();
-            $end = $now->copy()->endOfYear();
-        } else {
-            $start = Carbon::createFromFormat('m-Y', $startDate)->startOfMonth();
-            $end = Carbon::createFromFormat('m-Y', $endDate)->endOfMonth();
-        }
-
-        $years = range($start->year, $end->year);
+        $years = $sales->map(fn ($sale) => Carbon::parse($sale->date, $tz)->year)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
 
         $quantity = [];
         $total = [];

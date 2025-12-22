@@ -12,6 +12,10 @@ class Sale extends Model
 
     protected $table = 'sales';
 
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
     protected $fillable = [
         'enterprise_id',
         'seller_id',

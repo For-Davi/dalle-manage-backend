@@ -25,25 +25,25 @@ class SaleRepository extends BaseRepository
         $query = $this->model
             ->where('enterprise_id', $filters['enterprise_id']);
 
-        if (! empty($filters['start_date']) && ! empty($filters['end_date'])) {
+        $hasStart = ! empty($filters['start_date']);
+        $hasEnd = ! empty($filters['end_date']);
 
-            [$startMonth, $startYear] = explode('-', $filters['start_date']);
-            [$endMonth, $endYear] = explode('-', $filters['end_date']);
+        if ($hasStart && ! $hasEnd) {
+            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'], $tz)->startOfDay();
 
-            $start = Carbon::createFromDate($startYear, $startMonth, 1, $tz)
-                ->startOfMonth()
-                ->format('d-m-Y H:i:s');
+            $query->where('date', '>=', $start);
+        }
 
-            $end = Carbon::createFromDate($endYear, $endMonth, 1, $tz)
-                ->endOfMonth()
-                ->format('d-m-Y H:i:s');
+        if ($hasEnd && ! $hasStart) {
+            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'], $tz)->endOfDay();
 
-            $query->whereRaw(
-                "STR_TO_DATE(date, '%d-%m-%Y %H:%i:%s')
-             BETWEEN STR_TO_DATE(?, '%d-%m-%Y %H:%i:%s')
-             AND STR_TO_DATE(?, '%d-%m-%Y %H:%i:%s')",
-                [$start, $end]
-            );
+            $query->where('date', '<=', $end);
+        }
+        if ($hasStart && $hasEnd) {
+            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'], $tz)->startOfDay();
+            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'], $tz)->endOfDay();
+
+            $query->whereBetween('date', [$start, $end]);
         }
 
         if (! empty($filters['seller'])) {

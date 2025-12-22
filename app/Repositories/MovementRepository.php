@@ -34,6 +34,35 @@ class MovementRepository extends BaseRepository
         return $query->get();
     }
 
+    public function getMovementForDashboard(array $filters)
+    {
+        $query = $this->model->where('enterprise_id', $filters['enterprise_id']);
+
+        $hasStart = ! empty($filters['start_date']);
+        $hasEnd = ! empty($filters['end_date']);
+
+        if ($hasStart && $hasEnd) {
+            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'])->format('Y-m-d');
+            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'])->format('Y-m-d');
+
+            $query->whereBetween('date', [$start, $end]);
+        }
+
+        if ($hasStart && ! $hasEnd) {
+            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'])->format('Y-m-d');
+
+            $query->where('date', '>=', $start);
+        }
+
+        if ($hasEnd && ! $hasStart) {
+            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'])->format('Y-m-d');
+
+            $query->where('date', '<=', $end);
+        }
+
+        return $query->get();
+    }
+
     public function getAllWithFilter(array $filters, array $relations = [])
     {
         $query = $this->model->where('enterprise_id', $filters['enterprise_id']);
