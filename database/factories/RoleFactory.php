@@ -11,12 +11,8 @@ class RoleFactory extends Factory
 
     public function definition()
     {
-        $categories = [
-            'Master',
-        ];
-
         return [
-            'name' => $this->faker->randomElement($categories),
+            'name' => strtoupper($this->faker->jobTitle()),
             'permissions' => [],
         ];
     }

@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Tag;
+use App\Models\TypeReceipt;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class TagFactory extends Factory
+class TypeReceiptFactory extends Factory
 {
-    protected $model = Tag::class;
+    protected $model = TypeReceipt::class;
 
     public function definition()
     {

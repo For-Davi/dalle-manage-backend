@@ -11,19 +11,8 @@ class DepartmentFactory extends Factory
 
     public function definition()
     {
-        $departments = [
-            'FINANCEIRO',
-            'RECURSOS HUMANOS',
-            'COMERCIAL',
-            'LOGÍSTICA',
-            'MARKETING',
-            'TI',
-            'ATENDIMENTO',
-            'ALMOXARIFADO',
-        ];
-
         return [
-            'name' => $this->faker->randomElement($departments),
+            'name' => strtoupper($this->faker->word()),
         ];
     }
 }

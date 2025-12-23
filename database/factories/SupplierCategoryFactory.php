@@ -11,26 +11,9 @@ class SupplierCategoryFactory extends Factory
 
     public function definition()
     {
-        $categories = [
-            'Alimentação',
-            'Limpeza',
-            'Construção',
-            'Tecnologia',
-            'Escritório',
-            'Transporte',
-            'Manutenção',
-            'Equipamentos',
-            'Serviços Gerais',
-            'Vestuário',
-            'Material Escolar',
-            'Higiene',
-            'Farmácia e Saúde',
-            'Ferramentas',
-            'Automotivo',
-        ];
-
         return [
-            'name' => $this->faker->randomElement($categories),
+            'name' => null,
+            'enterprise_id' => null,
         ];
     }
 }
