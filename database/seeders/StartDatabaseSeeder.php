@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\Enterprise;
 use App\Models\GridGroup;
 use App\Models\Movement;
+use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductColor;
 use App\Models\Receipt;
@@ -28,7 +29,7 @@ class StartDatabaseSeeder extends Seeder
     public function run()
     {
         Enterprise::factory()
-            ->count(10)
+            ->count(2)
             ->create()
             ->each(function ($enterprise) {
 
@@ -272,12 +273,62 @@ class StartDatabaseSeeder extends Seeder
                 }
 
                 // ------------------------------------------------------------
-                $productCategories = ['Blusa', 'Bermuda', 'Calçado'];
+                $productCategories = [
+                    'Camiseta',
+                    'Blusa',
+                    'Camisa',
+                    'Calça',
+                    'Bermuda',
+                    'Short',
+                    'Vestido',
+                    'Jaqueta',
+                    'Moletom',
+                    'Tênis',
+                    'Sapato',
+                    'Sandália',
+                    'Chinelo',
+                    'Boné',
+                    'Bolsa',
+                    'Cinto',
+                ];
+
                 foreach ($productCategories as $productCategory) {
                     ProductCategory::factory()->create([
                         'name' => $productCategory,
                         'enterprise_id' => $enterprise->id,
                     ]);
+                }
+
+                // ------------------------------------------------------------
+                $productsData = [
+                    'Camiseta',
+                    'Blusa',
+                    'Camisa',
+                    'Calça',
+                    'Bermuda',
+                    'Short',
+                    'Vestido',
+                    'Jaqueta',
+                    'Moletom',
+                    'Tênis',
+                    'Sapato',
+                    'Sandália',
+                    'Chinelo',
+                    'Boné',
+                    'Bolsa',
+                    'Cinto',
+                ];
+                foreach ($productsData as $productData) {
+                    Product::factory()
+                        ->withRandomCategory()
+                        ->withRandomTags()
+                        ->withAdvancedSettings()
+                        ->withVariants()
+                        ->withLog()
+                        ->create([
+                            'name' => $productData,
+                            'enterprise_id' => $enterprise->id,
+                        ]);
                 }
 
                 // ------------------------------------------------------------

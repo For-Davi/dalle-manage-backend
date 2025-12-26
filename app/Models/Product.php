@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Scopes\EnterpriseScope;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
 class Product extends Model
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
 
     protected $table = 'products';
 
