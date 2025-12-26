@@ -2,18 +2,19 @@
 
 namespace Database\Factories;
 
-use App\Models\Tag;
+use App\Models\Receipt;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class TagFactory extends Factory
+class ReceiptFactory extends Factory
 {
-    protected $model = Tag::class;
+    protected $model = Receipt::class;
 
     public function definition()
     {
         return [
-            'name' => null,
             'enterprise_id' => null,
+            'type_receipt_id' => null,
+            'identifier' => null,
         ];
     }
 }
