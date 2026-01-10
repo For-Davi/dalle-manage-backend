@@ -11,7 +11,9 @@ use App\Helpers\ProductVariantHelper;
 use App\Helpers\SaleHelper;
 use App\Jobs\SendCouponToEmailJob;
 use App\Repositories\ClientRepository;
+use App\Repositories\EmployeeRepository;
 use App\Repositories\ProductVariantRepository;
+use App\Repositories\ReceiptRepository;
 use App\Repositories\SaleDeliveryRepository;
 use App\Repositories\SaleItemRepository;
 use App\Repositories\SalePaymentsMethodRepository;
@@ -31,8 +33,37 @@ class SaleService
         protected SaleItemRepository $saleItemRepository,
         protected ClientRepository $clientRepository,
         protected UserRepository $userRepository,
+        protected EmployeeRepository $employeeRepository,
         protected ProductMovementService $productMovementService,
+        protected ReceiptRepository $receiptRepository,
     ) {}
+
+    public function getSales()
+    {
+        $sales = $this->saleRepository->getAllByEnterprise();
+
+        $sales->load(['payment.type']);
+
+        $data = [];
+
+        foreach($sales as $sale){
+            $data[] = [
+                'id' => $sale->id,
+                'enterprise_id' => $sale->enterprise_id,
+                'total' => $sale->total,
+                'date' => $sale->date,
+                'sale_payments_methods' => $sale->payment->map(function ($payment) {
+                return [
+                    'value' => $payment->value,
+                    'installments' => $payment->installments,
+                    'type' => $payment->type,
+                ];
+            }),
+            ];
+        };
+
+        return $data;
+    }
 
     public function create($request)
     {
@@ -112,10 +143,13 @@ class SaleService
             $installments = $isValidInstallment ? $installment['value'] : null;
             $amount = $isValidInstallment ? $installment['amount'] : $payment['value'];
 
+            $receipt = $this->receiptRepository->findById($payment['receiptID']);
+
             $salePaymentDTO = CreateSalePaymentDTO::fromRequest([
                 'saleID' => $saleID,
                 'paymentMethodID' => $paymentMethodID,
                 'receiptID' => $payment['receiptID'],
+                'receiptName' => $receipt->identifier,
                 'installments' => $installments,
                 'value' => $amount,
             ]);
@@ -202,10 +236,14 @@ class SaleService
             $request->input('paymentData.fees'),
         ]);
 
+        $seller = $this->employeeRepository->findById($request->sellerID);
+
         $saleDTO = CreateSaleDTO::fromRequest([
             'enterpriseID' => $enterpriseID,
             'sellerID' => $request->sellerID,
+            'sellerName' => $seller->name,
             'clientID' => $request->clientData['id'] ?? null,
+            'clientName' => $request->clientData['name'] ?? null,
             'fees' => $request->input('paymentData.fees'),
             'totalValue' => $totalValue,
             'change' => $request->input('paymentData.change'),

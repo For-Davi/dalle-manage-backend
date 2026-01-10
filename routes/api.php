@@ -263,6 +263,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     });
 
     Route::prefix('sale')->group(function () {
+        Route::get('/', [SaleController::class, 'index']);
         Route::post('/', [SaleController::class, 'store']);
         Route::get('/{saleID}', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);

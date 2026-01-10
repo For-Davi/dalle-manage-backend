@@ -15,6 +15,7 @@ class SalePaymentMethod extends Model
         'sale_id',
         'payment_method_id',
         'receipt_id',
+        'receipt_name',
         'installments',
         'value',
     ];

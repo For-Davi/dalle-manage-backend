@@ -6,6 +6,7 @@ use App\Http\Requests\Sale\CreateSaleRequest;
 use App\Http\Requests\Sale\ExportSaleRequest;
 use App\Http\Requests\Sale\SendToEmailRequest;
 use App\Http\Requests\Sale\ShowSaleRequest;
+use Illuminate\Http\Request;
 use App\Repositories\SaleRepository;
 use App\Services\SaleService;
 use App\Utils\ErrorLogger;
@@ -17,6 +18,19 @@ class SaleController
         private SaleService $service,
         private SaleRepository $repository,
     ) {}
+
+    public function index(Request $request)
+    {
+        try {
+            $sales = $this->service->getSales();
+
+            return response()->json(['sales' => $sales], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao fazer busca de vendas:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao fazer busca de vendas'], 500);
+        }
+    }
 
     public function store(CreateSaleRequest $request)
     {
