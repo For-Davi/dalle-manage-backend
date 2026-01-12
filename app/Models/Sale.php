@@ -18,6 +18,7 @@ class Sale extends Model
 
     protected $fillable = [
         'enterprise_id',
+        'status',
         'seller_id',
         'seller_name',
         'client_id',
@@ -27,6 +28,11 @@ class Sale extends Model
         'change',
         'date',
     ];
+
+    public function delivery()
+    {
+        return $this->hasOne(SaleDelivery::class, 'sale_id');
+    }
 
     public function payment()
     {

@@ -8,6 +8,7 @@ use App\Http\Requests\Sale\SendToEmailRequest;
 use App\Http\Requests\Sale\ShowSaleRequest;
 use Illuminate\Http\Request;
 use App\Repositories\SaleRepository;
+use App\Http\Resources\Sale\SaleResource;
 use App\Services\SaleService;
 use App\Utils\ErrorLogger;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,21 @@ class SaleController
             ErrorLogger::log('Erro ao fazer busca de vendas:', $e, $request);
 
             return response()->json(['message' => 'Erro ao fazer busca de vendas'], 500);
+        }
+    }
+
+    public function show(ShowSaleRequest $request)
+    {
+        try {
+            $sale = $this->repository->findById($request->route('saleID'));
+
+            $sale->load(['delivery', 'payment.type', 'items.product.color']);
+
+            return response()->json(['sale' =>  new SaleResource($sale)], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar venda:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar venda'], 500);
         }
     }
 
