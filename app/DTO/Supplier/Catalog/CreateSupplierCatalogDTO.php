@@ -15,7 +15,7 @@ class CreateSupplierCatalogDTO extends BaseDTO
         public ?string $description,
     ) {}
 
-    public static function fromRequest(array $data): self
+    public static function fromRequest($data): self
     {
         return new self(
             price: $data['price'],

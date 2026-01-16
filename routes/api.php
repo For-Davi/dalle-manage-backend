@@ -264,9 +264,10 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('sale')->group(function () {
         Route::get('/', [SaleController::class, 'index']);
+        Route::get('/{saleID}', [SaleController::class, 'show']);
         Route::post('/', [SaleController::class, 'store']);
+        Route::get('/product/{saleID}', [SaleController::class, 'showProducts']);
         Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
-        Route::get('/{saleID}/', [SaleController::class, 'show']);
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
     });

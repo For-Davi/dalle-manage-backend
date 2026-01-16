@@ -18,17 +18,15 @@ class SaleResource extends JsonResource
             'date' => $this->date,
             'sale_itens' => $this->items->map(function ($item) {
                 return [
-                    'product_name' =>
-                        $item->product?->product?->name
-                        ?? $item->product_name,
+                    'product_name' => $item->product_name,
                     'product_sku' => $item->product_sku,
                     'product_price' => $item->product_price,
                     'quantity' => $item->quantity,
                     'total' => $item->total,
-                    'grid' => $item->product->gridItem->gridGroup->name,
-                    'code' => $item->product->code,
-                    'color' => $item->product?->color?->hex_color_code,
-                    'color_name' => $item->product?->color?->name
+                    'grid' => $item->product_grid_name,
+                    'code' => $item->product_code,
+                    'color' => $item->product_color,
+                    'color_name' => $item->product_color_name
                 ];
             }),
             'sale_payments_methods' => $this->payment->map(function ($payment) {

@@ -8,7 +8,9 @@ use App\Http\Requests\Sale\SendToEmailRequest;
 use App\Http\Requests\Sale\ShowSaleRequest;
 use Illuminate\Http\Request;
 use App\Repositories\SaleRepository;
+use App\Repositories\SaleItemRepository;
 use App\Http\Resources\Sale\SaleResource;
+use App\Http\Resources\Sale\SaleItensResource;
 use App\Services\SaleService;
 use App\Utils\ErrorLogger;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +20,7 @@ class SaleController
     public function __construct(
         private SaleService $service,
         private SaleRepository $repository,
+        private SaleItemRepository $saleItemRepository,
     ) {}
 
     public function index(Request $request)
@@ -64,6 +67,21 @@ class SaleController
             ErrorLogger::log('Erro ao fazer a venda:', $e, $request);
 
             return response()->json(['message' => 'Erro ao fazer a venda'], 500);
+        }
+    }
+
+    public function showProducts(ShowSaleRequest $request)
+    {
+        try {
+            $products = $this->saleItemRepository->findBySaleId($request->route('saleID'));
+
+            $products->load(['product.color']);
+
+            return response()->json(['saleItens' => SaleItensResource::collection($products)], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar produtos da venda:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar produtos da venda'], 500);
         }
     }
 

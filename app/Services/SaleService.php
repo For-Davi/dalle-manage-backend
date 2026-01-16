@@ -169,7 +169,7 @@ class SaleService
         foreach ($products['products'] as $product) {
             $productVariant = $this->productVariantRepository
                 ->findById($product['productVariantID'])
-                ->loadMissing(['product']);
+                ->loadMissing(['product.category', 'color', 'gridItem.gridGroup','suppliers']);
 
             $price = $product['offer'] ?? $product['price'];
             $hasOffer = $price > 0 && isset($product['offer']);
@@ -184,6 +184,12 @@ class SaleService
                 'productName' => $productVariant->product->name,
                 'productSKU' => $productVariant->sku ?? null,
                 'productPrice' => $unitPrice,
+                'productColor' => $productVariant->color?->hex_color_code ?? null,
+                'productColorName' => $productVariant->color?->name ?? null,
+                'productGridSize' => $productVariant->gridItem?->size ?? null,
+                'productGridName' => $productVariant->gridItem?->gridGroup?->name ?? null,
+                'productCode' => $productVariant->code,
+                'productCategory' => $productVariant->product->category?->name ?? null,
                 'quantity' => $quantity,
                 'total' => $total,
             ]);
@@ -236,12 +242,14 @@ class SaleService
             $request->input('paymentData.fees'),
         ]);
 
-        $seller = $this->employeeRepository->findById($request->sellerID);
+        if($request->sellerID){
+            $seller = $this->employeeRepository->findById($request->sellerID);
+        }
 
         $saleDTO = CreateSaleDTO::fromRequest([
             'enterpriseID' => $enterpriseID,
             'sellerID' => $request->sellerID,
-            'sellerName' => $seller->name,
+            'sellerName' => $seller->name ?? null,
             'clientID' => $request->clientData['id'] ?? null,
             'clientName' => $request->clientData['name'] ?? null,
             'fees' => $request->input('paymentData.fees'),
