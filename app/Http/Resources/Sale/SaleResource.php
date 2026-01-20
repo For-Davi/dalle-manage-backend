@@ -26,7 +26,7 @@ class SaleResource extends JsonResource
                     'grid' => $item->product_grid_name,
                     'code' => $item->product_code,
                     'color' => $item->product_color,
-                    'color_name' => $item->product_color_name
+                    'color_name' => $item->product_color_name,
                 ];
             }),
             'sale_payments_methods' => $this->payment->map(function ($payment) {
@@ -34,10 +34,10 @@ class SaleResource extends JsonResource
                     'value' => $payment->value,
                     'installments' => $payment->installments,
                     'type' => $payment->type->name,
-                    'receipt' => $payment->receipt->identifier
+                    'receipt' => $payment->receipt->identifier,
                 ];
             }),
             'sale_delivery' => $this->delivery,
-        ]; 
+        ];
     }
 }

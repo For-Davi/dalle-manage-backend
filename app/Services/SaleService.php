@@ -36,33 +36,14 @@ class SaleService
         protected EmployeeRepository $employeeRepository,
         protected ProductMovementService $productMovementService,
         protected ReceiptRepository $receiptRepository,
+        protected CommissionService $commissionService,
     ) {}
 
     public function getSales()
     {
         $sales = $this->saleRepository->getAllByEnterprise();
 
-        $sales->load(['payment.type']);
-
-        $data = [];
-
-        foreach($sales as $sale){
-            $data[] = [
-                'id' => $sale->id,
-                'enterprise_id' => $sale->enterprise_id,
-                'total' => $sale->total,
-                'date' => $sale->date,
-                'sale_payments_methods' => $sale->payment->map(function ($payment) {
-                return [
-                    'value' => $payment->value,
-                    'installments' => $payment->installments,
-                    'type' => $payment->type,
-                ];
-            }),
-            ];
-        };
-
-        return $data;
+        return $sales;
     }
 
     public function create($request)
@@ -88,6 +69,11 @@ class SaleService
         // Atualização dos dados do cliente
         if ($request->clientData) {
             $this->updateClientData($request->clientData);
+        }
+
+        // Cria comissão
+        if($sale->seller_id){
+            $this->commissionService->create($sale->id, $sale->seller_id, $request->saleData['products'], 'sale');
         }
 
         return $sale;
@@ -169,7 +155,7 @@ class SaleService
         foreach ($products['products'] as $product) {
             $productVariant = $this->productVariantRepository
                 ->findById($product['productVariantID'])
-                ->loadMissing(['product.category', 'color', 'gridItem.gridGroup','suppliers']);
+                ->loadMissing(['product.category', 'color', 'gridItem.gridGroup', 'suppliers']);
 
             $price = $product['offer'] ?? $product['price'];
             $hasOffer = $price > 0 && isset($product['offer']);
@@ -242,7 +228,7 @@ class SaleService
             $request->input('paymentData.fees'),
         ]);
 
-        if($request->sellerID){
+        if ($request->sellerID) {
             $seller = $this->employeeRepository->findById($request->sellerID);
         }
 

@@ -10,6 +10,7 @@ class ProductVariantTableResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'product_id' => $this->product_id,
             'product_variant_id' => $this->id,
             'name' => $this->product?->name,
             'price' => $this->price,

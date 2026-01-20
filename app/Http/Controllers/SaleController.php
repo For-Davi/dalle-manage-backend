@@ -6,13 +6,14 @@ use App\Http\Requests\Sale\CreateSaleRequest;
 use App\Http\Requests\Sale\ExportSaleRequest;
 use App\Http\Requests\Sale\SendToEmailRequest;
 use App\Http\Requests\Sale\ShowSaleRequest;
-use Illuminate\Http\Request;
-use App\Repositories\SaleRepository;
-use App\Repositories\SaleItemRepository;
-use App\Http\Resources\Sale\SaleResource;
 use App\Http\Resources\Sale\SaleItensResource;
+use App\Http\Resources\Sale\SaleResource;
+use App\Http\Resources\Sale\SalesIndexResource;
+use App\Repositories\SaleItemRepository;
+use App\Repositories\SaleRepository;
 use App\Services\SaleService;
 use App\Utils\ErrorLogger;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SaleController
@@ -28,7 +29,7 @@ class SaleController
         try {
             $sales = $this->service->getSales();
 
-            return response()->json(['sales' => $sales], 200);
+            return response()->json(['sales' => SalesIndexResource::collection($sales)], 200);
         } catch (\Exception $e) {
             ErrorLogger::log('Erro ao fazer busca de vendas:', $e, $request);
 
@@ -43,7 +44,7 @@ class SaleController
 
             $sale->load(['delivery', 'payment.type', 'items.product.color']);
 
-            return response()->json(['sale' =>  new SaleResource($sale)], 200);
+            return response()->json(['sale' => new SaleResource($sale)], 200);
         } catch (\Exception $e) {
             ErrorLogger::log('Erro ao buscar venda:', $e, $request);
 

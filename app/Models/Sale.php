@@ -58,6 +58,10 @@ class Sale extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+    public function commissions()
+    {
+        return $this->hasMany(Commission::class, 'sale_id');
+    }
 
     protected static function booted()
     {

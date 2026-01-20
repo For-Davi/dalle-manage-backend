@@ -62,6 +62,7 @@ class CreateSaleRequest extends FormRequest
             // REGRAS DA VENDA
             'saleData.totalPrice' => 'required|numeric|min:0.01',
             'saleData.products' => 'required|array',
+            'saleData.products.*.productID' => 'required|exists:products,id',
             'saleData.products.*.productVariantID' => 'required|exists:product_variants,id',
             'saleData.products.*.newQuantity' => 'required|min:1',
             'saleData.products.*.variantActive' => 'required|in:1',
