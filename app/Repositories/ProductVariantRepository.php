@@ -38,7 +38,7 @@ class ProductVariantRepository extends BaseRepository
     public function getAllWithFilter(FilterProductDTO $filters)
     {
         $query = $this->model->where('enterprise_id', $filters->enterpriseID)->with([
-            'product', 'images', 'color',
+            'product', 'images', 'color', 'suppliers', 'gridItem.gridGroup',
         ]);
 
         if ($filters->name !== null) {

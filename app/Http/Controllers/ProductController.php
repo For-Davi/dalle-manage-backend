@@ -35,7 +35,7 @@ class ProductController
     public function index(Request $request)
     {
         try {
-            $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers']);
+            $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem']);
 
             return response()->json(['products' => ProductVariantTableResource::collection($productsVariants)], 200);
         } catch (\Exception $e) {
@@ -102,7 +102,7 @@ class ProductController
             $product = $this->service->create($request);
             if ($product) {
                 DB::commit();
-                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color']);
+                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
                 return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto cadastrado'], 201);
             }
@@ -147,7 +147,7 @@ class ProductController
     public function search(SearchProductRequest $request)
     {
         try {
-            $productsVariants = $this->productVariantRepository->getAllBySearch($request->value, ['product', 'color', 'gridItem.gridGroup']);
+            $productsVariants = $this->productVariantRepository->getAllBySearch($request->value, ['product', 'color', 'gridItem.gridGroup', 'suppliers']);
 
             return response()->json(['products' => $productsVariants], 200);
 
@@ -287,7 +287,7 @@ class ProductController
 
             if ($product) {
                 DB::commit();
-                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color']);
+                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
                 return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto excluído'], 200);
             }
@@ -309,7 +309,7 @@ class ProductController
 
             if ($variant) {
                 DB::commit();
-                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color']);
+                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
                 return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Variante excluída'], 200);
             }
