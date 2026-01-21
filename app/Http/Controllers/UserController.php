@@ -16,6 +16,7 @@ use App\Http\Requests\User\UpdateUserPasswordRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\User\UserListResource;
 use App\Jobs\SendWelcomeMailJob;
+use App\Models\User;
 use App\Repositories\EnterpriseRepository;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
@@ -23,6 +24,8 @@ use App\Utils\ErrorLogger;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 class UserController
 {
@@ -100,6 +103,46 @@ class UserController
             ErrorLogger::log('Erro ao registrar com usuário:', $e, $request);
 
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->stateless()->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+
+            $user = User::where('email', $googleUser->email)->first();
+
+            if (! $user) {
+                DB::beginTransaction();
+                $data = new Request([
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'password' => Str::random(16),
+                    'nameEnterprise' => 'Empresa de '.$googleUser->name,
+                    'sellerCode' => null,
+                    'google_id' => $googleUser->id,
+                ]);
+
+                $user = $this->service->register($data);
+                DB::commit();
+                dispatch(new SendWelcomeMailJob($user));
+            }
+
+            $token = $this->configureToken($user);
+
+            return redirect(rtrim(config('app.url'), '/')."/auth?token={$token}");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            ErrorLogger::log('Erro no Callback Google:', $e);
+
+            return redirect(rtrim(config('app.url'), '/').'/login?error');
         }
     }
 

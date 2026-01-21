@@ -13,7 +13,6 @@ use App\Repositories\MovementRepository;
 use App\Services\MovementService;
 use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Laravel\Reverb\Loggers\Log;
 use Illuminate\Support\Facades\DB;
 
 class MovementController

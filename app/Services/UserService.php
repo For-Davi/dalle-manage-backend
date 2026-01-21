@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserService
 {
@@ -51,10 +52,16 @@ class UserService
 
     public function login($request)
     {
-        $user = $this->repository->findByEmail($request->email);
+        if ($request->token) {
+            $user = $this->findByToken($request->token);
+        } else {
+            $user = $this->repository->findByEmail($request->email);
+        }
 
         $this->hasUser($user);
-        UserHelper::checkPassword($user, $request->password);
+        if (! $request->token) {
+            UserHelper::checkPassword($user, $request->password);
+        }
         UserHelper::checkUserActive($user);
         UserHelper::clearTokenReset($user);
         $this->resetRegisterPix($user->id);
@@ -158,6 +165,7 @@ class UserService
             ...$request->only(['name', 'password', 'email']),
             'enterpriseID' => $enterprise->id,
             'roleID' => $role->id,
+            'googleID' => $request->google_id ?? null,
         ]);
 
         return $this->createUser($userDTO->toArray());
@@ -327,5 +335,21 @@ class UserService
         $profilePasswordDTO = UpdateUserPasswordDTO::fromRequest($request);
 
         return $this->repository->updatePassword($request->user()->id, $profilePasswordDTO->toArray());
+    }
+
+    public function findByToken(string $token)
+    {
+        $accessToken = PersonalAccessToken::findToken($token);
+
+        if (! $accessToken) {
+            throw new \Exception('Token inválido ou expirado.');
+        }
+
+        if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
+            $accessToken->delete();
+            throw new \Exception('O token expirou. Faça login novamente.');
+        }
+
+        return $accessToken->tokenable;
     }
 }

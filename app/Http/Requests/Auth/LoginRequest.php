@@ -14,20 +14,21 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|string|email|max:50',
-            'password' => 'required|string',
+            'token' => 'nullable|string',
+            'email' => 'required_without:token|nullable|string|email|max:50',
+            'password' => 'required_without:token|nullable|string',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'email.required' => 'O e-mail é obrigatório',
-            'email.string' => 'O e-mail deve ser uma string',
-            'email.email' => 'O e-mail deve ser um endereço de e-mail válido',
-            'email.max' => 'O e-mail não pode ter mais de 50 caracteres',
-            'password.required' => 'A senha é obrigatória',
-            'password.string' => 'A senha deve ser uma string',
+            'email.required_without' => 'Por favor, informe seu e-mail para realizar o login.',
+            'email.string' => 'O e-mail informado não é válido.',
+            'email.email' => 'Digite um endereço de e-mail válido.',
+            'email.max' => 'O e-mail deve ter no máximo 50 caracteres.',
+            'password.required_without' => 'A senha é obrigatória para acessar sua conta.',
+            'password.string' => 'A senha informada é inválida.',
         ];
     }
 }

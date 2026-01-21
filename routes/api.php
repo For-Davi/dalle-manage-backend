@@ -38,6 +38,8 @@ Route::post('/register', [UserController::class, 'register']);
 Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/verify', [UserController::class, 'verify']);
 Route::post('/newPassword', [UserController::class, 'newPassword']);
+Route::get('/auth/google/redirect', [UserController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [UserController::class, 'handleGoogleCallback']);
 
 Route::middleware(['webhook.asaas'])->group(function () {
     Route::post('/send-webhook', [WebhookAsaasController::class, 'update']);

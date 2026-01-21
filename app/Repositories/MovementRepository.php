@@ -6,7 +6,6 @@ use App\Models\Movement;
 use App\Repositories\Base\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Laravel\Reverb\Loggers\Log;
 
 class MovementRepository extends BaseRepository
 {
@@ -65,51 +64,50 @@ class MovementRepository extends BaseRepository
     }
 
     public function getAllWithFilter(array $filters, array $relations = [])
-{
-    $query = $this->model->where('enterprise_id', $filters['enterprise_id']);
+    {
+        $query = $this->model->where('enterprise_id', $filters['enterprise_id']);
 
-    if (!is_null($filters['category'])) {
-        $query->where('transaction_category_id', $filters['category']);
+        if (! is_null($filters['category'])) {
+            $query->where('transaction_category_id', $filters['category']);
+        }
+
+        if ($filters['type'] !== 'all') {
+            $query->where('type', $filters['type']);
+        }
+
+        if (empty($filters['period'])) {
+            $now = Carbon::now('America/Sao_Paulo');
+            $month = $now->month;
+            $year = $now->year;
+        } else {
+            [$month, $year] = explode('/', $filters['period']);
+        }
+
+        $query
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month);
+
+        if (! empty($relations)) {
+            $query->with($relations);
+        }
+
+        return $query->get();
     }
-
-    if ($filters['type'] !== 'all') {
-        $query->where('type', $filters['type']);
-    }
-
-    if (empty($filters['period'])) {
-        $now = Carbon::now('America/Sao_Paulo');
-        $month = $now->month;
-        $year  = $now->year;
-    } else {
-        [$month, $year] = explode('/', $filters['period']);
-    }
-
-    $query
-        ->whereYear('date', $year)
-        ->whereMonth('date', $month);
-
-    if (!empty($relations)) {
-        $query->with($relations);
-    }
-
-    return $query->get();
-}
-
 
     public function getPeriods()
-{
-    return $this->model
-        ->selectRaw("
+    {
+        return $this->model
+            ->selectRaw("
             DISTINCT
             DATE_FORMAT(`date`, '%m-%Y') as period,
             YEAR(`date`)  as year_part,
             MONTH(`date`) as month_part
         ")
-        ->orderBy('year_part', 'ASC')
-        ->orderBy('month_part', 'ASC')
-        ->pluck('period')
-        ->toArray();
-}
+            ->orderBy('year_part', 'ASC')
+            ->orderBy('month_part', 'ASC')
+            ->pluck('period')
+            ->toArray();
+    }
 
     public function delete($id)
     {

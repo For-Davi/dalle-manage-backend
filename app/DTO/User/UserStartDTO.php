@@ -11,6 +11,7 @@ class UserStartDTO extends BaseDTO
         public string $name,
         public string $email,
         public string $password,
+        public ?string $google_id,
         public int $enterprise_id,
         public int $role_id
     ) {}
@@ -22,6 +23,7 @@ class UserStartDTO extends BaseDTO
             email: $data['email'],
             password: Hash::make($data['password']),
             role_id: $data['roleID'],
+            google_id: $data['googleID'],
             enterprise_id: $data['enterpriseID'],
         );
     }
