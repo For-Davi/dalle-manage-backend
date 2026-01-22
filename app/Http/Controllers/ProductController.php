@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\Product\FilterProductDTO;
+use App\Helpers\ProductVariantHelper;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\DeleteProductRequest;
 use App\Http\Requests\Product\ExportProductRequest;
@@ -13,6 +14,7 @@ use App\Http\Requests\Product\UpdateProductAdvancedRequest;
 use App\Http\Requests\Product\UpdateProductBasicRequest;
 use App\Http\Requests\Product\UpdateProductMediaRequest;
 use App\Http\Requests\Product\UpdateProductTagRequest;
+use App\Http\Requests\Product\Variant\CheckCodesRequest;
 use App\Http\Requests\Product\Variant\DeleteProductVariantRequest;
 use App\Http\Requests\Product\Variant\ShowProductVariantRequest;
 use App\Http\Requests\Product\Variant\UpdateProductVariantRequest;
@@ -92,6 +94,39 @@ class ProductController
             ErrorLogger::log('Erro ao buscar variante:', $e, $request);
 
             return response()->json(['message' => 'Erro ao buscar variante'], 500);
+        }
+    }
+
+    public function checkCodes(CheckCodesRequest $request)
+    {
+        try {
+            $codes = $request->input('codes', []);
+
+            $usedCodes = ProductVariantHelper::getUsedCodes($codes);
+
+            if (! empty($usedCodes)) {
+                $duplicatedList = implode(', ', $usedCodes);
+
+                return response()->json([
+                    'available' => false,
+                    'message' => "Os seguintes códigos já estão em uso: {$duplicatedList}",
+                    'used_codes' => $usedCodes,
+                ], 200);
+            }
+
+            return response()->json([
+                'available' => true,
+                'message' => 'Todos os códigos estão disponíveis para uso',
+                'used_codes' => [],
+            ], 200);
+
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao validar códigos das variantes:', $e, $request);
+
+            return response()->json([
+                'available' => false,
+                'message' => 'Erro interno ao validar códigos.',
+            ], 500);
         }
     }
 

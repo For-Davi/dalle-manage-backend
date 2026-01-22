@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -49,5 +50,14 @@ class ProductVariantHelper
                 'dataSale.products.*.newQuantity' => ['A quantidade informada do produto excede a quantidade que ele possui no estoque.'],
             ]);
         }
+    }
+
+    public static function getUsedCodes(array $codes): array
+    {
+        return DB::table('product_variants')
+            ->whereIn('code', $codes)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
+            ->pluck('code')
+            ->toArray();
     }
 }

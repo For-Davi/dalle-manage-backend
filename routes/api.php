@@ -138,6 +138,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
             Route::get('/{variantID}', [ProductController::class, 'showVariant']);
             Route::post('/search', [ProductController::class, 'search']);
             Route::post('/movement', [ProductMovementController::class, 'store']);
+            Route::post('/check-codes', [ProductController::class, 'checkCodes']);
             Route::put('/', [ProductController::class, 'updateVariant']);
             Route::delete('/{variantID}', [ProductController::class, 'destroyVariant']);
         });
