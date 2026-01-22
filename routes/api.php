@@ -31,6 +31,7 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
+use App\Http\Controllers\CommissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
@@ -285,4 +286,12 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::post('/filter', [DashboardController::class, 'filter']);
     });
+
+    Route::prefix('commission')->group(function () {
+        Route::get('/{saleID}', [CommissionController::class, 'index']);
+    });
+    // Route::prefix('return')->group(function () {
+    //     Route::get('/', [ReturnController::class, 'index']);
+    //     Route::post('/', [ReturnController::class, 'store']);
+    // });
 });

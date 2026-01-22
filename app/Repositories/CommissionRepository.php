@@ -11,4 +11,9 @@ class CommissionRepository extends BaseRepository
     {
         parent::__construct($model);
     }
+
+    public function getAllBySale($saleID)
+    {
+         return $this->model->where('sale_id', $saleID)->get();
+    }
 }

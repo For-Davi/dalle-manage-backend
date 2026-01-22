@@ -58,7 +58,7 @@ class Sale extends Model
     {
         return $this->belongsTo(Employee::class);
     }
-    public function commissions()
+    public function commission()
     {
         return $this->hasMany(Commission::class, 'sale_id');
     }
