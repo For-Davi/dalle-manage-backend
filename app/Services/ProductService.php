@@ -130,7 +130,7 @@ class ProductService
     {
         foreach ($variant['colors'] as $color) {
             $this->productVariantRepository->create(
-                $this->buildVariantDTO($variant, $productID, $color['id'])->toArray()
+                $this->buildVariantDTO($variant, $productID, $color)->toArray()
             );
         }
     }
@@ -142,15 +142,18 @@ class ProductService
         );
     }
 
-    private function buildVariantDTO(array $variant, int $productID, ?int $colorID = null): CreateProductVariantDTO
+    private function buildVariantDTO(array $variant, int $productID, ?array $color = null): CreateProductVariantDTO
     {
-        $sku = $this->getSku($colorID, $variant['sku']);
+        $sku = $this->getSku($color['id'], $variant['sku']);
         if ($sku !== null) {
             SkuHelper::existsSKU(
-                $this->getSku($colorID, $variant['sku']),
+                $this->getSku($color['id'], $variant['sku']),
                 'create',
             );
         }
+
+        $stockQuantity = $color ? $color['stockQuantity'] : $variant['stockQuantity'];
+        $minStockAlert = $color ? $color['minStockAlert'] : $variant['minStockAlert'];
 
         return CreateProductVariantDTO::fromRequest([
             'active' => $variant['active'],
@@ -159,11 +162,11 @@ class ProductService
             'offer' => $variant['offer'],
             'location' => $variant['location'],
             'gridItemID' => $variant['gridItemID'],
-            'colorID' => $colorID,
+            'colorID' => $color['id'],
             'price' => $variant['price'],
             'cost' => $variant['cost'],
-            'stockQuantity' => $variant['stockQuantity'],
-            'minStockAlert' => $variant['minStockAlert'],
+            'stockQuantity' => $stockQuantity,
+            'minStockAlert' => $minStockAlert,
             'productID' => $productID,
         ]);
     }

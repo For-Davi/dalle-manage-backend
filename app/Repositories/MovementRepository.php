@@ -77,15 +77,15 @@ class MovementRepository extends BaseRepository
 
         if (empty($filters['period'])) {
             $now = Carbon::now('America/Sao_Paulo');
-            $month = str_pad($now->month, 2, '0', STR_PAD_LEFT);
+            $month = $now->month;
             $year = $now->year;
         } else {
             [$month, $year] = explode('/', $filters['period']);
-            $month = str_pad($month, 2, '0', STR_PAD_LEFT);
         }
 
-        $query->where(DB::raw('SUBSTRING(`date`, 4, 2)'), '=', $month)
-            ->where(DB::raw('SUBSTRING(`date`, 7, 4)'), '=', $year);
+        $query
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month);
 
         if (! empty($relations)) {
             $query->with($relations);
@@ -99,9 +99,9 @@ class MovementRepository extends BaseRepository
         return $this->model
             ->selectRaw("
             DISTINCT
-            CONCAT(SUBSTRING(`date`, 4, 2), '-', SUBSTRING(`date`, 7, 4)) as period,
-            CAST(SUBSTRING(`date`, 7, 4) AS UNSIGNED) as year_part,
-            CAST(SUBSTRING(`date`, 4, 2) AS UNSIGNED) as month_part
+            DATE_FORMAT(`date`, '%m-%Y') as period,
+            YEAR(`date`)  as year_part,
+            MONTH(`date`) as month_part
         ")
             ->orderBy('year_part', 'ASC')
             ->orderBy('month_part', 'ASC')

@@ -29,6 +29,14 @@ class ProductVariantTableResource extends JsonResource
                 'price' => $this->suppliers->first()->pivot->price ?? null,
                 'description' => $this->suppliers->first()->pivot->description ?? null,
             ] : null,
+            'grid_item' => $this->gridItem ? [
+                'id' => $this->gridItem->id,
+                'size' => $this->gridItem->size,
+                'grid_group' => $this->gridItem->gridGroup ? [
+                    'id' => $this->gridItem->gridGroup->id,
+                    'name' => $this->gridItem->gridGroup->name,
+                ] : null,
+            ] : null,
         ];
     }
 }
