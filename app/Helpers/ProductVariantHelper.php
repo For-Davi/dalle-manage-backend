@@ -60,4 +60,13 @@ class ProductVariantHelper
             ->pluck('code')
             ->toArray();
     }
+
+    public static function getUsedSkus(array $skus): array
+    {
+        return DB::table('product_variants')
+            ->whereIn('sku', $skus)
+            ->where('enterprise_id', Auth::user()->enterprise_id)
+            ->pluck('sku')
+            ->toArray();
+    }
 }

@@ -101,31 +101,44 @@ class ProductController
     {
         try {
             $codes = $request->input('codes', []);
+            $skus = $request->input('skus', []);
 
             $usedCodes = ProductVariantHelper::getUsedCodes($codes);
+            $usedSkus = ProductVariantHelper::getUsedSkus($skus);
 
-            if (! empty($usedCodes)) {
-                $duplicatedList = implode(', ', $usedCodes);
+            if (! empty($usedCodes) || ! empty($usedSkus)) {
+
+                $messages = [];
+
+                if (! empty($usedCodes)) {
+                    $messages[] = 'Códigos já em uso: '.implode(', ', $usedCodes);
+                }
+
+                if (! empty($usedSkus)) {
+                    $messages[] = 'SKUs já em uso: '.implode(', ', $usedSkus);
+                }
 
                 return response()->json([
                     'available' => false,
-                    'message' => "Os seguintes códigos já estão em uso: {$duplicatedList}",
+                    'message' => implode(' | ', $messages),
                     'used_codes' => $usedCodes,
+                    'used_skus' => $usedSkus,
                 ], 200);
             }
 
             return response()->json([
                 'available' => true,
-                'message' => 'Todos os códigos estão disponíveis para uso',
+                'message' => 'Todos os códigos e SKUs estão disponíveis para uso.',
                 'used_codes' => [],
+                'used_skus' => [],
             ], 200);
 
         } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao validar códigos das variantes:', $e, $request);
+            ErrorLogger::log('Erro ao validar códigos e SKUs das variantes:', $e, $request);
 
             return response()->json([
                 'available' => false,
-                'message' => 'Erro interno ao validar códigos.',
+                'message' => 'Erro interno ao validar códigos e SKUs.',
             ], 500);
         }
     }

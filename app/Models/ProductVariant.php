@@ -26,6 +26,7 @@ class ProductVariant extends Model
         'location',
         'color_id',
         'offer',
+        'code',
     ];
 
     protected static function booted()
@@ -40,14 +41,22 @@ class ProductVariant extends Model
         });
     }
 
-    public function setNameAttribute($value)
+    public function setSkuAttribute($value)
     {
-        $this->attributes['sku'] = strtoupper($value);
+        if ($value !== null && $value !== '') {
+            $this->attributes['sku'] = strtoupper($value);
+        } else {
+            $this->attributes['sku'] = null;
+        }
     }
 
     public function setCodeAttribute($value)
     {
-        $this->attributes['code'] = strtoupper($value);
+        if ($value !== null && $value !== '') {
+            $this->attributes['code'] = strtoupper($value);
+        } else {
+            $this->attributes['code'] = null;
+        }
     }
 
     public function enterprise()

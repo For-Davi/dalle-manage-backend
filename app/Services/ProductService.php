@@ -144,27 +144,29 @@ class ProductService
 
     private function buildVariantDTO(array $variant, int $productID, ?array $color = null): CreateProductVariantDTO
     {
-        $sku = $this->getSku($color['id'], $variant['sku']);
-        if ($sku !== null) {
-            SkuHelper::existsSKU(
-                $this->getSku($color['id'], $variant['sku']),
-                'create',
-            );
+        if ($color && ! empty($color['sku'])) {
+            SkuHelper::existsSKU($color['sku'], 'create');
+        } elseif (! empty($variant['sku'])) {
+            SkuHelper::existsSKU($variant['sku'], 'create');
         }
 
-        $stockQuantity = $color ? $color['stockQuantity'] : $variant['stockQuantity'];
-        $minStockAlert = $color ? $color['minStockAlert'] : $variant['minStockAlert'];
+        $stockQuantity = $color ? ($color['stockQuantity'] ?? 0) : ($variant['stockQuantity'] ?? 0);
+        $minStockAlert = $color ? ($color['minStockAlert'] ?? 0) : ($variant['minStockAlert'] ?? 0);
+        $code = $color ? ($color['code'] ?? null) : ($variant['code'] ?? null);
+        $sku = $color ? ($color['sku'] ?? null) : ($variant['sku'] ?? null);
+        $colorID = $color ? ($color['id'] ?? null) : null;
 
         return CreateProductVariantDTO::fromRequest([
-            'active' => $variant['active'],
+            'active' => $variant['active'] ?? true,
             'sku' => $sku,
-            'description' => $variant['description'],
-            'offer' => $variant['offer'],
-            'location' => $variant['location'],
-            'gridItemID' => $variant['gridItemID'],
-            'colorID' => $color['id'],
-            'price' => $variant['price'],
-            'cost' => $variant['cost'],
+            'code' => $code,
+            'description' => $variant['description'] ?? null,
+            'offer' => $variant['offer'] ?? false,
+            'location' => $variant['location'] ?? null,
+            'gridItemID' => $variant['gridItemID'] ?? null,
+            'colorID' => $colorID,
+            'price' => $variant['price'] ?? 0,
+            'cost' => $variant['cost'] ?? 0,
             'stockQuantity' => $stockQuantity,
             'minStockAlert' => $minStockAlert,
             'productID' => $productID,
@@ -182,33 +184,10 @@ class ProductService
         return Storage::url($path);
     }
 
-    private function getSKU(?string $colorID, ?string $sku): ?string
-    {
-        if ($sku === null) {
-            return null;
-        }
-
-        if ($colorID === null) {
-            return $sku;
-        }
-
-        $productColor = $this->productColorRepository->findById($colorID);
-        if ($productColor === null) {
-            return $sku;
-        }
-
-        return $sku.'-'.strtoupper($productColor->name);
-    }
-
     public function updateVariant($request)
     {
-        $sku = $this->getSku($request->colorID, $request->sku);
-        if ($sku !== null) {
-            SkuHelper::existsSKU(
-                $this->getSku($request->colorID, $request->sku),
-                'update',
-                $request->id
-            );
+        if (! empty($request->sku)) {
+            SkuHelper::existsSKU($request->sku, 'update', $request->id);
         }
 
         $productVariantDTO = UpdateProductVariantDTO::fromRequest($request);
