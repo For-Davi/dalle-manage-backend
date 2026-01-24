@@ -12,166 +12,148 @@ class CreateReturnRequest extends FormRequest
     }
 
     protected function prepareForValidation()
-    {
-
-        if ($this->has('returnData.products')) {
-            $this->merge([
-                'saleData' => array_merge($this->input('saleData', []), [
-                    'products' => collect($this->input('saleData.products', []))
-                        ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
-                        ->toArray(),
-                ]),
-            ]);
-        }
-        if ($this->has('paymentData.payment')) {
-            $this->merge([
-                'paymentData' => array_merge($this->input('paymentData', []), [
-                    'payment' => collect($this->input('paymentData.payment', []))
-                        ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
-                        ->toArray(),
-                ]),
-            ]);
-        }
+{
+    if ($this->has('returnData')) {
+        $this->merge([
+            'returnData' => collect($this->input('returnData', []))
+                ->map(function ($return) {
+                    return [
+                        'reason' => $return['reason'] ?? null,
+                        'description' => $return['description'] ?? null,
+                        'products' => collect($return['products'] ?? [])
+                            ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
+                            ->toArray(),
+                    ];
+                })
+                ->toArray(),
+        ]);
     }
+    if ($this->has('exchangeProducts')) {
+        $this->merge([
+            'exchangeProducts' => collect($this->input('exchangeProducts', []))
+                ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
+                ->toArray(),
+        ]);
+    }
+}
+
 
     public function rules(): array
     {
         return [
-            // REGRAS DO CLIENTE
-            'clientData' => 'nullable|array',
-            'clientData.id' => 'required_with:clientData|exists:clients,id',
-            'clientData.name' => 'required_with:clientData|string|min:1|max:100',
-            'clientData.email' => 'nullable|email|max:100',
-            'clientData.dateBirthday' => 'nullable|string',
-            'clientData.cpf' => 'nullable|numeric',
-            'clientData.cnpj' => 'nullable|numeric',
-            'clientData.stateRegistration' => 'nullable|string|max:20',
-            'clientData.municipalRegistration' => 'nullable|string|max:20',
-            'clientData.phone' => 'nullable|string|max:20',
-            'clientData.country' => 'nullable|string|max:50',
-            'clientData.state' => 'nullable|string|max:20',
-            'clientData.city' => 'nullable|string|max:50',
-            'clientData.cep' => 'nullable|numeric',
-            'clientData.neighborhood' => 'nullable|string|max:50',
-            'clientData.address' => 'nullable|string|max:100',
-            'clientData.number' => 'nullable|numeric',
-            'clientData.complement' => 'nullable|string|max:100',
-            'clientData.description' => 'nullable|string|max:500',
-            'clientData.sex' => 'nullable|in:M,F',
+            //VENDA
+            'saleID' => 'required|exists:sales,id',
 
-            // REGRAS DA VENDA
-            'saleData.totalPrice' => 'required|numeric|min:0.01',
-            'saleData.products' => 'required|array',
-            'saleData.products.*.productID' => 'required|exists:products,id',
-            'saleData.products.*.productVariantID' => 'required|exists:product_variants,id',
-            'saleData.products.*.newQuantity' => 'required|min:1',
-            'saleData.products.*.variantActive' => 'required|in:1',
+            //VINCULO DE DEVOLUÇÃO
+            'returnID' => 'nullable|exists:returns,id',
 
-            // REGRAS DA ENTREGA
-            'deliveryData.freight' => 'required|boolean',
-            'deliveryData.freightValue' => 'required|numeric|min:0',
-            'deliveryData.cep' => 'nullable|numeric',
-            'deliveryData.state' => 'nullable|string|max:20',
-            'deliveryData.city' => 'nullable|string|max:50',
-            'deliveryData.neighborhood' => 'nullable|string|max:50',
-            'deliveryData.address' => 'nullable|string|max:100',
-            'deliveryData.numberAddress' => 'nullable|numeric',
-            'deliveryData.complement' => 'nullable|string|max:100',
-            'deliveryData.recipientName' => 'nullable|string|min:3|max:100',
-            'deliveryData.recipientPhone' => 'nullable|string|max:20',
-            'deliveryData.observation' => 'nullable|string|max:5000',
-
-            // REGRAS DO PAGAMENTO
+            //VENDEDOR
             'sellerID' => 'nullable|exists:employees,id',
-            'paymentData.change' => 'required|numeric|min:0',
-            'paymentData.fees' => 'required|numeric|min:0',
-            'paymentData.couponID' => 'nullable',
-            'paymentData.payment' => 'required|array',
-            'paymentData.payment.*.paymentType' => 'required|string|exists:types_receipt,name',
-            'paymentData.payment.*.value' => 'nullable|numeric|min:0',
-            'paymentData.payment.*.receiptID' => 'required|exists:receipts,id',
-            'paymentData.payment.*.installment' => 'nullable',
-            'paymentData.payment.*.installment.value' => 'nullable|integer|min:1|max:12',
-            'paymentData.payment.*.installment.amount' => 'nullable|numeric',
+
+            // REGRAS DA DEVOLUÇÃO
+            'returnData' => 'required|array',
+            'returnData.*.reason' => 'required|string|in:defect,violated,out_of_standard,wrong_sent,delivery_delay,wrong_bought,dissatisfaction,duplicate_order,incompatible,regret,payment_issue,not_informed',
+            'returnData.*.description' => 'nullable|string',
+            'returnData.*.products' => 'required|array',
+            'returnData.*.products.*.product_id' => 'required|exists:product_variants,id',
+            'returnData.*.products.*.product_name' => 'required|string',
+            'returnData.*.products.*.product_sku' => 'nullable|string',
+            'returnData.*.products.*.product_price' => 'required|numeric',
+            'returnData.*.products.*.quantity' => 'required|numeric|min:0',
+            'returnData.*.products.*.returnQuantity' => 'required|numeric|min:1',
+            'returnData.*.products.*.color' => 'nullable|string',
+            'returnData.*.products.*.color_name' => 'nullable|string',
+            'returnData.*.products.*.total' => 'required|numeric',
+
+            //REGRAS DO ESTORNO
+            'exchangeData.generatesCredit' => 'required|in:1,0',
+            'exchangeData.refundValue' => 'required|numeric',
+            'exchangeData.diferenceRefundValue' => 'required|numeric',
+
+            //REGRAS DE PRODUTOS DA TROCA
+            'exchangeProducts' => 'nullable|array',
+            'exchangeProducts.*.product_variant_id' => 'required|exists:product_variants,id',
+            'exchangeProducts.*.product_name' => 'required|string',
+            'exchangeProducts.*.price' => 'required|numeric',
+            'exchangeProducts.*.offer' => 'nullable|numeric',
+            'exchangeProducts.*.stock_quantity' => 'required|min:1',
+            'exchangeProducts.*.sku' => 'nullable|string',
+            'exchangeProducts.*.code' => 'required|numeric',
+            'saleData.products.*.variant_active' => 'required|in:1',
+            'exchangeProducts.*.quantity' => 'required|numeric|min:1',
+            'exchangeProducts.*.color.name' => 'nullable|string',
+            'exchangeProducts.*.color.hex_color_code' => 'nullable|string',
         ];
     }
 
     public function messages(): array
-    {
-        return [
-            // Cliente
-            'clientData.array' => 'Os dados do cliente devem ser um array',
-            'clientData.id.exists' => 'O cliente selecionado não existe.',
-            'clientData.id.required_with' => 'O ID do cliente é obrigatório quando os dados do cliente são informados.',
-            'clientData.name.required_with' => 'O nome do cliente é obrigatório quando os dados do cliente são informados.',
-            'clientData.name.string' => 'O nome do cliente deve ser um texto.',
-            'clientData.name.min' => 'O nome do cliente deve ter pelo menos 1 caractere.',
-            'clientData.name.max' => 'O nome do cliente não pode exceder 100 caracteres.',
-            'clientData.email' => 'O e-mail do cliente deve ser válido.',
-            'clientData.email.max' => 'O e-mail do cliente não pode exceder 100 caracteres.',
-            'clientData.cpf.numeric' => 'O CPF deve ser um número.',
-            'clientData.cnpj.numeric' => 'O CNPJ deve ser um número.',
-            'clientData.stateRegistration.max' => 'A inscrição estadual não pode exceder 20 caracteres.',
-            'clientData.municipalRegistration.max' => 'A inscrição municipal não pode exceder 20 caracteres.',
-            'clientData.phone.max' => 'O telefone não pode exceder 20 caracteres.',
-            'clientData.country.max' => 'O país não pode exceder 50 caracteres.',
-            'clientData.state.max' => 'O estado não pode exceder 20 caracteres.',
-            'clientData.city.max' => 'A cidade não pode exceder 50 caracteres.',
-            'clientData.cep.numeric' => 'O CEP deve ser numérico.',
-            'clientData.neighborhood.max' => 'O bairro não pode exceder 50 caracteres.',
-            'clientData.address.max' => 'O endereço não pode exceder 100 caracteres.',
-            'clientData.number.numeric' => 'O número deve ser numérico.',
-            'clientData.complement.max' => 'O complemento não pode exceder 100 caracteres.',
-            'clientData.description.max' => 'A descrição não pode exceder 500 caracteres.',
-            'clientData.sex.in' => 'O sexo deve ser "M" ou "F".',
+{
+    return [
+        //VENDA
+        'saleID.required' => 'É obrigatório o id da venda',
+        'saleID.exists' => 'O id da venda informada não existe',
 
-            // Venda
-            'saleData.totalPrice.required' => 'O valor total da venda é obrigatório.',
-            'saleData.totalPrice.numeric' => 'O valor total da venda deve ser numérico.',
-            'saleData.totalPrice.min' => 'O valor total da venda deve ser no mínimo 0',
-            'saleData.products.required' => 'É necessário enviar pelo menos um produto.',
-            'saleData.products.array' => 'Os produtos devem ser um array.',
-            'saleData.products.*.productVariantID.required' => 'O ID da variante do produto é obrigatório.',
-            'saleData.products.*.productVariantID.exists' => 'O produto selecionado não existe.',
-            'saleData.products.*.newQuantity.required' => 'A quantidade do produto é obrigatória.',
-            'saleData.products.*.newQuantity.min' => 'A quantidade do produto deve ser no mínimo 1.',
-            'saleData.products.*.variantActive.required' => 'Deve ser informado se a variante está ativa ou não',
+        //VINCULO DE DEVOLUÇÃO
+        'returnID.exsists' => 'O id da devolução informada não existe',
 
-            // Entrega
-            'deliveryData.freightValue.required' => 'O valor do frete é obrigatório.',
-            'deliveryData.freightValue.numeric' => 'O valor do frete deve ser numérico.',
-            'deliveryData.freightValue.min' => 'O valor do frete não pode ser negativo.',
-            'deliveryData.cep.numeric' => 'O CEP deve ser numérico.',
-            'deliveryData.state.max' => 'O estado não pode exceder 20 caracteres.',
-            'deliveryData.city.max' => 'A cidade não pode exceder 50 caracteres.',
-            'deliveryData.neighborhood.max' => 'O bairro não pode exceder 50 caracteres.',
-            'deliveryData.address.max' => 'O endereço não pode exceder 100 caracteres.',
-            'deliveryData.numberAddress.numeric' => 'O número do endereço deve ser numérico.',
-            'deliveryData.complement.max' => 'O complemento não pode exceder 100 caracteres.',
-            'deliveryData.recipientName.min' => 'O nome do recebedor deve ter pelo menos 3 caracteres.',
-            'deliveryData.recipientName.max' => 'O nome do recebedor não pode exceder 100 caracteres.',
-            'deliveryData.recipientPhone.max' => 'O telefone do recebedor não pode exceder 20 caracteres.',
+        //VENDEDOR
+        'saleID.exsists' => 'O id do vendedor informado não existe',
 
-            // Pagamento
-            'sellerID.exists' => 'O vendedor selecionado não existe.',
-            'paymentData.change.required' => 'O valor do troco é obrigatório.',
-            'paymentData.change.numeric' => 'O valor do troco deve ser numérico.',
-            'paymentData.change.min' => 'O valor do troco não pode ser negativo.',
-            'paymentData.fees.required' => 'O valor das tarifas é obrigatório.',
-            'paymentData.fees.numeric' => 'O valor das tarifas deve ser numérico.',
-            'paymentData.fees.min' => 'O valor das tarifas não pode ser negativo.',
-            'paymentData.payment.required' => 'É necessário enviar pelo menos um pagamento.',
-            'paymentData.payment.array' => 'O pagamento deve ser um array.',
-            'paymentData.payment.*.paymentType.required' => 'O tipo de pagamento é obrigatório.',
-            'paymentData.payment.*.paymentType.exists' => 'O tipo de pagamento selecionado não existe.',
-            'paymentData.payment.*.value.numeric' => 'O valor do pagamento deve ser numérico.',
-            'paymentData.payment.*.value.min' => 'O valor do pagamento não pode ser negativo.',
-            'paymentData.payment.*.receiptID.required' => 'O recebimento é obrigatório.',
-            'paymentData.payment.*.receiptID.exists' => 'O recebimento selecionado não existe.',
-            'paymentData.payment.*.installment.value.integer' => 'O número de parcelas deve ser um inteiro.',
-            'paymentData.payment.*.installment.value.min' => 'O mínimo de parcelas é 1.',
-            'paymentData.payment.*.installment.value.max' => 'O máximo de parcelas é 12.',
-            'paymentData.payment.*.installment.amount.numeric' => 'O valor da parcela deve ser numérico.',
-        ];
-    }
+        //DEVOLUÇÃO
+        'returnData.required' => 'É obrigatório informar os itens que foram devolvidos.',
+        'returnData.array' => 'Os itens devolvidos devem ser enviados em formato de lista.',
+        'returnData.*.reason.required' => 'Informe o motivo da devolução.',
+        'returnData.*.reason.string' => 'O motivo da devolução deve ser um texto válido.',
+        'returnData.*.reason.in' => 'O motivo da devolução informado não é válido.',
+        'returnData.*.description.string' => 'A descrição da devolução deve ser um texto válido.',
+        'returnData.*.products.required' => 'É obrigatório informar os produtos da devolução.',
+        'returnData.*.products.array' => 'Os produtos da devolução devem ser enviados em formato de lista.',
+        'returnData.*.products.*.product_id.required' => 'Informe o produto devolvido.',
+        'returnData.*.products.*.product_id.exists' => 'O produto devolvido informado não é válido.',
+        'returnData.*.products.*.product_name.required' => 'Informe o nome do produto devolvido.',
+        'returnData.*.products.*.product_name.string' => 'O nome do produto devolvido deve ser um texto válido.',
+        'returnData.*.products.*.product_sku.string' => 'O SKU do produto devolvido deve ser um texto válido.',
+        'returnData.*.products.*.product_price.required' => 'Informe o valor do produto devolvido.',
+        'returnData.*.products.*.product_price.numeric' => 'O valor do produto devolvido deve ser numérico.',
+        'returnData.*.products.*.quantity.required' => 'Informe a quantidade do produto devolvido.',
+        'returnData.*.products.*.quantity.numeric' => 'A quantidade em estoque do produto devolvido deve ser numérica.',
+        'returnData.*.products.*.quantity.min' => 'A quantidade em estoque do produto devolvido deve ser no mínimo 1.',
+        'returnData.*.products.*.returnQuantity.required' => 'Informe a quantidade do produto devolvido.',
+        'returnData.*.products.*.returnQuantity.numeric' => 'A quantidade do produto a ser devolvido deve ser numérica.',
+        'returnData.*.products.*.returnQuantity.min' => 'A quantidade do produto devolvido deve ser no mínimo 1.',
+        'returnData.*.products.*.color.string' => 'A cor do produto devolvido deve ser um texto válido.',
+        'returnData.*.products.*.color_name.string' => 'O nome da cor do produto devolvido deve ser um texto válido.',
+        'returnData.*.products.*.total.required' => 'Informe o valor total do produto devolvido.',
+        'returnData.*.products.*.total.numeric' => 'O valor total do produto devolvido deve ser numérico.',
+
+        //ESTORNO
+        'exchangeData.refundValue.required' => 'É obrigatório informar o valor do estorno.',
+        'exchangeData.refundValue.numeric' => 'O valor do estorno deve ser numérico.',
+        'exchangeData.diferenceRefundValue.required' => 'É obrigatório informar o valor da diferença.',
+        'exchangeData.diferenceRefundValue.numeric' => 'O valor da diferença deve ser numérico.',
+
+        //ITENS DE TROCA
+        'exchangeProducts.array' => 'Os produtos da troca devem ser enviados em formato de lista.',
+        'exchangeProducts.*.product_variant_id.required' => 'Informe o produto da troca.',
+        'exchangeProducts.*.product_variant_id.exists' => 'O produto da troca informado não é válido.',
+        'exchangeProducts.*.product_name.required' => 'Informe o nome do produto da troca.',
+        'exchangeProducts.*.product_name.string' => 'O nome do produto da troca deve ser um texto válido.',
+        'exchangeProducts.*.price.required' => 'Informe o valor do produto da troca.',
+        'exchangeProducts.*.price.numeric' => 'O valor do produto da troca deve ser numérico.',
+        'exchangeProducts.*.offer.numeric' => 'O valor da oferta deve ser numérico.',
+        'exchangeProducts.*.stock_quantity.required' => 'Informe o estoque disponível do produto da troca.',
+        'exchangeProducts.*.stock_quantity.min' => 'O estoque do produto da troca deve ser no mínimo 1.',
+        'exchangeProducts.*.sku.string' => 'O SKU do produto da troca deve ser um texto válido.',
+        'exchangeProducts.*.code.required' => 'Informe o código do produto da troca.',
+        'exchangeProducts.*.code.numeric' => 'O código do produto da troca deve ser numérico.',
+        'saleData.products.*.variant_active.required' => 'O produto selecionado não está ativo.',
+        'saleData.products.*.variant_active.in' => 'O produto selecionado não está ativo.',
+        'exchangeProducts.*.quantity.required' => 'Informe a quantidade do produto da troca.',
+        'exchangeProducts.*.quantity.numeric' => 'A quantidade do produto da troca deve ser numérica.',
+        'exchangeProducts.*.quantity.min' => 'A quantidade do produto da troca deve ser no mínimo 1.',
+        'exchangeProducts.*.color.name.string' => 'O nome da cor deve ser um texto válido.',
+        'exchangeProducts.*.color.hex_color_code.string' => 'O código hexadecimal da cor deve ser um texto válido.',
+    ];
+}
+
 }

@@ -50,4 +50,15 @@ class SaleHelper
             ]);
         }
     }
+
+    public static function existsSale($saleID, $enterpriseID)
+    {
+        $existSale = DB::table('sales')->where('id', $saleID)->where('enterprise_id', $enterpriseID)->first();
+
+        if (! $existSale) {
+            throw ValidationException::withMessages([
+                 'message' => ['A venda informada não existe.'],
+            ]);
+        }
+    }
 }

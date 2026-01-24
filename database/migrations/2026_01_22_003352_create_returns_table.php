@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('sale_id');
             $table->foreign('sale_id')->references('id')->on('sales');
+            $table->unsignedBigInteger('linked_return_id')->nullable();
+            $table->foreign('linked_return_id')->references('id')->on('returns');
             $table->string('status');
             $table->string('created_by_name');
             $table->string('created_by_email');

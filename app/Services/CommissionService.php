@@ -32,11 +32,40 @@ class CommissionService
         //Caso a comissão seja feita por uma venda ele cria uma comissão com esse tipo Sale
         if ($type === 'sale') {
             return $this->createCommissionSale($commissionProducts, $saleID, $seller);
+        } 
+
+        //Caso a comissão seja feita por uma devolução ele cria uma comissão com esse tipo Return
+        if($type === 'return'){
+            return $this->createCommissionsReturn($commissionProducts, $saleID, $seller);
         }
     }
 
     private function createCommissionSale(array $commissionProducts, int $saleID, $seller)
     {
+        foreach ($commissionProducts as $item) {
+            $commissionDTO = CreateCommissionDTO::fromRequest([
+                'sale_id' => $saleID,
+                'type' => 'sale',
+                'status' => 'active',
+                'product_id' => $item['product_id'],
+                'product_name' => $item['product_name'],
+                'seller_id' => $seller->id,
+                'seller_name' => $seller->name,
+                'seller_email' => $seller->email,
+                'percentage' => $item['percentage'],
+                'commission_value' => $item['commission_value'],
+            ]);
+
+            $this->commissionRepository->create($commissionDTO->toArray());
+        }
+
+        return true;
+    }
+
+    private function createCommissionsReturn(array $commissionProducts, int $saleID, $seller)
+    {
+
+    //Lógica da comissão
         foreach ($commissionProducts as $item) {
             $commissionDTO = CreateCommissionDTO::fromRequest([
                 'sale_id' => $saleID,
@@ -64,7 +93,7 @@ class CommissionService
         foreach ($products as $product) {
             $productID = $product['productID'];
 
-            $value = ($product['offer'] && $product['offer'] > 0 ? $product['offer'] * $product['newQuantity'] : $product['price']) * $product['newQuantity'];
+            $value = $product['offer'] && $product['offer'] > 0 ? $product['offer'] * $product['newQuantity'] : $product['price'] * $product['newQuantity'];
 
             if (isset($calculatedValueProducts[$productID])) {
                 $calculatedValueProducts[$productID]['value'] += $value;
