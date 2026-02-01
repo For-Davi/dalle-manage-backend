@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('sale_id');
             $table->foreign('sale_id')->references('id')->on('sales');
+            $table->unsignedBigInteger('return_id');
+            $table->foreign('return_id')->references('id')->on('returns');
             $table->string('status');
             $table->decimal('exchange_value', 10, 2)->default(0);
             $table->decimal('difference_value', 10, 2)->default(0);
@@ -19,7 +21,6 @@ return new class extends Migration
             $table->string('created_by_email');
             $table->string('updated_by_name')->nullable();
             $table->string('updated_by_email')->nullable();
-            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

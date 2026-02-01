@@ -13,8 +13,9 @@ class SalesIndexResource extends JsonResource
             'id' => $this->id,
             'seller_name' => $this->seller_name,
             'client_name' => $this->client_name,
+            'status' => $this->status,
             'fees' => $this->fees,
-            'total' => $this->total,
+            'starting_total' => $this->starting_total,
             'change' => $this->change,
             'date' => $this->date,
         ];

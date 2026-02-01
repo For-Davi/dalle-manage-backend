@@ -8,6 +8,7 @@ use App\Repositories\ClientRepository;
 use App\Repositories\ProductAdvancedRepository;
 use App\Repositories\EmployeeRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\SaleRepository;
 
 class CommissionService
 {
@@ -17,6 +18,7 @@ class CommissionService
         protected ProductAdvancedRepository $productAdavancedRepository,
         protected EmployeeRepository $employeeRepository,
         protected CommissionRepository $commissionRepository,
+        protected SaleRepository $saleRepository,
     ) {}
 
     public function create(int $saleID, int $sellerID, array $products, string $type)
@@ -42,6 +44,9 @@ class CommissionService
 
     private function createCommissionSale(array $commissionProducts, int $saleID, $seller)
     {
+        $sale = $this->saleRepository->findById($saleID);
+        $totalCommission = 0;
+    
         foreach ($commissionProducts as $item) {
             $commissionDTO = CreateCommissionDTO::fromRequest([
                 'sale_id' => $saleID,
@@ -56,8 +61,12 @@ class CommissionService
                 'commission_value' => $item['commission_value'],
             ]);
 
+            $totalCommission += $item['commission_value'];
+
             $this->commissionRepository->create($commissionDTO->toArray());
         }
+        $currentTotal = $sale->current_total - $totalCommission;
+        $this->saleRepository->update($saleID, ['current_total' => $currentTotal]);
 
         return true;
     }
@@ -121,7 +130,7 @@ class CommissionService
                     'product_id' => $product->id,
                     'product_name' => $product->name,
                     'percentage' => $productAdvanced->commission_percentage,
-                    'commission_value' => $productAdvanced->commission_percentage / 100 * $item['value'],
+                    'commission_value' => round( ($productAdvanced->commission_percentage / 100) * $item['value'], 2 ),
                 ];
             } else {
                 continue;

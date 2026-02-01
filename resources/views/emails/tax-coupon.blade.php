@@ -154,7 +154,7 @@
     <div class="totals">
       <div>
         <span><strong>TROCO:</strong> R$ {{ number_format($coupon['sale']->change, 2, ',', '.') }}</span>
-        <span class="total">TOTAL: R$ {{ number_format($coupon['sale']->total, 2, ',', '.') }}</span>
+        <span class="total">TOTAL: R$ {{ number_format($coupon['sale']->starting_total, 2, ',', '.') }}</span>
       </div>
       <span><strong>TARIFAS:</strong> R$ {{ number_format($coupon['sale']->fees, 2, ',', '.') }}</span>
     </div>

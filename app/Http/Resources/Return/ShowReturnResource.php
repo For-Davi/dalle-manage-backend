@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Resources\Return;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ShowReturnResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'status' => match ($this->status) {
+                'active' => 'Ativa',
+                'cancelled' => 'Cancelada',
+                default => $this->status,
+            },
+            'linked_return_id' => $this->linked_return_id,
+            'created_by_name' => $this->created_by_name,
+            'created_by_email' => $this->created_by_email,
+            'updated_by_name' => $this->updated_by_name,
+            'updated_by_email' => $this->updated_by_email,
+            'created_at' =>  $this->created_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+            'updated_at' =>  $this->updated_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+            'return_items' => $this->items->map(function ($item) {
+                return [
+                    'product_name' => $item->product_name,
+                    'product_sku' => $item->product_sku,
+                    'product_price' => $item->product_price,
+                    'quantity' => $item->quantity,
+                    'total' => $item->total,
+                    'color' => $item->product_color,
+                    'color_name' => $item->product_color_name,
+                    'reason' => $item->reason,
+                    'description' => $item->description,
+                ];
+            }),
+            'return_exchange_items' => $this->returnExchangeItems->map(function ($exchangeItem) {
+                return [
+                    'product_name' => $exchangeItem->product_name,
+                    'product_sku' => $exchangeItem->product_sku,
+                    'product_price' => $exchangeItem->product_price,
+                    'quantity' => $exchangeItem->quantity,
+                    'total' => $exchangeItem->total,
+                    'color' => $exchangeItem->product_color,
+                    'color_name' => $exchangeItem->product_color_name,
+                ];
+            }),
+        ];
+    }
+}

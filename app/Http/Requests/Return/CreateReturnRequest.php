@@ -53,9 +53,9 @@ class CreateReturnRequest extends FormRequest
             // REGRAS DA DEVOLUÇÃO
             'returnData' => 'required|array',
             'returnData.*.reason' => 'required|string|in:defect,violated,out_of_standard,wrong_sent,delivery_delay,wrong_bought,dissatisfaction,duplicate_order,incompatible,regret,payment_issue,not_informed',
-            'returnData.*.description' => 'nullable|string',
+            'returnData.*.description' => 'nullable|string|max: 1000',
             'returnData.*.products' => 'required|array',
-            'returnData.*.products.*.product_id' => 'required|exists:product_variants,id',
+            'returnData.*.products.*.product_variant_id' => 'required|exists:product_variants,id',
             'returnData.*.products.*.product_name' => 'required|string',
             'returnData.*.products.*.product_sku' => 'nullable|string',
             'returnData.*.products.*.product_price' => 'required|numeric',
@@ -67,13 +67,13 @@ class CreateReturnRequest extends FormRequest
 
             //REGRAS DO ESTORNO
             'exchangeData.generatesCredit' => 'required|in:1,0',
-            'exchangeData.refundValue' => 'required|numeric',
-            'exchangeData.diferenceRefundValue' => 'required|numeric',
+            'exchangeData.exchangeValue' => 'required|numeric',
+            'exchangeData.differenceValue' => 'required|numeric',
 
             //REGRAS DE PRODUTOS DA TROCA
             'exchangeProducts' => 'nullable|array',
             'exchangeProducts.*.product_variant_id' => 'required|exists:product_variants,id',
-            'exchangeProducts.*.product_name' => 'required|string',
+            'exchangeProducts.*.name' => 'required|string',
             'exchangeProducts.*.price' => 'required|numeric',
             'exchangeProducts.*.offer' => 'nullable|numeric',
             'exchangeProducts.*.stock_quantity' => 'required|min:1',
@@ -106,10 +106,11 @@ class CreateReturnRequest extends FormRequest
         'returnData.*.reason.string' => 'O motivo da devolução deve ser um texto válido.',
         'returnData.*.reason.in' => 'O motivo da devolução informado não é válido.',
         'returnData.*.description.string' => 'A descrição da devolução deve ser um texto válido.',
+        'returnData.*.description.max' => 'A descrição da devolução não pode ultrapassar 1000 caracteres.',
         'returnData.*.products.required' => 'É obrigatório informar os produtos da devolução.',
         'returnData.*.products.array' => 'Os produtos da devolução devem ser enviados em formato de lista.',
-        'returnData.*.products.*.product_id.required' => 'Informe o produto devolvido.',
-        'returnData.*.products.*.product_id.exists' => 'O produto devolvido informado não é válido.',
+        'returnData.*.products.*.product_variant_id.required' => 'Informe o produto devolvido.',
+        'returnData.*.products.*.product_variant_id.exists' => 'O produto devolvido informado não é válido.',
         'returnData.*.products.*.product_name.required' => 'Informe o nome do produto devolvido.',
         'returnData.*.products.*.product_name.string' => 'O nome do produto devolvido deve ser um texto válido.',
         'returnData.*.products.*.product_sku.string' => 'O SKU do produto devolvido deve ser um texto válido.',
@@ -127,17 +128,17 @@ class CreateReturnRequest extends FormRequest
         'returnData.*.products.*.total.numeric' => 'O valor total do produto devolvido deve ser numérico.',
 
         //ESTORNO
-        'exchangeData.refundValue.required' => 'É obrigatório informar o valor do estorno.',
-        'exchangeData.refundValue.numeric' => 'O valor do estorno deve ser numérico.',
-        'exchangeData.diferenceRefundValue.required' => 'É obrigatório informar o valor da diferença.',
-        'exchangeData.diferenceRefundValue.numeric' => 'O valor da diferença deve ser numérico.',
+        'exchangeData.exchangeValue.required' => 'É obrigatório informar o valor do estorno.',
+        'exchangeData.exchangeValue.numeric' => 'O valor do estorno deve ser numérico.',
+        'exchangeData.differenceValue.required' => 'É obrigatório informar o valor da diferença.',
+        'exchangeData.differenceValue.numeric' => 'O valor da diferença deve ser numérico.',
 
         //ITENS DE TROCA
         'exchangeProducts.array' => 'Os produtos da troca devem ser enviados em formato de lista.',
         'exchangeProducts.*.product_variant_id.required' => 'Informe o produto da troca.',
         'exchangeProducts.*.product_variant_id.exists' => 'O produto da troca informado não é válido.',
-        'exchangeProducts.*.product_name.required' => 'Informe o nome do produto da troca.',
-        'exchangeProducts.*.product_name.string' => 'O nome do produto da troca deve ser um texto válido.',
+        'exchangeProducts.*.name.required' => 'Informe o nome do produto da troca.',
+        'exchangeProducts.*.name.string' => 'O nome do produto da troca deve ser um texto válido.',
         'exchangeProducts.*.price.required' => 'Informe o valor do produto da troca.',
         'exchangeProducts.*.price.numeric' => 'O valor do produto da troca deve ser numérico.',
         'exchangeProducts.*.offer.numeric' => 'O valor da oferta deve ser numérico.',

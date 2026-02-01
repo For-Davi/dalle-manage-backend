@@ -5,10 +5,14 @@ namespace App\Services;
 use App\DTO\Client\CreateClientDTO;
 use App\DTO\Client\UpdateClientDTO;
 use App\Repositories\ClientRepository;
+use App\Repositories\SaleRepository;
 
 class ClientService
 {
-    public function __construct(protected ClientRepository $repository) {}
+    public function __construct(
+        protected ClientRepository $repository,
+        protected SaleRepository $saleRepository,
+    ) {}
 
     public function create($request)
     {
@@ -22,5 +26,12 @@ class ClientService
         $supplierDTO = UpdateClientDTO::fromRequest($request);
 
         return $this->repository->update($request->id, $supplierDTO->toArray());
+    }
+
+    public function updateCredit($saleID, $credit)
+    {
+        $sale = $this->saleRepository->findById($saleID);
+
+        return $this->repository->update($sale->client_id, ['credits' => $credit]);
     }
 }

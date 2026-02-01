@@ -24,7 +24,8 @@ class Sale extends Model
         'client_id',
         'client_name',
         'fees',
-        'total',
+        'starting_total',
+        'current_total',
         'change',
         'date',
     ];

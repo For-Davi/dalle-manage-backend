@@ -13,6 +13,7 @@ class SalePaymentMethod extends Model
 
     protected $fillable = [
         'sale_id',
+        'exchange_id',
         'payment_method_id',
         'receipt_id',
         'receipt_name',

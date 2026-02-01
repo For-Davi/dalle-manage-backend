@@ -241,6 +241,7 @@ class SaleService
             'fees' => $request->input('paymentData.fees'),
             'totalValue' => $totalValue,
             'change' => $request->input('paymentData.change'),
+            'currentTotal' => $totalValue - $request->input('paymentData.fees'),
         ]);
 
         return $this->saleRepository->create($saleDTO->toArray());

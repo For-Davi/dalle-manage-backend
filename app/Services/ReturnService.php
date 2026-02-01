@@ -5,11 +5,14 @@ namespace App\Services;
 use App\DTO\Return\CreateReturnDTO;
 use App\DTO\Return\ReturnItem\CreateReturnItemDTO;
 use App\DTO\Return\ExchangeReturnItem\CreateExchangeReturnItemDTO;
+use App\DTO\Return\UpdateReturnDTO;
 use App\Repositories\ReturnRepository;
 use App\Repositories\ReturnItemRepository;
 use App\Repositories\ExchangeReturnItemRepository;
 use App\Services\ExchangeService;
+use App\Services\ClientService;
 use App\Helpers\ProductVariantHelper;
+use App\Helpers\ReturnHelper;
 use App\Helpers\ReturnItemHelper;
 
 class ReturnService
@@ -19,6 +22,7 @@ class ReturnService
         protected ReturnItemRepository $returnItemRepository,
         protected ExchangeReturnItemRepository $exchangeReturnItemRepository,
         protected ExchangeService $exchangeService,
+        protected ClientService $clientService,
     ) {}
 
     public function create($request)
@@ -50,11 +54,30 @@ class ReturnService
             $this->createExchangeReturnItems($request['exchangeProducts'], $return->id);
         }
 
-        //Criação do estorno e diferença a pagar(caso tenha um dos dois)
-        if($request['exchangeData.exchangeValue'] > 0 || $request['exchangeData.differenceValue'] > 0){
-            $this->exchangeService->create($request);
+        //Se pediu para gerar o crédito, gera crédito, caso o contrário gera estorno
+        if($request['exchangeData']['generatesCredit'] === 1 && $request['exchangeData']['exchangeValue'] > 0 && $request['exchangeData']['differenceValue'] === 0){
+            return $this->clientService->updateCredit($request['saleID'], $request['exchangeData']['exchangeValue']);
+        } else {
+            if($request['exchangeData']['exchangeValue'] > 0 || $request['exchangeData']['differenceValue'] > 0){
+            $this->exchangeService->create($request['exchangeData'], $request['saleID'], $return->id);
         }
+        }
+
+        return true;
         
+        //Criação do crédito ao cliente (caso seja informado que é para gerar crédito)
+    }
+
+    public function update($request)
+    {
+        ReturnHelper::existsReturn($request->saleID, $request->id);
+        ReturnHelper::isSameStatus($request->id, $request->status);
+
+        $returnDTO = UpdateReturnDTO::fromRequest($request);
+
+        $this->repository->update($request->id, $returnDTO->toArray());
+
+        return $this->exchangeService->updateExchangeAfterReturn($request);
     }
 
     private function validateExchangeProducts($products)
@@ -89,39 +112,44 @@ class ReturnService
                     'returnID' => $returnID,
                     'productVariantID' => $product['product_variant_id'],
                     'productName' => $product['product_name'],
-                    'productSKU' => $product['product_sku'],
+                    'productSKU' => $product['product_sku'] ?? null,
                     'productPrice' => $product['product_price'],
-                    'productColor' => $product['product_color'],
-                    'productColorName' => $product['product_color_name'],
+                    'productColor' => $product['color'] ?? null,
+                    'productColorName' => $product['color_name'] ?? null,
                     'returnQuantity' => $product['returnQuantity'],
                     'total' => $product['total'],
                     'reason' => $return['reason'],
-                    'description' => $return['description'],
+                    'description' => $return['description'] ?? null,
                 ]);
 
                 $this->returnItemRepository->create($returnItemDTO->toArray());
             }
         }
+
+        return true;
     }
 
     private function createExchangeReturnItems(array $exchangeProducts, $returnID)
     {
         foreach($exchangeProducts as $product){
+
             $total = $product['offer'] ? $product['offer']*$product['quantity'] : $product['price']*$product['quantity'];
 
             $exchangeReturnItemDTO = CreateExchangeReturnItemDTO::fromRequest([
                     'returnID' => $returnID,
                     'productVariantID' => $product['product_variant_id'],
-                    'productName' => $product['product_name'],
-                    'productSKU' => $product['product_sku'],
-                    'productPrice' => $product['product_price'],
-                    'productColor' => $product['product_color'],
-                    'productColorName' => $product['product_color_name'],
-                    'returnQuantity' => $product['returnQuantity'],
+                    'productName' => $product['name'],
+                    'productSKU' => $product['sku'] ?? null,
+                    'productPrice' => $product['price'],
+                    'productColor' => $product['color']['hex_color_code'] ?? null,
+                    'productColorName' => $product['color']['name'] ?? null,
+                    'quantity' => $product['quantity'],
                     'total' => $total,
                 ]);
 
             $this->exchangeReturnItemRepository->create($exchangeReturnItemDTO->toArray());
         }
+
+        return true;
     }
 }

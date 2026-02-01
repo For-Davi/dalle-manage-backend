@@ -32,6 +32,8 @@ use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
 use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\ReturnController;
+use App\Http\Controllers\ExchangeController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
@@ -292,8 +294,15 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('commission')->group(function () {
         Route::get('/{saleID}', [CommissionController::class, 'index']);
     });
-    // Route::prefix('return')->group(function () {
-    //     Route::get('/', [ReturnController::class, 'index']);
-    //     Route::post('/', [ReturnController::class, 'store']);
-    // });
+    Route::prefix('returns')->group(function () {
+        Route::get('/{saleID}', [ReturnController::class, 'index']);
+        Route::get('/return/{returnID}', [ReturnController::class, 'show']);
+        Route::get('/linked/{returnID}', [ReturnController::class, 'showLinked']);
+        Route::post('/', [ReturnController::class, 'store']);
+        Route::put('/', [ReturnController::class, 'update']);
+    });
+    Route::prefix('exchange')->group(function () {
+        Route::get('/{saleID}', [ExchangeController::class, 'index']);
+        Route::post('/', [ExchangeController::class, 'createPayment']);
+    });
 });

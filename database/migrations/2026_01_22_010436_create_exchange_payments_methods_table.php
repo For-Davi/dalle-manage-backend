@@ -11,8 +11,6 @@ return new class extends Migration
     {
         Schema::create('exchange_payments_methods', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('sale_id');
-            $table->foreign('sale_id')->references('id')->on('sales');
             $table->unsignedBigInteger('exchange_id');
             $table->foreign('exchange_id')->references('id')->on('exchanges');
             $table->unsignedBigInteger('receipt_id')->nullable();
@@ -21,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('payment_method_id');
             $table->foreign('payment_method_id')->references('id')->on('types_receipt');
             $table->decimal('value', 10, 2);
+            $table->decimal('change', 10, 2);
             $table->timestamps();
         });
     }

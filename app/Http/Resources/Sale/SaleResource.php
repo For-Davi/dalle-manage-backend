@@ -12,8 +12,10 @@ class SaleResource extends JsonResource
         return [
             'seller_name' => $this->seller_name,
             'client_name' => $this->client_name,
+            'status' => $this->status,
             'fees' => $this->fees,
-            'total' => $this->total,
+            'starting_total' => $this->starting_total,
+            'current_total' => $this->current_total,
             'change' => $this->change,
             'date' => $this->date,
             'sale_itens' => $this->items->map(function ($item) {

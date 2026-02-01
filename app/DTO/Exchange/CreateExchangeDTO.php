@@ -9,6 +9,7 @@ class CreateExchangeDTO extends BaseDTO
 {
     public function __construct(
         public int $sale_id,
+        public int $return_id,
         public string $status,
         public float $exchange_value,
         public float $difference_value,
@@ -22,9 +23,10 @@ class CreateExchangeDTO extends BaseDTO
     {
         return new self(
             sale_id: $data['saleID'],
+            return_id: $data['returnID'],
             status: 'active',
-            exchange_value: $data[''],
-            difference_value: 'active',
+            exchange_value: $data['exchangeValue'],
+            difference_value: $data['differenceValue'],
             created_by_name: Auth::user()->name,
             created_by_email: Auth::user()->email,
             updated_by_name: null,
