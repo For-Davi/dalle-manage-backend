@@ -22,6 +22,8 @@ class ExchangePaymentHelper
                 throw ValidationException::withMessages([
                     'exchangeData.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
                 ]);
+            } else {
+                return $existPaymentMethod->id;
             }
         } else {
             throw ValidationException::withMessages([

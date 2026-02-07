@@ -146,7 +146,7 @@ class SaleService
 
     private function createSaleDelivery($deliveryData, int $saleID)
     {
-        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($deliveryData, $saleID);
+        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($deliveryData, $saleID, null);
         $this->saleDeliveryRepository->create($deliveryDTO->toArray());
     }
 

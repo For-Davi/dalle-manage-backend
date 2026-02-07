@@ -15,6 +15,7 @@ class ExchangeAdditional extends Model
     protected $fillable = [
         'exchange_id',
         'change',
+        'fees',
         'description'
     ];
 }

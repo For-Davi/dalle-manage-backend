@@ -19,7 +19,6 @@ return new class extends Migration
             $table->unsignedBigInteger('payment_method_id');
             $table->foreign('payment_method_id')->references('id')->on('types_receipt');
             $table->decimal('value', 10, 2);
-            $table->decimal('change', 10, 2);
             $table->timestamps();
         });
     }

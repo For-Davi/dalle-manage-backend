@@ -2,11 +2,13 @@
 
 namespace App\DTO\Exchange\ExchangePayment;
 
-class CreateExchangeChangeDTO
+class CreateExchangeAdditionalDTO
 {
     public function __construct(
         public readonly int $exchange_id,
-        public readonly int $change,
+        public readonly float $change,
+        public readonly float $fees,
+        public readonly ?string $description,
     ) {}
 
     public static function fromRequest($data): self
@@ -14,6 +16,8 @@ class CreateExchangeChangeDTO
         return new self(
             exchange_id: $data['exchangeID'],
             change: $data['change'],
+            fees: $data['fees'],
+            description: $data['description'],
         );
     }
 
@@ -22,6 +26,8 @@ class CreateExchangeChangeDTO
         return [
             'exchange_id' => $this->exchange_id,
             'change' => $this->change,
+            'fees' => $this->fees,
+            'description' => $this->description,
         ];
     }
 }

@@ -4,7 +4,7 @@ namespace App\Http\Requests\Exchange;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreatePaymentExchangeRequest extends FormRequest
+class CreateExchangePaymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -28,6 +28,7 @@ class CreatePaymentExchangeRequest extends FormRequest
             'additionalExchangePaymentData.saleID' => 'required|exists:sales,id',
             'additionalExchangePaymentData.exchangeID' => 'required|exists:exchanges,id',
             'additionalExchangePaymentData.change' => 'required|numeric|min:0',
+            'additionalExchangePaymentData.description' => 'nullable|string|max:1000',
             'exchangePaymentData' => 'required|array',
             'exchangePaymentData.*.paymentType' => 'required|string|exists:types_receipt,name',
             'exchangePaymentData.*.value' => 'nullable|numeric|min:0',
@@ -42,9 +43,11 @@ class CreatePaymentExchangeRequest extends FormRequest
             'additionalExchangePaymentData.saleID.exists' => 'O ID da venda não existe',
             'additionalExchangePaymentData.exchangeID.required' => 'O ID do estorno é obrigatório',
             'additionalExchangePaymentData.exchangeID.exists' => 'O ID do estorno informada não existe',
-            'additionalExchangePaymentData.*.change.required' => 'O troco do pagamento deve ser informado',
-            'additionalExchangePaymentData.*.change.numeric' => 'O troco do pagamento deve estar em formato numérico',
-            'additionalExchangePaymentData.*.change.min' => 'O troco do pagamento deve ser no mínimo 0',
+            'additionalExchangePaymentData.change.required' => 'O troco do pagamento deve ser informado',
+            'additionalExchangePaymentData.change.numeric' => 'O troco do pagamento deve estar em formato numérico',
+            'additionalExchangePaymentData.change.min' => 'O troco do pagamento deve ser no mínimo 0',
+            'additionalExchangePaymentData.description.string' => 'A descrição deve ser uma string',
+            'additionalExchangePaymentData.description.max' => 'A descrição não pode ultrapassar mais de 1000 caracteres',
             'exchangePaymentData.required' => 'Insira os dados do pagamento do estorno',
             'exchangePaymentData.array' => 'Os dados do pagamento do estorno devem ser um array',
             'exchangePaymentData.*.paymentType.required' => 'O tipo de pagamento é obrigatório',

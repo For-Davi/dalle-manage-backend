@@ -28,7 +28,7 @@ class Returns extends Model
     }
     public function returnExchangeItems()
     {
-        return $this->hasMany(ExchangeReturnItem::class, 'return_id');
+        return $this->hasMany(ReturnExchangeItem::class, 'return_id');
     }
     public function returns()
     {

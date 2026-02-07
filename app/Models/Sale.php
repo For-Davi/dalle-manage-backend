@@ -32,12 +32,12 @@ class Sale extends Model
 
     public function delivery()
     {
-        return $this->hasOne(SaleDelivery::class, 'sale_id');
+        return $this->hasOne(SaleDelivery::class, 'sale_id')->where('exchange_id', null);
     }
 
     public function payment()
     {
-        return $this->hasMany(SalePaymentMethod::class, 'sale_id');
+        return $this->hasMany(SalePaymentMethod::class, 'sale_id')->where('exchange_id', null);
     }
 
     public function items()

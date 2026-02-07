@@ -19,4 +19,14 @@ class ExchangePaymentMethod extends Model
         'payment_method_id',
         'value',
     ];
+
+    public function type()
+    {
+        return $this->belongsTo(TypeReceipt::class, 'payment_method_id');
+    }
+
+    public function receipt()
+    {
+        return $this->belongsTo(Receipt::class);
+    }
 }

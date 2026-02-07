@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Exchange\CreateDifferencePaymentRequest;
 use App\Repositories\ExchangeRepository;
 use App\Services\ExchangeService;
 use App\Http\Resources\Exchange\ExchangeResource;
+use App\Http\Resources\Exchange\ShowExchangeResource;
 use App\Http\Requests\Exchange\IndexExchangeRequest;
-use App\Http\Requests\Exchange\CreatePaymentExchangeRequest;
+use App\Http\Requests\Exchange\CreateExchangePaymentRequest;
+use App\Http\Requests\Exchange\ShowExchangeRequest;
 use Illuminate\Support\Facades\DB;
 use App\Utils\ErrorLogger;
 
@@ -22,6 +25,8 @@ class ExchangeController
         try {
             $exchanges = $this->repository->getAllBySale($request->route('saleID'));
 
+            $exchanges->load(['paymentExchange', 'paymentDifference']);
+
             return response()->json(['exchanges' => ExchangeResource::collection($exchanges)], 200);
         } catch (\Exception $e) {
             ErrorLogger::log('Erro ao buscar estornos:', $e, $request);
@@ -30,23 +35,66 @@ class ExchangeController
         }
     }
 
-    public function createPayment(CreatePaymentExchangeRequest $request)
+    public function show(ShowExchangeRequest $request)
+    {
+        try {
+            $exchange = $this->repository->findById($request->route('exchangeID'));
+
+            $exchange->load(['paymentExchange', 'paymentDifference', 'additional']);
+
+            dd('dammmmmmmmmmmmmmmmn',$exchange);
+
+            return response()->json(['exchange' => new ShowExchangeResource($exchange)], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar estorno:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar estorno'], 500);
+        }
+    }
+
+    public function createExchangePayment(CreateExchangePaymentRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            $result = $this->service->createPayment($request);
+            $result = $this->service->createExchangePayment($request);
 
             if($result){
                 DB::commit();
 
-                $exchanges = $this->repository->getAllBySale($request->route('saleID'));
+                $exchanges = $this->repository->getAllBySale($request['additionalExchangePaymentData']['saleID']);
 
-                return response()->json(['exchanges' => ExchangeResource::collection($exchanges)], 200);
+                return response()->json(['exchanges' => ExchangeResource::collection($exchanges)], 201);
             }
 
         } catch (\Exception $e) {
+            DB::rollback();
+
             ErrorLogger::log('Erro ao criar pagamento do estorno:', $e, $request);
+
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function createDifferencePayment(CreateDifferencePaymentRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $result = $this->service->createDifferencePayment($request);
+
+            if($result){
+                DB::commit();
+
+                $exchanges = $this->repository->getAllBySale($request['additionalDifferencePaymentData']['saleID']);
+
+                return response()->json(['exchanges' => ExchangeResource::collection($exchanges)], 201);
+            }
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            ErrorLogger::log('Erro ao criar pagamento da diferença:', $e, $request);
 
             return response()->json(['message' => $e->getMessage()], 500);
         }

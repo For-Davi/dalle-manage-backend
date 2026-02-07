@@ -303,6 +303,8 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     });
     Route::prefix('exchange')->group(function () {
         Route::get('/{saleID}', [ExchangeController::class, 'index']);
-        Route::post('/', [ExchangeController::class, 'createPayment']);
+        Route::get('/exchange/{exchangeID}', [ExchangeController::class, 'show']);
+        Route::post('/', [ExchangeController::class, 'createExchangePayment']);
+        Route::post('/difference', [ExchangeController::class, 'createDifferencePayment']);
     });
 });

@@ -5,7 +5,7 @@ namespace App\Http\Resources\Exchange;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ExchangeResource extends JsonResource
+class ShowExchangeResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -21,11 +21,12 @@ class ExchangeResource extends JsonResource
             'exchange_value' => $this->exchange_value,
             'difference_value' => $this->difference_value,
             'created_by_name' => $this->created_by_name,
+            'created_by_email' => $this->created_by_email,
             'updated_by_name' => $this->updated_by_name,
+            'updated_by_email' => $this->updated_by_email,
             'created_at' => $this->created_at
                 ->timezone('America/Sao_Paulo')
                 ->format('d/m/Y H:i:s'),
-
             'exchange_payment_method' => $this->paymentExchange
                 ? $this->paymentExchange->map(function ($payment) {
                     return [

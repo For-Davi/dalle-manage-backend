@@ -13,7 +13,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('exchange_id');
             $table->foreign('exchange_id')->references('id')->on('exchanges');
-            $table->decimal('change', 10, 2)->nullable();
+            $table->decimal('change', 10, 2);
+            $table->decimal('fees', 10, 2);
             $table->text('description')->nullable();
             $table->timestamps();
         });
