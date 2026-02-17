@@ -13,7 +13,9 @@ class SaleHelper
 
         if ($existPaymentMethod) {
 
-            $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
+            if($existPaymentMethod->name !== 'CREDIT'){
+
+                $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
                 ->where('type_receipt_id', $existPaymentMethod->id)
                 ->first();
 
@@ -28,6 +30,9 @@ class SaleHelper
                 ]);
 
             }
+            
+            }
+
         } else {
             throw ValidationException::withMessages([
                 'paymentData.payment.*.paymentType' => ['O tipo de pagamento informado não existe.'],
@@ -57,7 +62,7 @@ class SaleHelper
 
         if (! $existSale) {
             throw ValidationException::withMessages([
-                 'message' => ['A venda informada não existe.'],
+                'message' => ['A venda informada não existe.'],
             ]);
         }
     }

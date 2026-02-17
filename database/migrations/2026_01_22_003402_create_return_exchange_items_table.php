@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('product_price', 10, 2);
             $table->string('product_color')->nullable();
             $table->string('product_color_name')->nullable();
-            $table->integer('quantity');   
+            $table->integer('quantity');
             $table->decimal('total', 10, 2);
             $table->timestamps();
         });

@@ -12,15 +12,15 @@ class CreateDifferencePaymentRequest extends FormRequest
     }
 
     protected function prepareForValidation()
-{
-    if ($this->has('exchangeData')) {
-        $this->merge([
-            'exchangeData' => collect($this->input('exchangeData', []))
-                ->map(fn ($e) => is_string($e) ? json_decode($e, true) : $e)
-                ->toArray(),
-        ]);
+    {
+        if ($this->has('exchangeData')) {
+            $this->merge([
+                'exchangeData' => collect($this->input('exchangeData', []))
+                    ->map(fn ($e) => is_string($e) ? json_decode($e, true) : $e)
+                    ->toArray(),
+            ]);
+        }
     }
-}
 
     public function rules(): array
     {

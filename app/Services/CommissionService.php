@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\DTO\Commission\CreateCommissionDTO;
-use App\Repositories\CommissionRepository;
 use App\Repositories\ClientRepository;
-use App\Repositories\ProductAdvancedRepository;
+use App\Repositories\CommissionRepository;
 use App\Repositories\EmployeeRepository;
+use App\Repositories\ProductAdvancedRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\SaleRepository;
 
@@ -25,19 +25,19 @@ class CommissionService
     {
         $seller = $this->employeeRepository->findById($sellerID);
 
-        //Retorna um array com os preço dos produtos ja calculados
+        // Retorna um array com os preço dos produtos ja calculados
         $calculatedValueProducts = $this->calculatedProducts($products);
 
-        //Retorna um array com o preço do produto calculado pela comissão
+        // Retorna um array com o preço do produto calculado pela comissão
         $commissionProducts = $this->calculateCommission($calculatedValueProducts);
 
-        //Caso a comissão seja feita por uma venda ele cria uma comissão com esse tipo Sale
+        // Caso a comissão seja feita por uma venda ele cria uma comissão com esse tipo Sale
         if ($type === 'sale') {
             return $this->createCommissionSale($commissionProducts, $saleID, $seller);
-        } 
+        }
 
-        //Caso a comissão seja feita por uma devolução ele cria uma comissão com esse tipo Return
-        if($type === 'return'){
+        // Caso a comissão seja feita por uma devolução ele cria uma comissão com esse tipo Return
+        if ($type === 'return') {
             return $this->createCommissionsReturn($commissionProducts, $saleID, $seller);
         }
     }
@@ -46,7 +46,7 @@ class CommissionService
     {
         $sale = $this->saleRepository->findById($saleID);
         $totalCommission = 0;
-    
+
         foreach ($commissionProducts as $item) {
             $commissionDTO = CreateCommissionDTO::fromRequest([
                 'sale_id' => $saleID,
@@ -74,7 +74,7 @@ class CommissionService
     private function createCommissionsReturn(array $commissionProducts, int $saleID, $seller)
     {
 
-    //Lógica da comissão
+        // Lógica da comissão
         foreach ($commissionProducts as $item) {
             $commissionDTO = CreateCommissionDTO::fromRequest([
                 'sale_id' => $saleID,
@@ -130,7 +130,7 @@ class CommissionService
                     'product_id' => $product->id,
                     'product_name' => $product->name,
                     'percentage' => $productAdvanced->commission_percentage,
-                    'commission_value' => round( ($productAdvanced->commission_percentage / 100) * $item['value'], 2 ),
+                    'commission_value' => round(($productAdvanced->commission_percentage / 100) * $item['value'], 2),
                 ];
             } else {
                 continue;
@@ -140,4 +140,3 @@ class CommissionService
         return $commissionProducts;
     }
 }
-

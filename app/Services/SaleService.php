@@ -66,13 +66,13 @@ class SaleService
             $this->createSaleDelivery($request->deliveryData, $sale->id);
         }
 
-        // Atualização dos dados do cliente
+        // Atualização dos dados do cliente e caso tenha sido utilizado crédito na forma de pagamento ele zera o crédito inteiro do cliente
         if ($request->clientData) {
-            $this->updateClientData($request->clientData);
+            $this->updateClientData($request->clientData, $request->paymentData);
         }
 
         // Cria comissão
-        if($sale->seller_id){
+        if ($sale->seller_id) {
             $this->commissionService->create($sale->id, $sale->seller_id, $request->saleData['products'], 'sale');
         }
 
@@ -105,6 +105,17 @@ class SaleService
         }
 
         return 'O cupom será enviado ao e-mail informado';
+    }
+
+    private function checkIfExistsCredit(array $payments)
+    {
+        foreach($payments['payment'] as $payment){
+            if($payment['paymentType'] === 'CREDIT'){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function createSalePaymentsMethods(array $payments, int $saleID, int $enterpriseID): void
@@ -247,10 +258,16 @@ class SaleService
         return $this->saleRepository->create($saleDTO->toArray());
     }
 
-    private function updateClientData($clientData)
+    private function updateClientData(array $clientData, array $payment)
     {
+        $hasCredit = $this->checkIfExistsCredit($payment);
+
+        if($hasCredit){
+            $this->clientRepository->update($clientData['id'], ['credits' => null]);
+        }
+
         $clientDTO = UpdateClientDTO::fromRequest($clientData);
 
-        $this->clientRepository->update($clientData['id'], $clientDTO->toArray());
+        return $this->clientRepository->update($clientData['id'], $clientDTO->toArray());
     }
 }

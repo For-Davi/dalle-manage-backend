@@ -4,16 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Return\CreateReturnRequest;
 use App\Http\Requests\Return\IndexReturnRequest;
-use App\Http\Resources\Return\ReturnResource;
 use App\Http\Requests\Return\ShowReturnRequest;
 use App\Http\Requests\Return\UpdateReturnRequest;
-use App\Http\Resources\Return\ShowReturnResource;
+use App\Http\Resources\Return\ReturnResource;
 use App\Http\Resources\Return\ShowLinkedReturnProductsResource;
+use App\Http\Resources\Return\ShowReturnResource;
 use App\Repositories\ReturnRepository;
 use App\Services\ReturnService;
 use App\Utils\ErrorLogger;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 
 class ReturnController
 {
@@ -59,7 +58,7 @@ class ReturnController
 
             $return->load(['returnExchangeItems']);
 
-            return response()->json(['return' => new ShowLinkedReturnProductsResource($return)], 200);
+            return response()->json(['products' => new ShowLinkedReturnProductsResource($return)], 200);
         } catch (\Exception $e) {
             ErrorLogger::log('Erro ao buscar devoluções:', $e, $request);
 

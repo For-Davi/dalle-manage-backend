@@ -33,7 +33,7 @@ class Client extends Model
         'number',
         'enterprise_id',
         'description',
-        'credits'
+        'credits',
     ];
 
     protected static function booted()

@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Exchange\CreateDifferencePaymentRequest;
-use App\Repositories\ExchangeRepository;
-use App\Services\ExchangeService;
+use App\Http\Requests\Exchange\CreateExchangePaymentRequest;
+use App\Http\Requests\Exchange\IndexExchangeRequest;
+use App\Http\Requests\Exchange\ShowExchangeRequest;
 use App\Http\Resources\Exchange\ExchangeResource;
 use App\Http\Resources\Exchange\ShowExchangeResource;
-use App\Http\Requests\Exchange\IndexExchangeRequest;
-use App\Http\Requests\Exchange\CreateExchangePaymentRequest;
-use App\Http\Requests\Exchange\ShowExchangeRequest;
-use Illuminate\Support\Facades\DB;
+use App\Repositories\ExchangeRepository;
+use App\Services\ExchangeService;
 use App\Utils\ErrorLogger;
+use Illuminate\Support\Facades\DB;
 
 class ExchangeController
 {
@@ -40,9 +40,7 @@ class ExchangeController
         try {
             $exchange = $this->repository->findById($request->route('exchangeID'));
 
-            $exchange->load(['paymentExchange', 'paymentDifference', 'additional']);
-
-            dd('dammmmmmmmmmmmmmmmn',$exchange);
+            $exchange->load(['paymentExchange', 'paymentDifference', 'additionalExchange']);
 
             return response()->json(['exchange' => new ShowExchangeResource($exchange)], 200);
         } catch (\Exception $e) {
@@ -59,7 +57,7 @@ class ExchangeController
 
             $result = $this->service->createExchangePayment($request);
 
-            if($result){
+            if ($result) {
                 DB::commit();
 
                 $exchanges = $this->repository->getAllBySale($request['additionalExchangePaymentData']['saleID']);
@@ -83,7 +81,7 @@ class ExchangeController
 
             $result = $this->service->createDifferencePayment($request);
 
-            if($result){
+            if ($result) {
                 DB::commit();
 
                 $exchanges = $this->repository->getAllBySale($request['additionalDifferencePaymentData']['saleID']);

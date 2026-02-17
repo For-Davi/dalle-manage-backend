@@ -11,7 +11,7 @@ class ReturnHelper
     {
         $return = DB::table('returns')->where('sale_id', $saleID)->where('id', $returnID)->first();
 
-        if(!$return){
+        if (! $return) {
             throw ValidationException::withMessages([
                 'id.exists' => ['A devolução informada não existe.'],
             ]);
@@ -22,13 +22,13 @@ class ReturnHelper
     {
         $dataStatus = null;
 
-        if($status === 'Ativa'){
+        if ($status === 'Ativa') {
             $dataStatus = 'active';
-        } else if($status === 'Cancelada') {
+        } elseif ($status === 'Cancelada') {
             $dataStatus = 'canceled';
         }
 
-        if(!$dataStatus){
+        if (! $dataStatus) {
             throw ValidationException::withMessages([
                 'status.in' => ['Informe um status válido.'],
             ]);

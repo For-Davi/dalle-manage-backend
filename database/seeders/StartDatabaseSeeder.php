@@ -159,6 +159,7 @@ class StartDatabaseSeeder extends Seeder
 
                 // ------------------------------------------------------------
                 $typesReceiptData = [
+                    'CREDIT',
                     'PIX',
                     'CREDIT_CARD',
                     'DEBT_CARD',
@@ -196,7 +197,7 @@ class StartDatabaseSeeder extends Seeder
                 ];
 
                 foreach ($typesReceipt as $typeReceipt) {
-                    foreach ($receiptIdentifiersByType[$typeReceipt->name] as $identifier) {
+                    foreach ($receiptIdentifiersByType[$typeReceipt->name] ?? [] as $identifier) {
                         Receipt::factory()->create([
                             'enterprise_id' => $enterprise->id,
                             'type_receipt_id' => $typeReceipt->id,

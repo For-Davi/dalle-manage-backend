@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
     public function up(): void
     {
         Schema::create('return_items', function (Blueprint $table) {
@@ -20,7 +19,7 @@ return new class extends Migration
             $table->decimal('product_price', 10, 2);
             $table->string('product_color')->nullable();
             $table->string('product_color_name')->nullable();
-            $table->integer('quantity');   
+            $table->integer('quantity');
             $table->decimal('total', 10, 2);
             $table->string('reason');
             $table->text('description')->nullable();

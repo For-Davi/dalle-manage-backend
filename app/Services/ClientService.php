@@ -28,10 +28,14 @@ class ClientService
         return $this->repository->update($request->id, $supplierDTO->toArray());
     }
 
-    public function updateCredit($saleID, $credit)
+    public function updateCredit($saleID = null, $credit, $clientID = null)
     {
-        $sale = $this->saleRepository->findById($saleID);
+        if(!$clientID){
+            $sale = $this->saleRepository->findById($saleID);
 
-        return $this->repository->update($sale->client_id, ['credits' => $credit]);
+            return $this->repository->update($sale->client_id, ['credits' => $credit]);
+        }
+
+        return $this->repository->update($clientID, ['credits' => $credit]);
     }
 }

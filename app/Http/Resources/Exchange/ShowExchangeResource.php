@@ -16,7 +16,6 @@ class ShowExchangeResource extends JsonResource
             'status' => match ($this->status) {
                 'active' => 'Ativo',
                 'cancelled' => 'Cancelado',
-                default => $this->status,
             },
             'exchange_value' => $this->exchange_value,
             'difference_value' => $this->difference_value,
@@ -24,6 +23,9 @@ class ShowExchangeResource extends JsonResource
             'created_by_email' => $this->created_by_email,
             'updated_by_name' => $this->updated_by_name,
             'updated_by_email' => $this->updated_by_email,
+            'change' => $this->additionalExchange->change ?? null,
+            'fees' => $this->additionalExchange->fees ?? null,
+            'description' => $this->additionalExchange->description ?? null,
             'created_at' => $this->created_at
                 ->timezone('America/Sao_Paulo')
                 ->format('d/m/Y H:i:s'),

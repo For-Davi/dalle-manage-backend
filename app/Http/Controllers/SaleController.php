@@ -42,7 +42,7 @@ class SaleController
         try {
             $sale = $this->repository->findById($request->route('saleID'));
 
-            $sale->load(['delivery', 'payment.type', 'items.product.color']);
+            $sale->load(['delivery', 'paymentWithCredit.type', 'items.product.color']);
 
             return response()->json(['sale' => new SaleResource($sale)], 200);
         } catch (\Exception $e) {

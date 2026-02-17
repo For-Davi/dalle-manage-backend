@@ -26,14 +26,17 @@ class Returns extends Model
     {
         return $this->hasMany(ReturnItem::class, 'return_id');
     }
+
     public function returnExchangeItems()
     {
         return $this->hasMany(ReturnExchangeItem::class, 'return_id');
     }
+
     public function returns()
     {
         return $this->hasOne(Returns::class, 'linked_return_id');
     }
+
     public function exchanges()
     {
         return $this->hasOne(Exchange::class, 'return_id');

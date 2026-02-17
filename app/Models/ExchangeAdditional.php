@@ -16,6 +16,6 @@ class ExchangeAdditional extends Model
         'exchange_id',
         'change',
         'fees',
-        'description'
+        'description',
     ];
 }

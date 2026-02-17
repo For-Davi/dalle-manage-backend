@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Commission\IndexCommissionRequest;
-use App\Repositories\CommissionRepository;
 use App\Http\Resources\Commission\CommissionResource;
+use App\Repositories\CommissionRepository;
 use App\Utils\ErrorLogger;
 
 class CommissionController

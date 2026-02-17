@@ -22,7 +22,7 @@ class CreateExchangeReturnItemDTO extends BaseDTO
     {
         return new self(
             return_id: $data['returnID'],
-            product_variant_id:  $data['productVariantID'],
+            product_variant_id: $data['productVariantID'],
             product_name: $data['productName'],
             product_sku: $data['productSKU'] ?? null,
             product_price: $data['productPrice'],

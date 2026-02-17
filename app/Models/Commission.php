@@ -29,6 +29,7 @@ class Commission extends Model
     {
         return $this->belongsTo(Sale::class);
     }
+
     public function seller()
     {
         return $this->belongsTo(Employee::class);

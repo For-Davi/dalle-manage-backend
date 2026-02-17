@@ -16,7 +16,7 @@ class UpdateReturnRequest extends FormRequest
         return [
             'id' => 'required|exists:returns,id',
             'saleID' => 'required|exists:sales,id',
-            'status' => 'required|string|in:Ativa,Cancelada'
+            'status' => 'required|string|in:Ativa,Cancelada',
         ];
     }
 

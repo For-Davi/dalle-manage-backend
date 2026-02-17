@@ -27,21 +27,21 @@ class Exchange extends Model
 
     public function paymentExchange()
     {
-       return $this->hasMany(ExchangePaymentMethod::class, 'exchange_id');
+        return $this->hasMany(ExchangePaymentMethod::class, 'exchange_id');
     }
 
     public function paymentDifference()
     {
-       return $this->hasMany(SalePaymentMethod::class, 'exchange_id');
+        return $this->hasMany(SalePaymentMethod::class, 'exchange_id');
     }
 
-    public function additional()
+    public function additionalExchange()
     {
-       return $this->hasOne(ExchangeAdditional::class, 'exchange_id');
+        return $this->hasOne(ExchangeAdditional::class, 'exchange_id');
     }
 
     public function delivery()
     {
-       return $this->hasOne(SaleDelivery::class, 'exchange_id');
+        return $this->hasOne(SaleDelivery::class, 'exchange_id');
     }
 }

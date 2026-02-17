@@ -2,8 +2,8 @@
 
 namespace App\DTO\Exchange;
 
-use Illuminate\Support\Facades\Auth;
 use App\DTO\BaseDTO;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateExchangeDTO extends BaseDTO
 {

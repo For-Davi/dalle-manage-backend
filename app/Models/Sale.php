@@ -37,7 +37,16 @@ class Sale extends Model
 
     public function payment()
     {
-        return $this->hasMany(SalePaymentMethod::class, 'sale_id')->where('exchange_id', null);
+        return $this->hasMany(SalePaymentMethod::class, 'sale_id')
+            ->whereNull('exchange_id')
+            ->whereHas('type', function ($query) {
+                $query->where('name', '!=', 'CREDIT');
+            });
+    }
+
+    public function paymentWithCredit()
+    {
+        return $this->hasMany(SalePaymentMethod::class, 'sale_id')->whereNull('exchange_id');
     }
 
     public function items()
@@ -59,6 +68,7 @@ class Sale extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
     public function commission()
     {
         return $this->hasMany(Commission::class, 'sale_id');

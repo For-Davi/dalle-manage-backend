@@ -14,6 +14,6 @@ class CommissionRepository extends BaseRepository
 
     public function getAllBySale($saleID)
     {
-         return $this->model->where('sale_id', $saleID)->get();
+        return $this->model->where('sale_id', $saleID)->get();
     }
 }

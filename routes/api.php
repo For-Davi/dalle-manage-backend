@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
+use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
+use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductMovementController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ScheduleController;
@@ -31,9 +34,6 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
-use App\Http\Controllers\CommissionController;
-use App\Http\Controllers\ReturnController;
-use App\Http\Controllers\ExchangeController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
@@ -216,6 +216,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('receipt')->group(function () {
         Route::prefix('type')->group(function () {
             Route::get('/', [TypeReceiptController::class, 'index']);
+            Route::get('/without-credit', [TypeReceiptController::class, 'indexWithoutCredit']);
             Route::post('/filter', [TypeReceiptController::class, 'filter']);
         });
 

@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -18,7 +17,7 @@ class ExchangePaymentHelper
                 ->where('type_receipt_id', $existPaymentMethod->id)
                 ->first();
 
-            if (!$isTypePaymentReceiptCorrect) {
+            if (! $isTypePaymentReceiptCorrect) {
                 throw ValidationException::withMessages([
                     'exchangeData.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
                 ]);

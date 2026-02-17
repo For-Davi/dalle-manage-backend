@@ -13,6 +13,7 @@ class TypesReceiptSeeder extends Seeder
         $enterprises = Enterprise::all();
 
         $types = [
+            'CREDIT',
             'PIX',
             'CREDIT_CARD',
             'DEBT_CARD',
