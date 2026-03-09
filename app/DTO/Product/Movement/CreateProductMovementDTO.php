@@ -23,9 +23,14 @@ class CreateProductMovementDTO extends BaseDTO
         public readonly int $created_by,
         public readonly int $enterprise_id,
         public readonly ?string $description,
+        public readonly string $status,
+        public readonly ?int $return_id,
+        public readonly ?int $sale_id,
+        public readonly string $created_by_name,
+        public readonly string $created_by_email,
     ) {}
 
-    public static function fromRequest($data): self
+    public static function fromRequest($data, $returnID = null, $saleID = null): self
     {
 
         $variant = DB::table('product_variants')->where('id', $data['variantID'])->first();
@@ -52,6 +57,11 @@ class CreateProductMovementDTO extends BaseDTO
             created_by: Auth::user()->id,
             enterprise_id: Auth::user()->enterprise_id,
             description: $data['description'],
+            status: 'active',
+            return_id: $returnID ?? null,
+            sale_id: $saleID ?? null,
+            created_by_name: Auth::user()->name,
+            created_by_email: Auth::user()->email,
         );
     }
 }

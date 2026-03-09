@@ -14,6 +14,8 @@ class SettingSystem extends Model
 
     protected $fillable = [
         'send_notification_stock_critical',
+        'has_credit_expired_data',
+        'quantity_credit_expire_days',
         'enterprise_id',
     ];
 

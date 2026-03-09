@@ -6,6 +6,7 @@ use App\DTO\Client\FilterClientDTO;
 use App\Http\Requests\Client\CreateClientRequest;
 use App\Http\Requests\Client\DeleteClientRequest;
 use App\Http\Requests\Client\FilterClientRequest;
+use App\Http\Requests\Client\GetClientCreditRequest;
 use App\Http\Requests\Client\ShowClientRequest;
 use App\Http\Requests\Client\UpdateClientRequest;
 use App\Repositories\ClientRepository;
@@ -125,6 +126,19 @@ class ClientController
             ErrorLogger::log('Erro ao excluir cliente:', $e, $request);
 
             return response()->json(['message' => 'Erro ao excluir cliente'], 500);
+        }
+    }
+
+    public function getCredit(GetClientCreditRequest $request)
+    {
+        try {
+            $credit = $this->service->getCredit($request);
+
+            return response()->json(['credit' => $credit], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar crédito do cliente:', $e, $request);
+
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 }

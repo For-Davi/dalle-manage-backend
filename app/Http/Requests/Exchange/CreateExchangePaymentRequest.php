@@ -26,6 +26,7 @@ class CreateExchangePaymentRequest extends FormRequest
     {
         return [
             'additionalExchangePaymentData.saleID' => 'required|exists:sales,id',
+            'additionalExchangePaymentData.returnID' => 'required|exists:returns,id',
             'additionalExchangePaymentData.exchangeID' => 'required|exists:exchanges,id',
             'additionalExchangePaymentData.change' => 'required|numeric|min:0',
             'additionalExchangePaymentData.description' => 'nullable|string|max:1000',
@@ -41,6 +42,8 @@ class CreateExchangePaymentRequest extends FormRequest
         return [
             'additionalExchangePaymentData.saleID.required' => 'O ID da venda é obrigatório',
             'additionalExchangePaymentData.saleID.exists' => 'O ID da venda não existe',
+            'additionalExchangePaymentData.returnID.required' => 'O ID da devolução é obrigatório',
+            'additionalExchangePaymentData.returnID.exists' => 'O ID da devolução não existe',
             'additionalExchangePaymentData.exchangeID.required' => 'O ID do estorno é obrigatório',
             'additionalExchangePaymentData.exchangeID.exists' => 'O ID do estorno informada não existe',
             'additionalExchangePaymentData.change.required' => 'O troco do pagamento deve ser informado',

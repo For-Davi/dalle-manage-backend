@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->decimal('credits', 10, 2)->nullable();
+            $table->decimal('credits', 10, 2)->default(0);
+            $table->timestamp('credit_expires_at')->nullable();
         });
     }
 
@@ -17,6 +18,7 @@ return new class extends Migration
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->dropColumn('credits');
+            $table->dropColumn('credit_expires_at');
         });
     }
 };

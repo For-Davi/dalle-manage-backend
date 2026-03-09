@@ -13,25 +13,21 @@ class SaleHelper
 
         if ($existPaymentMethod) {
 
-            if($existPaymentMethod->name !== 'CREDIT'){
-
+            if ($existPaymentMethod->name !== 'CREDIT') {
                 $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
-                ->where('type_receipt_id', $existPaymentMethod->id)
-                ->first();
+                    ->where('type_receipt_id', $existPaymentMethod->id)
+                    ->first();
 
-            if ($isTypePaymentReceiptCorrect) {
-
-                return $existPaymentMethod->id;
-
-            } else {
-
-                throw ValidationException::withMessages([
-                    'paymentData.payment.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
-                ]);
-
+                if ($isTypePaymentReceiptCorrect) {
+                    return $existPaymentMethod->id;
+                } else {
+                    throw ValidationException::withMessages([
+                        'paymentData.payment.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
+                    ]);
+                }
             }
-            
-            }
+
+            return $existPaymentMethod->id;
 
         } else {
             throw ValidationException::withMessages([

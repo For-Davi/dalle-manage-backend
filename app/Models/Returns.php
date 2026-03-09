@@ -20,6 +20,9 @@ class Returns extends Model
         'created_by_email',
         'updated_by_name',
         'updated_by_email',
+        'seller_id',
+        'seller_name',
+        'seller_email',
     ];
 
     public function items()

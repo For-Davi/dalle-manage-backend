@@ -9,7 +9,7 @@ class CreateSalePaymentDTO
         public readonly ?int $exchange_id,
         public readonly int $payment_method_id,
         public readonly ?int $receipt_id,
-        public readonly string $receipt_name,
+        public readonly ?string $receipt_name,
         public readonly ?int $installments,
         public readonly float $value,
     ) {}
@@ -21,7 +21,7 @@ class CreateSalePaymentDTO
             exchange_id: $data['exchangeID'] ?? null,
             payment_method_id: $data['paymentMethodID'],
             receipt_id: $data['receiptID'] ?? null,
-            receipt_name: $data['receiptName'],
+            receipt_name: $data['receiptName'] ?? null,
             installments: $data['installments'] ?? null,
             value: $data['value'],
         );

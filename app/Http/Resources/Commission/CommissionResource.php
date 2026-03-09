@@ -10,7 +10,7 @@ class CommissionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'created_at' => $this->created_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+            'created_at' => $this->created_at?->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
 
             'status' => match ($this->status) {
                 'active' => 'Ativa',
@@ -23,7 +23,7 @@ class CommissionResource extends JsonResource
                 'return' => 'Devolução',
                 default => $this->type,
             },
-
+            'return_id' => $this->return_id,
             'product_name' => $this->product_name,
             'seller_name' => $this->seller_name,
             'seller_email' => $this->seller_email,

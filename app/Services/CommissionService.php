@@ -8,6 +8,7 @@ use App\Repositories\CommissionRepository;
 use App\Repositories\EmployeeRepository;
 use App\Repositories\ProductAdvancedRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\ProductVariantRepository;
 use App\Repositories\SaleRepository;
 
 class CommissionService
@@ -19,30 +20,33 @@ class CommissionService
         protected EmployeeRepository $employeeRepository,
         protected CommissionRepository $commissionRepository,
         protected SaleRepository $saleRepository,
+        protected ProductVariantRepository $productVariantRepository,
     ) {}
 
-    public function create(int $saleID, int $sellerID, array $products, string $type)
+    public function create(int $saleID, int $sellerID, ?int $returnID, array $products)
     {
         $seller = $this->employeeRepository->findById($sellerID);
 
         // Retorna um array com os preço dos produtos ja calculados
-        $calculatedValueProducts = $this->calculatedProducts($products);
+        $calculatedValueProducts = $returnID ? $this->calculatedReturnExchangeProducts($products) : $this->calculatedSaleProducts($products);
 
         // Retorna um array com o preço do produto calculado pela comissão
         $commissionProducts = $this->calculateCommission($calculatedValueProducts);
 
-        // Caso a comissão seja feita por uma venda ele cria uma comissão com esse tipo Sale
-        if ($type === 'sale') {
-            return $this->createCommissionSale($commissionProducts, $saleID, $seller);
+        // Caso a comissão seja feita por uma venda ele cria uma comissão com o tipo Sale
+        if (! $returnID && count($commissionProducts) > 0) {
+            return $this->createCommission($commissionProducts, $saleID, null, $seller, 'sale');
         }
 
-        // Caso a comissão seja feita por uma devolução ele cria uma comissão com esse tipo Return
-        if ($type === 'return') {
-            return $this->createCommissionsReturn($commissionProducts, $saleID, $seller);
+        // Caso a comissão seja feita por uma devolução ele cria uma comissão com o tipo Return
+        if ($returnID && count($commissionProducts) > 0) {
+            return $this->createCommission($commissionProducts, $saleID, $returnID, $seller, 'return');
         }
+
+        return true;
     }
 
-    private function createCommissionSale(array $commissionProducts, int $saleID, $seller)
+    private function createCommission(array $commissionProducts, int $saleID, ?int $returnID, $seller, string $type)
     {
         $sale = $this->saleRepository->findById($saleID);
         $totalCommission = 0;
@@ -50,7 +54,8 @@ class CommissionService
         foreach ($commissionProducts as $item) {
             $commissionDTO = CreateCommissionDTO::fromRequest([
                 'sale_id' => $saleID,
-                'type' => 'sale',
+                'return_id' => $returnID,
+                'type' => $type,
                 'status' => 'active',
                 'product_id' => $item['product_id'],
                 'product_name' => $item['product_name'],
@@ -65,37 +70,16 @@ class CommissionService
 
             $this->commissionRepository->create($commissionDTO->toArray());
         }
-        $currentTotal = $sale->current_total - $totalCommission;
-        $this->saleRepository->update($saleID, ['current_total' => $currentTotal]);
 
-        return true;
-    }
-
-    private function createCommissionsReturn(array $commissionProducts, int $saleID, $seller)
-    {
-
-        // Lógica da comissão
-        foreach ($commissionProducts as $item) {
-            $commissionDTO = CreateCommissionDTO::fromRequest([
-                'sale_id' => $saleID,
-                'type' => 'sale',
-                'status' => 'active',
-                'product_id' => $item['product_id'],
-                'product_name' => $item['product_name'],
-                'seller_id' => $seller->id,
-                'seller_name' => $seller->name,
-                'seller_email' => $seller->email,
-                'percentage' => $item['percentage'],
-                'commission_value' => $item['commission_value'],
-            ]);
-
-            $this->commissionRepository->create($commissionDTO->toArray());
+        if ($type !== 'return') {
+            $currentTotal = $sale->current_total - $totalCommission;
+            $this->saleRepository->update($saleID, ['current_total' => $currentTotal]);
         }
 
         return true;
     }
 
-    private function calculatedProducts(array $products)
+    private function calculatedSaleProducts(array $products)
     {
         $calculatedValueProducts = [];
 
@@ -110,6 +94,26 @@ class CommissionService
                 $calculatedValueProducts[$productID] = [
                     'product_id' => $productID,
                     'value' => $value,
+                ];
+            }
+        }
+
+        return $calculatedValueProducts;
+    }
+
+    private function calculatedReturnExchangeProducts(array $products)
+    {
+        $calculatedValueProducts = [];
+
+        foreach ($products as $product) {
+            $productVariant = $this->productVariantRepository->findById($product['product_variant_id']);
+
+            if (isset($calculatedValueProducts[$productVariant->product_id])) {
+                $calculatedValueProducts[$productVariant->product_id]['value'] += $product['total'];
+            } else {
+                $calculatedValueProducts[$productVariant->product_id] = [
+                    'product_id' => $productVariant->product_id,
+                    'value' => $product['total'],
                 ];
             }
         }
@@ -132,8 +136,6 @@ class CommissionService
                     'percentage' => $productAdvanced->commission_percentage,
                     'commission_value' => round(($productAdvanced->commission_percentage / 100) * $item['value'], 2),
                 ];
-            } else {
-                continue;
             }
         }
 

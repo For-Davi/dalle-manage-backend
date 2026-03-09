@@ -34,6 +34,7 @@ class Client extends Model
         'enterprise_id',
         'description',
         'credits',
+        'credit_expires_at',
     ];
 
     protected static function booted()

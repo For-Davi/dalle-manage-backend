@@ -16,7 +16,7 @@ class CreateExchangeAdditionalDTO
         return new self(
             exchange_id: $data['exchangeID'],
             change: $data['change'],
-            fees: $data['fees'],
+            fees: (float) $data['fees'],
             description: $data['description'],
         );
     }

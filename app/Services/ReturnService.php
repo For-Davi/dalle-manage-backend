@@ -6,12 +6,17 @@ use App\DTO\Return\CreateReturnDTO;
 use App\DTO\Return\ExchangeReturnItem\CreateExchangeReturnItemDTO;
 use App\DTO\Return\ReturnItem\CreateReturnItemDTO;
 use App\DTO\Return\UpdateReturnDTO;
+use App\DTO\StockReentry\CreateStockReentryReturnItemsDTO;
 use App\Helpers\ProductVariantHelper;
 use App\Helpers\ReturnHelper;
 use App\Helpers\ReturnItemHelper;
+use App\Helpers\StockReentryReturnItemHelper;
+use App\Repositories\EmployeeRepository;
+use App\Repositories\ProductMovementRepository;
 use App\Repositories\ReturnExchangeItemRepository;
 use App\Repositories\ReturnItemRepository;
 use App\Repositories\ReturnRepository;
+use App\Repositories\StockReentryReturnItemRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +29,9 @@ class ReturnService
         protected ExchangeService $exchangeService,
         protected ClientService $clientService,
         protected ProductMovementService $productMovementService,
+        protected StockReentryReturnItemRepository $stockReentryReturnItemRepository,
+        protected ProductMovementRepository $productMovementRepository,
+        protected EmployeeRepository $employeeRepository,
     ) {}
 
     public function create($request)
@@ -31,26 +39,23 @@ class ReturnService
         $enterpriseID = Auth::user()->enterprise_id;
 
         // Verificação dos produtos da devolução
-        foreach ($request['returnData'] as $item) {
-            $this->validateReturnProducts($item['products'], $request['saleID']);
-        }
+        $this->validateReturnProducts($request['returnData'], $request['saleID']);
+
         // Verificação dos produtos da vinculação de devolução(caso tenha)
         if ($request['returnID']) {
-            foreach ($request['returnData'] as $item) {
-                $this->validateVinculateReturnProducts($item['products'], $request['returnID']);
-            }
+            $this->validateVinculateReturnProducts($request['returnData'], $request['returnID']);
         }
+
         // Verificação dos produtos da troca (caso tenha)
         $this->validateExchangeProducts($request['exchangeProducts']);
 
         // Criação da devolução
-        $returnDTO = CreateReturnDTO::fromRequest($request);
-        $return = $this->repository->create($returnDTO->toArray());
+        $return = $this->createReturn($request);
 
         // Criação dos itens da devolução
         $this->createReturnItems($request['returnData'], $return->id);
 
-        // Criação dos itens de troca (caso tenha)
+        // Criação dos itens de troca e a movimentação de produto (caso tenha)
         if ($request['exchangeProducts']) {
             $this->createExchangeReturnItems($request['exchangeProducts'], $return->id, $enterpriseID);
         }
@@ -61,14 +66,14 @@ class ReturnService
 
         // Gera crédito ao cliente
         if ($createCredit) {
-            return $this->clientService->updateCredit($request['saleID'], $request['exchangeData']['exchangeValue']);
+            return $this->clientService->updateCredit($request['saleID'], $request['exchangeData']['exchangeValue'], null, 'exchangeData');
         }
 
-        // Cria estorno/diferença, caso nao crie, é feita a retirada do estoque dos produtos trocados (caso tenha)
+        // Cria estorno/diferença (caso tenha)
         if ($createExchangeOrDifference) {
             return $this->exchangeService->create($request['exchangeData'], $request['saleID'], $return->id);
         } else {
-            return $this->updateProductMovement($return->id, $enterpriseID, 'trade', 'out');
+            return $this->createReturnExchangeProductMovement($return->id, $enterpriseID, 'trade', 'out');
         }
     }
 
@@ -85,17 +90,58 @@ class ReturnService
 
         $this->exchangeService->updateExchangeAfterReturn($request);
 
-        return $this->validateAndUpdateProductMovement($return, $enterpriseID);
+        $this->updateStockReentryReturnItem($return->id, $request->status, $enterpriseID);
+
+        return $this->updateReturnExchangeProductMovement($return->id, $request->status);
     }
 
-    private function validateAndUpdateProductMovement($return, int $enterpriseID)
+    private function createReturn($request)
     {
-        if ($return->status === 'active') {
-            return $this->updateProductMovement($return->id, $enterpriseID, 'trade', 'out');
+        $seller = null;
+
+        if ($request['sellerID']) {
+            $seller = $this->employeeRepository->findById($request['sellerID']);
         }
-        if ($return->status === 'canceled') {
-            return $this->updateProductMovement($return->id, $enterpriseID, 'return_canceled', 'in');
+        $returnDTO = CreateReturnDTO::fromRequest($request, $seller?->name, $seller?->email);
+
+        return $this->repository->create($returnDTO->toArray());
+    }
+
+    private function updateReturnExchangeProductMovement(int $returnID, string $status)
+    {
+        $hasReturnExchangeItems = $this->returnExchangeItemRepository->findByReturnId($returnID);
+
+        if ($hasReturnExchangeItems) {
+            $movementData = [
+                'status' => $status === 'Ativa' ? 'active' : 'canceled',
+                'updated_by' => Auth::user()->id,
+                'updated_by_name' => Auth::user()->name,
+                'updated_by_email' => Auth::user()->email,
+            ];
+
+            $this->productMovementRepository->updateTradeProductsMovement($returnID, $movementData, 'return');
         }
+
+        return true;
+    }
+
+    private function updateStockReentryReturnItem(int $returnID, string $status, int $enterpriseID)
+    {
+        $products = $this->returnItemRepository->findByReturnId($returnID);
+
+        $status = $status === 'Ativa' ? 'active' : 'canceled';
+
+        foreach ($products as $product) {
+            $this->stockReentryReturnItemRepository->updateStockReentry(
+                $product['product_variant_id'],
+                $product['quantity'],
+                $status,
+                $enterpriseID,
+                $returnID
+            );
+        }
+
+        return true;
     }
 
     private function validateExchangeProducts($products)
@@ -108,17 +154,21 @@ class ReturnService
         }
     }
 
-    private function validateReturnProducts($products, int $saleID)
+    private function validateReturnProducts($returnData, int $saleID)
     {
-        foreach ($products as $product) {
-            ReturnItemHelper::quantityExceedsQuantitySale($product['product_variant_id'], $saleID, $product['returnQuantity']);
+        foreach ($returnData as $item) {
+            foreach ($item['products'] as $product) {
+                ReturnItemHelper::quantityExceedsQuantitySale($product['product_variant_id'], $saleID, $product['returnQuantity']);
+            }
         }
     }
 
-    private function validateVinculateReturnProducts($products, int $returnID)
+    private function validateVinculateReturnProducts($returnData, int $returnID)
     {
-        foreach ($products as $product) {
-            ReturnItemHelper::quantityExceedsQuantityExchangeItem($product['product_variant_id'], $returnID, $product['returnQuantity']);
+        foreach ($returnData as $item) {
+            foreach ($item['products'] as $product) {
+                ReturnItemHelper::quantityExceedsQuantityExchangeItem($product['product_variant_id'], $returnID, $product['returnQuantity']);
+            }
         }
     }
 
@@ -141,13 +191,29 @@ class ReturnService
                 ]);
 
                 $this->returnItemRepository->create($returnItemDTO->toArray());
+                $this->createOrUpdateStockReentry($product);
             }
         }
 
         return true;
     }
 
-    private function createExchangeReturnItems(array $exchangeProducts, int $returnID, int $enterpriseID)
+    private function createOrUpdateStockReentry($product)
+    {
+
+        $existProduct = StockReentryReturnItemHelper::existsProduct($product['product_variant_id']);
+        if ($existProduct) {
+            $quantityTotal = $existProduct->quantity + $product['returnQuantity'];
+
+            return $this->stockReentryReturnItemRepository->update($existProduct->id, ['quantity' => $quantityTotal]);
+        } else {
+            $stockReentryDTO = CreateStockReentryReturnItemsDTO::fromRequest($product, Auth::user()->enterprise_id);
+
+            return $this->stockReentryReturnItemRepository->create($stockReentryDTO->toArray());
+        }
+    }
+
+    private function createExchangeReturnItems(array $exchangeProducts, int $returnID)
     {
         if ($exchangeProducts) {
             foreach ($exchangeProducts as $product) {
@@ -173,11 +239,9 @@ class ReturnService
         return true;
     }
 
-    private function updateProductMovement(int $returnID, int $enterpriseID, string $reason, string $type)
+    private function createReturnExchangeProductMovement(int $returnID, int $enterpriseID, string $reason, string $type)
     {
         $returnExchangeProducts = $this->returnExchangeItemRepository->findByReturnId($returnID);
-
-        \Log::info(['dados cehgaram']);
 
         if ($returnExchangeProducts->isNotEmpty()) {
             foreach ($returnExchangeProducts as $product) {

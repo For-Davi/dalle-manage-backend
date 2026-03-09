@@ -62,7 +62,7 @@ class ExchangeController
 
                 $exchanges = $this->repository->getAllBySale($request['additionalExchangePaymentData']['saleID']);
 
-                return response()->json(['exchanges' => ExchangeResource::collection($exchanges)], 201);
+                return response()->json(['exchanges' => ExchangeResource::collection($exchanges), 'message' => 'Pagamento do estorno realizado'], 201);
             }
 
         } catch (\Exception $e) {
@@ -86,7 +86,7 @@ class ExchangeController
 
                 $exchanges = $this->repository->getAllBySale($request['additionalDifferencePaymentData']['saleID']);
 
-                return response()->json(['exchanges' => ExchangeResource::collection($exchanges)], 201);
+                return response()->json(['exchanges' => ExchangeResource::collection($exchanges), 'message' => 'Pagamento da diferença realizado'], 201);
             }
 
         } catch (\Exception $e) {

@@ -17,6 +17,7 @@ class ReturnItem extends Model
         'product_variant_id',
         'product_name',
         'product_sku',
+        'product_code',
         'product_price',
         'product_color',
         'product_color_name',

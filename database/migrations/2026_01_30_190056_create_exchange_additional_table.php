@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('exchange_additional', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('exchange_id');
-            $table->foreign('exchange_id')->references('id')->on('exchanges');
+            $table->foreign('exchange_id')->on('exchanges')->references('id');
             $table->decimal('change', 10, 2);
             $table->decimal('fees', 10, 2);
             $table->text('description')->nullable();

@@ -8,6 +8,7 @@ class CreateCommissionDTO extends BaseDTO
 {
     public function __construct(
         public int $sale_id,
+        public ?int $return_id,
         public string $type,
         public string $status,
         public int $product_id,
@@ -23,6 +24,7 @@ class CreateCommissionDTO extends BaseDTO
     {
         return new self(
             sale_id: $data['sale_id'],
+            return_id: $data['return_id'],
             type: $data['type'],
             status: $data['status'],
             product_id: $data['product_id'],

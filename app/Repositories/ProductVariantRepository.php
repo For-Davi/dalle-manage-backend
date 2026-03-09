@@ -9,9 +9,20 @@ use Illuminate\Support\Facades\DB;
 
 class ProductVariantRepository extends BaseRepository
 {
-    public function __construct(ProductVariant $model)
+    protected StockReentryReturnItemRepository $stockReentryReturnItemRepository;
+
+    public function __construct(ProductVariant $model, StockReentryReturnItemRepository $stockReentryReturnItemRepository)
     {
         parent::__construct($model);
+
+        $this->stockReentryReturnItemRepository = $stockReentryReturnItemRepository;
+    }
+
+    public function findStockReentryReturnItemById($id)
+    {
+        $query = $this->stockReentryReturnItemRepository->getAllByEnterprise();
+
+        return $query->where('product_variant_id', $id)->first();
     }
 
     public function getAllBySearch($value, $relations = null)
@@ -84,6 +95,37 @@ class ProductVariantRepository extends BaseRepository
                 'stock_quantity' => $newStock,
             ]);
         }
+    }
+
+    public function changeStockReentryReturnItemQuantity(int $variantID, string $type, int $quantity)
+    {
+        $returnItem = $this->findStockReentryReturnItemById($variantID);
+        $variant = $this->findById($variantID);
+        if ($returnItem && $variant) {
+            $currentQuantity = (int) $returnItem->quantity;
+            $currentStock = (int) $variant->stock_quantity;
+
+            $newQuantity = $currentQuantity - $quantity;
+
+            if ($type === 'in') {
+                $newStock = $currentStock + $quantity;
+
+                $variant->update([
+                    'stock_quantity' => $newStock,
+                ]);
+            }
+
+            if ($newQuantity === 0) {
+                return $returnItem->delete();
+            }
+
+            return $this->stockReentryReturnItemRepository->updateStockReentryReturnItem(
+                $variantID, [
+                    'quantity' => $newQuantity,
+                ]);
+        }
+
+        return null;
     }
 
     public function delete($id)

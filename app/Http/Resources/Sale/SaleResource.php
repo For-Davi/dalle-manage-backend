@@ -17,7 +17,7 @@ class SaleResource extends JsonResource
             'starting_total' => $this->starting_total,
             'current_total' => $this->current_total,
             'change' => $this->change,
-            'date' => $this->date,
+            'date' => $this->date->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
             'sale_itens' => $this->items->map(function ($item) {
                 return [
                     'product_name' => $item->product_name,

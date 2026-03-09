@@ -145,6 +145,10 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
             Route::delete('/{variantID}', [ProductController::class, 'destroyVariant']);
         });
 
+        Route::prefix('stock-reentry')->group(function () {
+            Route::post('/movement', [ProductMovementController::class, 'storeStockReentry']);
+        });
+
         Route::get('/', [ProductController::class, 'index']);
         Route::get('/{productID}', [ProductController::class, 'show']);
         Route::post('/export', [ProductController::class, 'export']);
@@ -176,6 +180,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/filter', [ClientController::class, 'filter']);
         Route::put('/', [ClientController::class, 'update']);
         Route::delete('/{clientID}', [ClientController::class, 'destroy']);
+        Route::post('/credit', [ClientController::class, 'getCredit']);
     });
 
     Route::prefix('tag')->group(function () {
@@ -272,6 +277,9 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/', [SaleController::class, 'index']);
         Route::get('/{saleID}', [SaleController::class, 'show']);
         Route::post('/', [SaleController::class, 'store']);
+        Route::post('/cancel', [SaleController::class, 'update']);
+        Route::delete('/{saleID}', [SaleController::class, 'destroy']);
+        Route::get('/cancel/{saleID}', [SaleController::class, 'showCancellation']);
         Route::get('/product/{saleID}', [SaleController::class, 'showProducts']);
         Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);
@@ -299,8 +307,10 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/{saleID}', [ReturnController::class, 'index']);
         Route::get('/return/{returnID}', [ReturnController::class, 'show']);
         Route::get('/linked/{returnID}', [ReturnController::class, 'showLinked']);
+        Route::get('/stock/reentry', [ReturnController::class, 'showStockReentry']);
         Route::post('/', [ReturnController::class, 'store']);
         Route::put('/', [ReturnController::class, 'update']);
+        Route::delete('/{saleID}/{returnID}', [ReturnController::class, 'destroy']);
     });
     Route::prefix('exchange')->group(function () {
         Route::get('/{saleID}', [ExchangeController::class, 'index']);

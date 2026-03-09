@@ -14,6 +14,7 @@ class Commission extends Model
 
     protected $fillable = [
         'sale_id',
+        'return_id',
         'type',
         'status',
         'product_id',

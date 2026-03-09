@@ -15,9 +15,12 @@ class CreateReturnDTO extends BaseDTO
         public string $created_by_email,
         public ?string $updated_by_name,
         public ?string $updated_by_email,
+        public ?int $seller_id,
+        public ?string $seller_name,
+        public ?string $seller_email,
     ) {}
 
-    public static function fromRequest($data): self
+    public static function fromRequest($data, $sellerName = null, $sellerEmail = null): self
     {
         return new self(
             sale_id: $data['saleID'],
@@ -27,6 +30,9 @@ class CreateReturnDTO extends BaseDTO
             created_by_email: Auth::user()->email,
             updated_by_name: null,
             updated_by_email: null,
+            seller_id: $data['sellerID'] ?? null,
+            seller_name: $sellerName ?? null,
+            seller_email: $sellerEmail ?? null,
         );
     }
 }

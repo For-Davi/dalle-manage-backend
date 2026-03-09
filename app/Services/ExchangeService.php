@@ -8,14 +8,16 @@ use App\DTO\Exchange\ExchangePayment\CreateExchangePaymentMethodDTO;
 use App\DTO\Exchange\UpdateExchangeDTO;
 use App\DTO\Sale\SaleDelivery\CreateSaleDeliveriesDTO;
 use App\DTO\Sale\SalePayment\CreateSalePaymentDTO;
+use App\Helpers\ClientHelper;
 use App\Helpers\ExchangePaymentHelper;
 use App\Helpers\SaleHelper;
 use App\Repositories\ClientRepository;
-use App\Repositories\ExchangeChangeRepository;
+use App\Repositories\ExchangeAdditionalRepository;
 use App\Repositories\ExchangePaymentMethodRepository;
 use App\Repositories\ExchangeRepository;
 use App\Repositories\ReceiptRepository;
 use App\Repositories\ReturnExchangeItemRepository;
+use App\Repositories\ReturnRepository;
 use App\Repositories\SaleDeliveryRepository;
 use App\Repositories\SalePaymentsMethodRepository;
 use App\Repositories\SaleRepository;
@@ -29,12 +31,14 @@ class ExchangeService
         protected SaleRepository $saleRepository,
         protected ClientRepository $clientRepository,
         protected ExchangePaymentMethodRepository $exchangePaymentRepository,
-        protected ExchangeChangeRepository $exchangeChangeRepository,
+        protected ExchangeAdditionalRepository $exchangeAdditionalRepository,
         protected ReceiptRepository $receiptRepository,
         protected SalePaymentsMethodRepository $salePaymentsRepository,
         protected SaleDeliveryRepository $saleDeliveryRepository,
         protected ReturnExchangeItemRepository $returnExchangeItemRepository,
         protected ProductMovementService $productMovementService,
+        protected CommissionService $commissionService,
+        protected ReturnRepository $returnRepository,
     ) {}
 
     public function create(array $exchangeData, int $saleID, int $returnID)
@@ -44,19 +48,11 @@ class ExchangeService
         $sale = $this->saleRepository->findById($saleID);
 
         $exchangeDTO = CreateExchangeDTO::fromRequest([
-            'saleID' => $saleID,
+            'saleID' => $sale->id,
             'returnID' => $returnID,
             'exchangeValue' => $exchangeData['exchangeValue'],
             'differenceValue' => $exchangeData['differenceValue'],
         ]);
-
-        if ($exchangeData['exchangeValue'] > 0) {
-            $currentTotal = $sale->current_total - $exchangeData['exchangeValue'];
-        } else {
-            $currentTotal = $sale->current_total + $exchangeData['differenceValue'];
-        }
-
-        $this->saleRepository->update($saleID, ['current_total' => $currentTotal]);
 
         return $this->repository->create($exchangeDTO->toArray());
     }
@@ -67,7 +63,14 @@ class ExchangeService
 
         $this->saveExchangePaymentData($request['exchangePaymentData'], $request['additionalExchangePaymentData']['exchangeID'], $enterpriseID);
 
-        return $this->createAdditionalData($request['additionalExchangePaymentData']);
+        $this->updateProductMovement($request['additionalExchangePaymentData']['exchangeID'], $enterpriseID);
+
+        $this->createAdditionalData($request['additionalExchangePaymentData']);
+
+        return $this->updateSale(
+            $request['additionalDifferencePaymentData']['exchangeID'],
+            $request['additionalDifferencePaymentData']['saleID'],
+        );
     }
 
     public function createDifferencePayment($request)
@@ -90,7 +93,28 @@ class ExchangeService
             );
         }
 
-        return $this->updateProductMovement($request['additionalDifferencePaymentData']['exchangeID'], $enterpriseID);
+        $this->updateProductMovement($request['additionalDifferencePaymentData']['exchangeID'], $enterpriseID);
+
+        $sale = $this->saleRepository->findById($request['additionalDifferencePaymentData']['saleID']);
+        $return = $this->returnRepository->findById($request['additionalDifferencePaymentData']['returnID']);
+
+        if ($return->seller_id) {
+            $returnExchangeItems = $this->returnExchangeItemRepository->findByReturnId($request['additionalDifferencePaymentData']['returnID']);
+
+            return $this->commissionService->create($sale->id, $return->seller_id, $return->id, $returnExchangeItems->toArray());
+        }
+
+        $creditValue = $this->checkIfExistsCredit($request['differencePaymentData']);
+
+        $this->updateSale(
+            $request['additionalDifferencePaymentData']['exchangeID'],
+            $request['additionalDifferencePaymentData']['saleID'],
+            (float) $request['additionalDifferencePaymentData']['fees'],
+            (float) $request['additionalDifferencePaymentData']['change'],
+            (float) $creditValue
+        );
+
+        return true;
     }
 
     public function updateExchangeAfterReturn($request)
@@ -98,40 +122,89 @@ class ExchangeService
 
         $sale = $this->saleRepository->findById($request['saleID']);
         $exchange = $this->repository->findByReturnId($request['id']);
+        $exchangeAdditional = $this->exchangeAdditionalRepository->findByExchangeId($exchange->id);
 
         if ($exchange) {
             $exchangeDTO = UpdateExchangeDTO::fromRequest($request);
             $updatedExchange = $this->repository->update($exchange->id, $exchangeDTO->toArray());
-            $currentTotal = $this->getCurrentTotal($updatedExchange, $sale);
+            $currentTotal = $this->getCurrentTotal($updatedExchange, $sale, $exchangeAdditional);
 
             return $this->saleRepository->update($sale->id, ['current_total' => $currentTotal]);
         } else {
-            return $this->updateClientCredit($sale);
+            return $this->updateClientCredit($sale->client_id);
         }
+    }
+
+    private function updateClientCredit(int $clientID, ?float $creditValue = null)
+    {
+        if ($clientID) {
+            ClientHelper::existsClient($clientID, 'saleID');
+            if ($creditValue) {
+                ClientHelper::validateCredit($clientID, $creditValue, 'saleID');
+            }
+
+            return $this->clientRepository->update($clientID, ['credits' => 0, 'credit_expires_at' => null]);
+        }
+
+        return true;
+    }
+
+    private function checkIfExistsCredit(array $payments)
+    {
+        foreach ($payments['payment'] as $payment) {
+            if ($payment['paymentType'] === 'CREDIT') {
+                return $payment['value'];
+            }
+        }
+
+        return null;
+    }
+
+    private function updateSale(int $exchangeID, int $saleID, ?float $fees = null, ?float $change = null, ?float $creditValue = null)
+    {
+        $exchange = $this->repository->findById($exchangeID);
+
+        $sale = $this->saleRepository->findById($saleID);
+
+        $currentTotal = $exchange->exchange_value > 0 ? $sale->current_total - $exchange->exchange_value : $sale->current_total + $exchange->difference_value;
+        if ($change) {
+            $currentTotal -= $change;
+        }
+        if ($fees) {
+            $currentTotal += $fees;
+        }
+        if ($creditValue) {
+            $currentTotal -= $creditValue;
+        }
+
+        return $this->saleRepository->update($sale->id, ['current_total' => $currentTotal]);
     }
 
     private function updateProductMovement(int $exchangeID, int $enterpriseID)
     {
         $exchange = $this->repository->findById($exchangeID);
 
-        $returnExchangeProducts = $this->returnExchangeItemRepository->findByReturnId($exchange->id);
+        $returnExchangeProducts = $this->returnExchangeItemRepository->findByReturnId($exchange->return_id);
 
-        foreach ($returnExchangeProducts as $product) {
-            $movementData = [
-                'reason' => 'sale',
-                'type' => 'out',
-                'documentNumber' => null,
-                'lotNumber' => null,
-                'quantity' => $product->quantity,
-                'unitCost' => null,
-                'totalCost' => null,
-                'variantID' => $product->product_variant_id,
-                'supplierID' => null,
-                'description' => null,
-                'enterprise_id' => $enterpriseID,
-            ];
+        if ($returnExchangeProducts) {
+            foreach ($returnExchangeProducts as $product) {
+                $movementData = [
+                    'reason' => 'sale',
+                    'type' => 'out',
+                    'documentNumber' => null,
+                    'lotNumber' => null,
+                    'quantity' => $product->quantity,
+                    'unitCost' => null,
+                    'totalCost' => null,
+                    'variantID' => $product->product_variant_id,
+                    'supplierID' => null,
+                    'description' => null,
+                    'enterprise_id' => $enterpriseID,
+                    'returnID' => $exchange->return_id,
+                ];
 
-            $this->productMovementService->create(new Request($movementData));
+                $this->productMovementService->create(new Request($movementData));
+            }
         }
 
         return true;
@@ -145,10 +218,10 @@ class ExchangeService
 
     private function createAdditionalData($additionalData)
     {
-        if ($additionalData['change'] > 0 || $additionalData['description']) {
+        if ($additionalData['change'] > 0 || (float) $additionalData['fees'] > 0 || $additionalData['description']) {
             $changeDTO = CreateExchangeAdditionalDTO::fromRequest($additionalData);
 
-            return $this->exchangeChangeRepository->create($changeDTO->toArray());
+            $this->exchangeAdditionalRepository->create($changeDTO->toArray());
         }
 
         return true;
@@ -193,14 +266,16 @@ class ExchangeService
             $installments = $isValidInstallment ? $installment['value'] : null;
             $amount = $isValidInstallment ? $installment['amount'] : $payment['value'];
 
-            $receipt = $this->receiptRepository->findById($payment['receiptID']);
+            if ($payment['paymentType'] !== 'CREDIT') {
+                $receipt = $this->receiptRepository->findById($payment['receiptID']);
+            }
 
             $salePaymentDTO = CreateSalePaymentDTO::fromRequest([
                 'saleID' => $saleID,
                 'exchangeID' => $exchangeID,
                 'paymentMethodID' => $paymentMethodID,
                 'receiptID' => $payment['receiptID'],
-                'receiptName' => $receipt->identifier,
+                'receiptName' => $receipt->identifier ?? null,
                 'installments' => $installments,
                 'value' => $amount,
             ]);
@@ -211,38 +286,19 @@ class ExchangeService
         return true;
     }
 
-    private function validatePaymentData($exchangeData, int $enterpriseID)
-    {
-        foreach ($exchangeData as $exchange) {
-            ExchangePaymentHelper::existsReceipt($exchange['receiptID']);
-            ExchangePaymentHelper::findPaymentMethodID($exchange['paymentType'], $enterpriseID, $exchange['receiptID']);
-        }
-    }
-
-    private function updateClientCredit($sale)
-    {
-        if ($sale->client_id) {
-            $client = $this->clientRepository->findById($sale->client_id);
-
-            return $this->clientRepository->update($client->id, ['credit' => null]);
-        }
-
-        return true;
-    }
-
-    private function getCurrentTotal($exchange, $sale)
+    private function getCurrentTotal($exchange, $sale, $additionalExchange)
     {
         if ($exchange->status === 'active' && $exchange->exchange_value > 0) {
             return $sale->current_total - $exchange->exchange_value;
         }
         if ($exchange->status === 'active' && $exchange->difference_value > 0) {
-            return $sale->current_total + $exchange->difference_value;
+            return $sale->current_total + ($exchange->difference_value + $additionalExchange->fees - $additionalExchange->change);
         }
         if ($exchange->status === 'canceled' && $exchange->exchange_value > 0) {
             return $sale->current_total + $exchange->exchange_value;
         }
         if ($exchange->status === 'canceled' && $exchange->difference_value > 0) {
-            return $sale->current_total - $exchange->difference_value;
+            return $sale->current_total - ($exchange->difference_value + $additionalExchange->fees - $additionalExchange->change);
         }
     }
 }

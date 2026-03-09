@@ -88,4 +88,64 @@ class SaleRepository extends BaseRepository
             'products' => $products,
         ];
     }
+
+    public function deleteSale($id)
+    {
+        $sale = $this->findById($id);
+
+        if ($sale) {
+            DB::table('sale_itens')->where('sale_id', $id)->delete();
+            DB::table('sale_deliveries')->where('sale_id', $id)->delete();
+            DB::table('sale_payments_methods')->where('sale_id', $id)->delete();
+            DB::table('sale_cancellations')->where('sale_id', $id)->delete();
+            DB::table('commissions')->where('sale_id', $id)->delete();
+
+            $returns = DB::table('returns')->where('sale_id', $id)->get();
+
+            foreach ($returns as $return) {
+
+                $exchanges = DB::table('exchanges')
+                    ->where('return_id', $return->id)
+                    ->get();
+
+                foreach ($exchanges as $exchange) {
+                    DB::table('exchange_payments_methods')
+                        ->where('exchange_id', $exchange->id)
+                        ->delete();
+
+                    DB::table('exchange_additional')
+                        ->where('exchange_id', $exchange->id)
+                        ->delete();
+
+                    DB::table('exchanges')
+                        ->where('id', $exchange->id)
+                        ->delete();
+                }
+
+                DB::table('return_items')
+                    ->where('return_id', $return->id)
+                    ->delete();
+
+                DB::table('return_exchange_items')
+                    ->where('return_id', $return->id)
+                    ->delete();
+
+                DB::table('product_movements')
+                    ->where('return_id', $return->id)
+                    ->delete();
+
+                DB::table('returns')
+                    ->where('id', $return->id)
+                    ->delete();
+            }
+
+            DB::table('product_movements')
+                ->where('sale_id', $id)
+                ->delete();
+
+            return $sale->delete();
+        }
+
+        return null;
+    }
 }

@@ -14,6 +14,6 @@ class ReturnExchangeItemRepository extends BaseRepository
 
     public function findByReturnId($id)
     {
-        return $this->model->where('return_id', $id)->get();
+        return $this->getAllByEnterprise(filters: ['return_id' => $id]);
     }
 }

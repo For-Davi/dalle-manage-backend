@@ -1,11 +1,11 @@
 services:
     laravel.test:
         build:
-            context: './vendor/laravel/sail/runtimes/8.4'
+            context: ./vendor/laravel/sail/runtimes/8.4
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.4/app'
+        image: sail-8.4/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -30,37 +30,33 @@ services:
             - mysql_manage
             - smtp
             - prometheus
-
     prometheus:
         image: prom/prometheus
         container_name: prometheus
         ports:
             - '9090:9090'
         volumes:
-            - ./prometheus.yml:/etc/prometheus/prometheus.yml
-        command: --config.file=/etc/prometheus/prometheus.yml
+            - './prometheus.yml:/etc/prometheus/prometheus.yml'
+        command: '--config.file=/etc/prometheus/prometheus.yml'
         networks:
             - manage-network
-
     grafana:
         image: grafana/grafana
         container_name: grafana
         ports:
             - '3000:3000'
         volumes:
-            - grafana_data:/var/lib/grafana
+            - 'grafana_data:/var/lib/grafana'
         networks:
             - manage-network
         depends_on:
             - prometheus
-
     mysql_manage:
         image: 'mysql/mysql-server:8.0'
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
             MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            # MYSQL_ROOT_HOST: '%'
             MYSQL_DATABASE: '${DB_DATABASE}'
             MYSQL_USER: '${DB_USERNAME}'
             MYSQL_PASSWORD: '${DB_PASSWORD}'
@@ -77,25 +73,22 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
-
     smtp:
         platform: linux/x86_64
         image: mailhog/mailhog
         container_name: docker-workspace-smtp
         logging:
-            driver: 'none'
+            driver: none
         ports:
-            - "1025:1025"
-            - "8025:8025"
+            - '1025:1025'
+            - '8025:8025'
         networks:
             - manage-network
-
 networks:
     manage-network:
         driver: bridge
         external: true
-
 volumes:
     sail-mysql:
         driver: local
-    grafana_data:
+    grafana_data: null

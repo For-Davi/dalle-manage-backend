@@ -11,4 +11,14 @@ class ReturnItemRepository extends BaseRepository
     {
         parent::__construct($model);
     }
+
+    public function findByReturnId($id)
+    {
+        return $this->model->where('return_id', $id)->get();
+    }
+
+    public function findByReturnAndProductVariantId($returnID, $productVariantID)
+    {
+        return $this->model->where('return_id', $returnID)->where('product_variant_id', $productVariantID)->first();
+    }
 }
