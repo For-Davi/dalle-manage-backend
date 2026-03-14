@@ -27,6 +27,14 @@ class ProductMovement extends Model
         'created_by',
         'enterprise_id',
         'description',
+        'status',
+        'return_id',
+        'sale_id',
+        'created_by_name',
+        'created_by_email',
+        'updated_by',
+        'updated_by_name',
+        'updated_by_email',
     ];
 
     protected static function booted()

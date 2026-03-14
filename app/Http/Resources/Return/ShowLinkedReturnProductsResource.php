@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Http\Resources\Return;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ShowLinkedReturnProductsResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return $this->returnExchangeItems->map(function ($exchangeItem) {
+            return [
+                'product_variant_id' => $exchangeItem->product_variant_id,
+                'product_name' => $exchangeItem->product_name,
+                'product_sku' => $exchangeItem->product_sku,
+                'product_price' => $exchangeItem->product_price,
+                'quantity' => $exchangeItem->quantity,
+                'total' => $exchangeItem->total,
+                'color' => $exchangeItem->product_color,
+                'color_name' => $exchangeItem->product_color_name,
+            ];
+        })->values()->toArray();
+    }
+}

@@ -13,21 +13,22 @@ class SaleHelper
 
         if ($existPaymentMethod) {
 
-            $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
-                ->where('type_receipt_id', $existPaymentMethod->id)
-                ->first();
+            if ($existPaymentMethod->name !== 'CREDIT') {
+                $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
+                    ->where('type_receipt_id', $existPaymentMethod->id)
+                    ->first();
 
-            if ($isTypePaymentReceiptCorrect) {
-
-                return $existPaymentMethod->id;
-
-            } else {
-
-                throw ValidationException::withMessages([
-                    'paymentData.payment.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
-                ]);
-
+                if ($isTypePaymentReceiptCorrect) {
+                    return $existPaymentMethod->id;
+                } else {
+                    throw ValidationException::withMessages([
+                        'paymentData.payment.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
+                    ]);
+                }
             }
+
+            return $existPaymentMethod->id;
+
         } else {
             throw ValidationException::withMessages([
                 'paymentData.payment.*.paymentType' => ['O tipo de pagamento informado não existe.'],
@@ -47,6 +48,17 @@ class SaleHelper
         if ($existReceipt && $existReceipt->active === 0) {
             throw ValidationException::withMessages([
                 'paymentData.payment.*.receiptID' => ['O tipo de recebimento informado não está ativo.'],
+            ]);
+        }
+    }
+
+    public static function existsSale($saleID, $enterpriseID)
+    {
+        $existSale = DB::table('sales')->where('id', $saleID)->where('enterprise_id', $enterpriseID)->first();
+
+        if (! $existSale) {
+            throw ValidationException::withMessages([
+                'message' => ['A venda informada não existe.'],
             ]);
         }
     }

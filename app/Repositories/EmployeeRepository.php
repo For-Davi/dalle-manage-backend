@@ -63,8 +63,12 @@ class EmployeeRepository extends BaseRepository
 
         if ($employee) {
 
-            $employee->delete();
             DB::table('users')->where('id', $employee->user_id)->delete();
+            DB::table('sales')->where('seller_id', $id)->update(['seller_id' => null]);
+            DB::table('returns')->where('seller_id', $id)->update(['seller_id' => null]);
+            DB::table('commissions')->where('seller_id', $id)->update(['seller_id' => null]);
+
+            $employee->delete();
 
             return true;
         }

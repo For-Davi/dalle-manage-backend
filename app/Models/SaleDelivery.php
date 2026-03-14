@@ -13,6 +13,7 @@ class SaleDelivery extends Model
 
     protected $fillable = [
         'sale_id',
+        'exchange_id',
         'freight_value',
         'cep',
         'state',

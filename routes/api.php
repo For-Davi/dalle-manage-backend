@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
+use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
+use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductMovementController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ScheduleController;
@@ -143,6 +146,10 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
             Route::delete('/{variantID}', [ProductController::class, 'destroyVariant']);
         });
 
+        Route::prefix('stock-reentry')->group(function () {
+            Route::post('/movement', [ProductMovementController::class, 'storeStockReentry']);
+        });
+
         Route::get('/', [ProductController::class, 'index']);
         Route::get('/{productID}', [ProductController::class, 'show']);
         Route::post('/export', [ProductController::class, 'export']);
@@ -174,6 +181,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/filter', [ClientController::class, 'filter']);
         Route::put('/', [ClientController::class, 'update']);
         Route::delete('/{clientID}', [ClientController::class, 'destroy']);
+        Route::post('/credit', [ClientController::class, 'getCredit']);
     });
 
     Route::prefix('tag')->group(function () {
@@ -214,6 +222,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('receipt')->group(function () {
         Route::prefix('type')->group(function () {
             Route::get('/', [TypeReceiptController::class, 'index']);
+            Route::get('/without-credit', [TypeReceiptController::class, 'indexWithoutCredit']);
             Route::post('/filter', [TypeReceiptController::class, 'filter']);
         });
 
@@ -266,8 +275,15 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     });
 
     Route::prefix('sale')->group(function () {
+        Route::get('/', [SaleController::class, 'index']);
+        Route::get('/{saleID}', [SaleController::class, 'show']);
         Route::post('/', [SaleController::class, 'store']);
-        Route::get('/{saleID}', [SaleController::class, 'showCouponInfos']);
+        Route::post('/cancel', [SaleController::class, 'update']);
+        Route::post('/filter', [SaleController::class, 'filter']);
+        Route::delete('/{saleID}', [SaleController::class, 'destroy']);
+        Route::get('/cancel/{saleID}', [SaleController::class, 'showCancellation']);
+        Route::get('/product/{saleID}', [SaleController::class, 'showProducts']);
+        Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
     });
@@ -284,5 +300,26 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::post('/filter', [DashboardController::class, 'filter']);
+    });
+
+    Route::prefix('commission')->group(function () {
+        Route::get('/{saleID}', [CommissionController::class, 'index']);
+    });
+    Route::prefix('returns')->group(function () {
+        Route::get('/{saleID}', [ReturnController::class, 'index']);
+        Route::get('/return/{returnID}', [ReturnController::class, 'show']);
+        Route::get('/linked/{returnID}', [ReturnController::class, 'showLinked']);
+        Route::get('/stock/reentry', [ReturnController::class, 'showStockReentry']);
+        Route::post('/', [ReturnController::class, 'store']);
+        Route::put('/', [ReturnController::class, 'update']);
+        Route::delete('/{saleID}/{returnID}', [ReturnController::class, 'destroy']);
+    });
+    Route::prefix('exchange')->group(function () {
+        Route::get('/{saleID}', [ExchangeController::class, 'index']);
+        Route::get('/exchange/{exchangeID}', [ExchangeController::class, 'show']);
+        Route::post('/', [ExchangeController::class, 'createExchangePayment']);
+        Route::post('/difference', [ExchangeController::class, 'createDifferencePayment']);
+        Route::post('/export', [ExchangeController::class, 'export']);
+        Route::post('/send-to-email', [ExchangeController::class, 'sendToEmail']);
     });
 });

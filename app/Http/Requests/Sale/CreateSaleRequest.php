@@ -27,7 +27,14 @@ class CreateSaleRequest extends FormRequest
             $this->merge([
                 'paymentData' => array_merge($this->input('paymentData', []), [
                     'payment' => collect($this->input('paymentData.payment', []))
-                        ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
+                        ->map(function ($p) {
+                            $p = is_string($p) ? json_decode($p, true) : $p;
+                            if ($p['paymentType'] === 'CREDIT') {
+                                $p['receiptID'] = null;
+                            }
+
+                            return $p;
+                        })
                         ->toArray(),
                 ]),
             ]);
@@ -62,6 +69,7 @@ class CreateSaleRequest extends FormRequest
             // REGRAS DA VENDA
             'saleData.totalPrice' => 'required|numeric|min:0.01',
             'saleData.products' => 'required|array',
+            'saleData.products.*.productID' => 'required|exists:products,id',
             'saleData.products.*.productVariantID' => 'required|exists:product_variants,id',
             'saleData.products.*.newQuantity' => 'required|min:1',
             'saleData.products.*.variantActive' => 'required|in:1',
@@ -88,7 +96,7 @@ class CreateSaleRequest extends FormRequest
             'paymentData.payment' => 'required|array',
             'paymentData.payment.*.paymentType' => 'required|string|exists:types_receipt,name',
             'paymentData.payment.*.value' => 'nullable|numeric|min:0',
-            'paymentData.payment.*.receiptID' => 'required|exists:receipts,id',
+            'paymentData.payment.*.receiptID' => 'nullable|required_unless:paymentData.payment.*.paymentType,CREDIT|exists:receipts,id',
             'paymentData.payment.*.installment' => 'nullable',
             'paymentData.payment.*.installment.value' => 'nullable|integer|min:1|max:12',
             'paymentData.payment.*.installment.amount' => 'nullable|numeric',
@@ -161,7 +169,7 @@ class CreateSaleRequest extends FormRequest
             'paymentData.fees.min' => 'O valor das tarifas não pode ser negativo.',
             'paymentData.payment.required' => 'É necessário enviar pelo menos um pagamento.',
             'paymentData.payment.array' => 'O pagamento deve ser um array.',
-            'paymentData.payment.*.paymentType.required' => 'O tipo de pagamento é obrigatório.',
+            'paymentData.payment.*.paymentType.required_unless' => 'O tipo de pagamento é obrigatório.',
             'paymentData.payment.*.paymentType.exists' => 'O tipo de pagamento selecionado não existe.',
             'paymentData.payment.*.value.numeric' => 'O valor do pagamento deve ser numérico.',
             'paymentData.payment.*.value.min' => 'O valor do pagamento não pode ser negativo.',

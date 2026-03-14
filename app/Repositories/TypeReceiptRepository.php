@@ -22,4 +22,11 @@ class TypeReceiptRepository extends BaseRepository
 
         return $query->get();
     }
+
+    public function getAllWithoutCredit()
+    {
+        $query = $this->getAllByEnterprise();
+
+        return $query->where('name', '!=', 'CREDIT');
+    }
 }

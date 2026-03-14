@@ -14,6 +14,6 @@ class SaleItemRepository extends BaseRepository
 
     public function findBySaleId($id)
     {
-        return $this->model->where('sale_id', $id)->get();
+        return $this->getAllByEnterprise(filters: ['sale_id' => $id]);
     }
 }

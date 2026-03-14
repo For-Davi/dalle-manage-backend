@@ -17,6 +17,12 @@ class SaleItem extends Model
         'product_name',
         'product_sku',
         'product_price',
+        'product_color',
+        'product_color_name',
+        'product_grid_size',
+        'product_grid_name',
+        'product_code',
+        'product_category',
         'quantity',
         'total',
     ];

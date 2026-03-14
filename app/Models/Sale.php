@@ -18,17 +18,35 @@ class Sale extends Model
 
     protected $fillable = [
         'enterprise_id',
+        'status',
         'seller_id',
+        'seller_name',
         'client_id',
+        'client_name',
         'fees',
-        'total',
+        'starting_total',
+        'current_total',
         'change',
         'date',
     ];
 
+    public function delivery()
+    {
+        return $this->hasOne(SaleDelivery::class, 'sale_id')->where('exchange_id', null);
+    }
+
     public function payment()
     {
-        return $this->hasMany(SalePaymentMethod::class, 'sale_id');
+        return $this->hasMany(SalePaymentMethod::class, 'sale_id')
+            ->whereNull('exchange_id')
+            ->whereHas('type', function ($query) {
+                $query->where('name', '!=', 'CREDIT');
+            });
+    }
+
+    public function paymentWithCredit()
+    {
+        return $this->hasMany(SalePaymentMethod::class, 'sale_id')->whereNull('exchange_id');
     }
 
     public function items()
@@ -49,6 +67,11 @@ class Sale extends Model
     public function seller()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function commission()
+    {
+        return $this->hasMany(Commission::class, 'sale_id');
     }
 
     protected static function booted()

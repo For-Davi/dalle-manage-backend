@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\DTO\Receipt\FilterReceiptDTO;
 use App\Models\Receipt;
 use App\Repositories\Base\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
 class ReceiptRepository extends BaseRepository
 {
@@ -29,6 +30,9 @@ class ReceiptRepository extends BaseRepository
         $receipt = $this->findById($id);
 
         if ($receipt) {
+            DB::table('sale_payments_methods')->where('receipt_id', $id)->update(['receipt_id' => null]);
+            DB::table('exchange_payments_methods')->where('receipt_id', $id)->update(['receipt_id' => null]);
+
             return $receipt->delete();
         }
 

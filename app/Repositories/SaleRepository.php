@@ -46,8 +46,34 @@ class SaleRepository extends BaseRepository
             $query->whereBetween('date', [$start, $end]);
         }
 
+        $hasMin = ! empty($filters['min_total']);
+        $hasMax = ! empty($filters['max_total']);
+
+        if ($hasMin && ! $hasMax) {
+            $query->where('starting_total', '>=', $filters['min_total']);
+        }
+
+        if ($hasMax && ! $hasMin) {
+            $query->where('starting_total', '<=', $filters['max_total']);
+        }
+        if ($hasMin && $hasMax) {
+            $query->whereBetween('starting_total', [$filters['min_total'], $filters['max_total']]);
+        }
+
+        if (! empty($filters['total'])) {
+            $query->where('starting_total', $filters['total']);
+        }
+
         if (! empty($filters['seller'])) {
             $query->where('seller_id', $filters['seller']);
+        }
+
+        if (! empty($filters['client'])) {
+            $query->where('client_id', $filters['client']);
+        }
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
 
         if (! empty($filters['product'])) {
@@ -61,7 +87,12 @@ class SaleRepository extends BaseRepository
         }
 
         if (! empty($filters['type_receipt'])) {
-            $query->whereHas('payment', fn ($q) => $q->where('payment_method_id', $filters['type_receipt'])
+            $query->whereHas('paymentWithCredit', fn ($q) => $q->where('payment_method_id', $filters['type_receipt'])
+            );
+        }
+
+        if (! empty($filters['receipt'])) {
+            $query->whereHas('payment', fn ($q) => $q->where('receipt_id', $filters['receipt'])
             );
         }
 
@@ -87,5 +118,71 @@ class SaleRepository extends BaseRepository
             'client' => $firstProduct->sale->client,
             'products' => $products,
         ];
+    }
+
+    public function deleteSale($id)
+    {
+        $sale = $this->findById($id);
+
+        if ($sale) {
+            DB::table('sale_itens')->where('sale_id', $id)->delete();
+            DB::table('sale_deliveries')->where('sale_id', $id)->delete();
+            DB::table('sale_payments_methods')->where('sale_id', $id)->delete();
+            DB::table('sale_cancellations')->where('sale_id', $id)->delete();
+            DB::table('commissions')->where('sale_id', $id)->delete();
+
+            $returns = DB::table('returns')->where('sale_id', $id)->get();
+
+            foreach ($returns as $return) {
+
+                $exchanges = DB::table('exchanges')
+                    ->where('return_id', $return->id)
+                    ->get();
+
+                foreach ($exchanges as $exchange) {
+                    DB::table('exchange_payments_methods')
+                        ->where('exchange_id', $exchange->id)
+                        ->delete();
+
+                    DB::table('exchange_additional')
+                        ->where('exchange_id', $exchange->id)
+                        ->delete();
+
+                    DB::table('exchanges')
+                        ->where('id', $exchange->id)
+                        ->delete();
+                }
+
+                DB::table('return_items')
+                    ->where('return_id', $return->id)
+                    ->delete();
+
+                DB::table('return_exchange_items')
+                    ->where('return_id', $return->id)
+                    ->delete();
+
+                DB::table('product_movements')
+                    ->where('return_id', $return->id)
+                    ->delete();
+
+                DB::table('returns')
+                    ->where('linked_return_id', $return->id)
+                    ->update([
+                        'linked_return_id' => null,
+                    ]);
+
+                DB::table('returns')
+                    ->where('id', $return->id)
+                    ->delete();
+            }
+
+            DB::table('product_movements')
+                ->where('sale_id', $id)
+                ->delete();
+
+            return $sale->delete();
+        }
+
+        return null;
     }
 }

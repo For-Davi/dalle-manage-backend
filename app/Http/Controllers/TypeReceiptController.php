@@ -27,6 +27,19 @@ class TypeReceiptController
         }
     }
 
+    public function indexWithoutCredit(FilterReceiptRequest $request)
+    {
+        try {
+            $types = $this->repository->getAllWithoutCredit();
+
+            return response()->json(['types' => $types], 200);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao buscar os tipos de recebimentos', $e, $request);
+
+            return response()->json(['message' => 'Erro ao buscar os tipos de recebimentos'], 500);
+        }
+    }
+
     public function filter(FilterReceiptRequest $request)
     {
         try {

@@ -4,14 +4,19 @@ namespace App\Services;
 
 use App\DTO\Client\UpdateClientDTO;
 use App\DTO\Sale\CreateSaleDTO;
+use App\DTO\Sale\SaleCancellation\CreateSaleCancellationDTO;
 use App\DTO\Sale\SaleDelivery\CreateSaleDeliveriesDTO;
 use App\DTO\Sale\SaleItem\CreateSaleItemDTO;
 use App\DTO\Sale\SalePayment\CreateSalePaymentDTO;
+use App\Helpers\ClientHelper;
 use App\Helpers\ProductVariantHelper;
 use App\Helpers\SaleHelper;
 use App\Jobs\SendCouponToEmailJob;
 use App\Repositories\ClientRepository;
+use App\Repositories\EmployeeRepository;
 use App\Repositories\ProductVariantRepository;
+use App\Repositories\ReceiptRepository;
+use App\Repositories\SaleCancellationRepository;
 use App\Repositories\SaleDeliveryRepository;
 use App\Repositories\SaleItemRepository;
 use App\Repositories\SalePaymentsMethodRepository;
@@ -24,14 +29,18 @@ use Illuminate\Support\Facades\Auth;
 class SaleService
 {
     public function __construct(
-        protected SaleRepository $saleRepository,
+        protected SaleRepository $repository,
         protected ProductVariantRepository $productVariantRepository,
         protected SalePaymentsMethodRepository $salePaymentsRepository,
         protected SaleDeliveryRepository $saleDeliveryRepository,
         protected SaleItemRepository $saleItemRepository,
         protected ClientRepository $clientRepository,
         protected UserRepository $userRepository,
+        protected EmployeeRepository $employeeRepository,
         protected ProductMovementService $productMovementService,
+        protected ReceiptRepository $receiptRepository,
+        protected CommissionService $commissionService,
+        protected SaleCancellationRepository $saleCancellationRepository,
     ) {}
 
     public function create($request)
@@ -54,18 +63,32 @@ class SaleService
             $this->createSaleDelivery($request->deliveryData, $sale->id);
         }
 
-        // Atualização dos dados do cliente
+        // Atualização dos dados do cliente e caso tenha sido utilizado crédito na forma de pagamento ele zera o crédito inteiro do cliente
         if ($request->clientData) {
-            $this->updateClientData($request->clientData);
+            $this->updateClientData($request->clientData, $request->paymentData);
+        }
+
+        // Cria comissão
+        if ($sale->seller_id) {
+            $this->commissionService->create($sale->id, $sale->seller_id, null, $request->saleData['products'], 'sale');
         }
 
         return $sale;
     }
 
+    public function update($request)
+    {
+        $this->repository->update($request['saleID'], ['status' => 'canceled']);
+
+        $saleCancellationDTO = CreateSaleCancellationDTO::fromRequest($request);
+
+        return $this->saleCancellationRepository->create($saleCancellationDTO->toArray());
+    }
+
     public function export($request)
     {
         $dateTime = now()->format('Ymd_His');
-        $couponData = $this->saleRepository->getCouponInfos($request->saleID);
+        $couponData = $this->repository->getCouponInfos($request->saleID);
 
         if ($couponData) {
             $fileName = "cupom_fiscal_{$dateTime}.pdf";
@@ -82,7 +105,7 @@ class SaleService
     {
         if ($request->email) {
 
-            $couponData = $this->saleRepository->getCouponInfos($request->saleID);
+            $couponData = $this->repository->getCouponInfos($request->saleID);
 
             SendCouponToEmailJob::dispatch($request->email, $couponData);
         }
@@ -90,10 +113,23 @@ class SaleService
         return 'O cupom será enviado ao e-mail informado';
     }
 
+    private function checkIfExistsCredit(array $payments)
+    {
+        foreach ($payments['payment'] as $payment) {
+            if ($payment['paymentType'] === 'CREDIT') {
+                return $payment['value'];
+            }
+        }
+
+        return null;
+    }
+
     private function createSalePaymentsMethods(array $payments, int $saleID, int $enterpriseID): void
     {
         foreach ($payments['payment'] as $payment) {
-            SaleHelper::existsReceipt($payment['receiptID']);
+            if ($payment['paymentType'] !== 'CREDIT') {
+                SaleHelper::existsReceipt($payment['receiptID']);
+            }
 
             $paymentMethodID = SaleHelper::findPaymentMethodID(
                 $payment['paymentType'],
@@ -112,10 +148,17 @@ class SaleService
             $installments = $isValidInstallment ? $installment['value'] : null;
             $amount = $isValidInstallment ? $installment['amount'] : $payment['value'];
 
+            $receipt = null;
+
+            if ($payment['paymentType'] !== 'CREDIT') {
+                $receipt = $this->receiptRepository->findById($payment['receiptID']);
+            }
+
             $salePaymentDTO = CreateSalePaymentDTO::fromRequest([
                 'saleID' => $saleID,
                 'paymentMethodID' => $paymentMethodID,
                 'receiptID' => $payment['receiptID'],
+                'receiptName' => $receipt->identifier ?? null,
                 'installments' => $installments,
                 'value' => $amount,
             ]);
@@ -126,7 +169,7 @@ class SaleService
 
     private function createSaleDelivery($deliveryData, int $saleID)
     {
-        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($deliveryData, $saleID);
+        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($deliveryData, $saleID, null);
         $this->saleDeliveryRepository->create($deliveryDTO->toArray());
     }
 
@@ -134,8 +177,7 @@ class SaleService
     {
         foreach ($products['products'] as $product) {
             $productVariant = $this->productVariantRepository
-                ->findById($product['productVariantID'])
-                ->loadMissing(['product']);
+                ->findById($product['productVariantID'], ['product.category', 'color', 'gridItem.gridGroup', 'suppliers']);
 
             $price = $product['offer'] ?? $product['price'];
             $hasOffer = $price > 0 && isset($product['offer']);
@@ -150,6 +192,12 @@ class SaleService
                 'productName' => $productVariant->product->name,
                 'productSKU' => $productVariant->sku ?? null,
                 'productPrice' => $unitPrice,
+                'productColor' => $productVariant->color?->hex_color_code ?? null,
+                'productColorName' => $productVariant->color?->name ?? null,
+                'productGridSize' => $productVariant->gridItem?->size ?? null,
+                'productGridName' => $productVariant->gridItem?->gridGroup?->name ?? null,
+                'productCode' => $productVariant->code,
+                'productCategory' => $productVariant->product->category?->name ?? null,
                 'quantity' => $quantity,
                 'total' => $total,
             ]);
@@ -157,6 +205,7 @@ class SaleService
             $movementData = [
                 'reason' => 'sale',
                 'type' => 'out',
+                'saleID' => $saleID,
                 'documentNumber' => null,
                 'lotNumber' => null,
                 'quantity' => $quantity,
@@ -201,23 +250,50 @@ class SaleService
             $request->input('deliveryData.freightValue'),
             $request->input('paymentData.fees'),
         ]);
+        $currentValue = $totalValue;
+
+        if ($request->sellerID) {
+            $seller = $this->employeeRepository->findById($request->sellerID);
+        }
+
+        foreach ($request->paymentData['payment'] as $payment) {
+            if ($payment['paymentType'] === 'CREDIT') {
+                $currentValue -= (float) $payment['value'];
+            }
+        }
+
+        $currentValue -= $request->input('paymentData.change');
 
         $saleDTO = CreateSaleDTO::fromRequest([
             'enterpriseID' => $enterpriseID,
             'sellerID' => $request->sellerID,
+            'sellerName' => $seller->name ?? null,
             'clientID' => $request->clientData['id'] ?? null,
+            'clientName' => $request->clientData['name'] ?? null,
             'fees' => $request->input('paymentData.fees'),
             'totalValue' => $totalValue,
             'change' => $request->input('paymentData.change'),
+            'currentTotal' => $currentValue <= 0 ? 0 : $currentValue,
         ]);
 
-        return $this->saleRepository->create($saleDTO->toArray());
+        return $this->repository->create($saleDTO->toArray());
     }
 
-    private function updateClientData($clientData)
+    private function updateClientData(array $clientData, array $payment)
     {
         $clientDTO = UpdateClientDTO::fromRequest($clientData);
 
-        $this->clientRepository->update($clientData['id'], $clientDTO->toArray());
+        $hasCredit = $this->checkIfExistsCredit($payment);
+
+        ClientHelper::validateCredit($clientData['id'], $hasCredit, 'clientData');
+
+        if ($hasCredit) {
+            return $this->clientRepository->update(
+                $clientData['id'],
+                [...$clientDTO->toArray(), 'credits' => 0, 'credit_expires_at' => null]
+            );
+        }
+
+        return $this->clientRepository->update($clientData['id'], $clientDTO->toArray());
     }
 }
