@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\DTO\Client\FilterClientDTO;
 use App\Models\Client;
 use App\Repositories\Base\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
 class ClientRepository extends BaseRepository
 {
@@ -52,6 +53,8 @@ class ClientRepository extends BaseRepository
         $client = $this->findById($id);
 
         if ($client) {
+            DB::table('sales')->where('client_id', $id)->update(['client_id' => null]);
+
             return $client->delete();
         }
 

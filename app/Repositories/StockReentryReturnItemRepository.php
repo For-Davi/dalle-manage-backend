@@ -17,7 +17,7 @@ class StockReentryReturnItemRepository extends BaseRepository
 
     public function findByProductVariantId($id)
     {
-        return $this->getAllByEnterprise(filters: ['product_variant_id' => $id]);
+        return $this->getAllByEnterprise(filters: ['product_variant_id' => $id])->first();
     }
 
     public function updateStockReentryReturnItem($id, $data)

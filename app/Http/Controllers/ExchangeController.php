@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Exchange\CreateDifferencePaymentRequest;
 use App\Http\Requests\Exchange\CreateExchangePaymentRequest;
+use App\Http\Requests\Exchange\ExportExchangeRequest;
 use App\Http\Requests\Exchange\IndexExchangeRequest;
+use App\Http\Requests\Exchange\SendToEmailRequest;
 use App\Http\Requests\Exchange\ShowExchangeRequest;
 use App\Http\Resources\Exchange\ExchangeResource;
+use App\Http\Resources\Exchange\ExchangeTaxCouponResource;
 use App\Http\Resources\Exchange\ShowExchangeResource;
 use App\Repositories\ExchangeRepository;
 use App\Services\ExchangeService;
@@ -84,15 +87,40 @@ class ExchangeController
             if ($result) {
                 DB::commit();
 
-                $exchanges = $this->repository->getAllBySale($request['additionalDifferencePaymentData']['saleID']);
+                $exchange = $this->repository->findById($request['additionalDifferencePaymentData']['exchangeID'], ['additionalExchange', 'return.returnExchangeItems', 'sale.enterprise']);
 
-                return response()->json(['exchanges' => ExchangeResource::collection($exchanges), 'message' => 'Pagamento da diferença realizado'], 201);
+                return response()->json(['exchangeTaxCoupon' => new ExchangeTaxCouponResource($exchange), 'message' => 'Pagamento da diferença realizado'], 201);
             }
 
         } catch (\Exception $e) {
             DB::rollback();
 
             ErrorLogger::log('Erro ao criar pagamento da diferença:', $e, $request);
+
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function export(ExportExchangeRequest $request)
+    {
+        try {
+            return $this->service->export($request);
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao exportar troca:', $e, $request);
+
+            return response()->json(['message' => 'Erro ao exportar troca'], 500);
+        }
+    }
+
+    public function sendToEmail(SendToEmailRequest $request)
+    {
+        try {
+            $result = $this->service->sendToEmail($request);
+
+            return response()->json(['message' => $result], 200);
+        } catch (\Exception $e) {
+
+            ErrorLogger::log('Erro ao enviar cupom para o email:', $e, $request);
 
             return response()->json(['message' => $e->getMessage()], 500);
         }

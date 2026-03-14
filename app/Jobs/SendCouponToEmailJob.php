@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Mail\CouponMail;
+use App\Mail\ExchangeCouponMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,14 +19,21 @@ class SendCouponToEmailJob implements ShouldQueue
 
     protected $coupon;
 
-    public function __construct($email, $coupon)
+    protected $type;
+
+    public function __construct($email, $coupon, $type = 'sale')
     {
         $this->email = $email;
         $this->coupon = $coupon;
+        $this->type = $type;
     }
 
     public function handle(): void
     {
-        Mail::to($this->email)->send(new CouponMail($this->coupon));
+        if ($this->type === 'sale') {
+            Mail::to($this->email)->send(new CouponMail($this->coupon));
+        } else {
+            Mail::to($this->email)->send(new ExchangeCouponMail($this->coupon));
+        }
     }
 }

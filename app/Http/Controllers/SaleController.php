@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\Sale\FilterSaleDTO;
 use App\Http\Requests\Sale\CreateSaleRequest;
 use App\Http\Requests\Sale\DeleteSaleRequest;
 use App\Http\Requests\Sale\ExportSaleRequest;
+use App\Http\Requests\Sale\FilterSaleRequest;
 use App\Http\Requests\Sale\SendToEmailRequest;
+use App\Http\Requests\Sale\ShowCancellationRequest;
 use App\Http\Requests\Sale\ShowSaleRequest;
 use App\Http\Requests\Sale\UpdateSaleRequest;
 use App\Http\Resources\Sale\SaleCancellationResource;
@@ -39,6 +42,21 @@ class SaleController
             ErrorLogger::log('Erro ao fazer busca de vendas:', $e, $request);
 
             return response()->json(['message' => 'Erro ao fazer busca de vendas'], 500);
+        }
+    }
+
+    public function filter(FilterSaleRequest $request)
+    {
+        try {
+            $saleFilterDTO = FilterSaleDTO::fromRequest($request);
+            $sales = $this->repository->getAllWithFilter($saleFilterDTO->toArray());
+
+            return response()->json(['sales' => SalesIndexResource::collection($sales)], 200);
+
+        } catch (\Exception $e) {
+            ErrorLogger::log('Erro ao filtrar vendas:', $e, $request);
+
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -132,7 +150,7 @@ class SaleController
         }
     }
 
-    public function showCancellation(ShowSaleRequest $request)
+    public function showCancellation(ShowCancellationRequest $request)
     {
         try {
             $cancellation = $this->saleCancellationRepository->findBySaleId($request->route('saleID'));
@@ -141,9 +159,9 @@ class SaleController
                 return response()->json(['cancellation' => new SaleCancellationResource($cancellation)], 200);
             }
         } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar produtos da venda:', $e, $request);
+            ErrorLogger::log('Erro ao buscar cancelamento da venda:', $e, $request);
 
-            return response()->json(['message' => 'Erro ao buscar produtos da venda'], 500);
+            return response()->json(['message' => 'Erro ao buscar cancelamento da venda'], 500);
         }
     }
 

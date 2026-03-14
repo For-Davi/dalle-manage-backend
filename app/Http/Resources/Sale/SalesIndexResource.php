@@ -17,7 +17,7 @@ class SalesIndexResource extends JsonResource
             'fees' => $this->fees,
             'starting_total' => $this->starting_total,
             'change' => $this->change,
-            'date' => $this->date,
+            'date' => $this->date->format('d/m/Y H:i:s'),
         ];
     }
 }

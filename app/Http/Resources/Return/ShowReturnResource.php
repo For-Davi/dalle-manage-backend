@@ -21,12 +21,15 @@ class ShowReturnResource extends JsonResource
             'created_by_email' => $this->created_by_email,
             'updated_by_name' => $this->updated_by_name,
             'updated_by_email' => $this->updated_by_email,
+            'seller_name' => $this->seller_name,
+            'seller_email' => $this->seller_email,
             'created_at' => $this->created_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
             'updated_at' => $this->updated_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
             'return_items' => $this->items->map(function ($item) {
                 return [
                     'product_name' => $item->product_name,
                     'product_sku' => $item->product_sku,
+                    'product_code' => $item->product_code,
                     'product_price' => $item->product_price,
                     'quantity' => $item->quantity,
                     'total' => $item->total,
@@ -40,6 +43,7 @@ class ShowReturnResource extends JsonResource
                 return [
                     'product_name' => $exchangeItem->product_name,
                     'product_sku' => $exchangeItem->product_sku,
+                    'product_code' => $exchangeItem->product_code,
                     'product_price' => $exchangeItem->product_price,
                     'quantity' => $exchangeItem->quantity,
                     'total' => $exchangeItem->total,

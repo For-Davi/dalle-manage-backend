@@ -11,7 +11,7 @@ class CreateStockReentryReturnItemsDTO extends BaseDTO
         public int $enterprise_id,
         public string $product_name,
         public ?string $product_sku,
-        public ?string $product_code,
+        public ?int $product_code,
         public ?string $product_color,
         public ?string $product_color_name,
         public int $quantity,

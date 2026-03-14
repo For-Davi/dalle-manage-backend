@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreign('enterprise_id')->references('id')->on('enterprises');
             $table->string('product_name');
             $table->string('product_sku')->nullable();
-            $table->string('product_code')->nullable();
+            $table->integer('product_code')->nullable();
             $table->string('product_color')->nullable();
             $table->string('product_color_name')->nullable();
             $table->integer('quantity');

@@ -11,6 +11,7 @@ use App\DTO\Sale\SalePayment\CreateSalePaymentDTO;
 use App\Helpers\ClientHelper;
 use App\Helpers\ExchangePaymentHelper;
 use App\Helpers\SaleHelper;
+use App\Jobs\SendCouponToEmailJob;
 use App\Repositories\ClientRepository;
 use App\Repositories\ExchangeAdditionalRepository;
 use App\Repositories\ExchangePaymentMethodRepository;
@@ -21,6 +22,7 @@ use App\Repositories\ReturnRepository;
 use App\Repositories\SaleDeliveryRepository;
 use App\Repositories\SalePaymentsMethodRepository;
 use App\Repositories\SaleRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -68,8 +70,8 @@ class ExchangeService
         $this->createAdditionalData($request['additionalExchangePaymentData']);
 
         return $this->updateSale(
-            $request['additionalDifferencePaymentData']['exchangeID'],
-            $request['additionalDifferencePaymentData']['saleID'],
+            $request['additionalExchangePaymentData']['exchangeID'],
+            $request['additionalExchangePaymentData']['saleID'],
         );
     }
 
@@ -122,9 +124,9 @@ class ExchangeService
 
         $sale = $this->saleRepository->findById($request['saleID']);
         $exchange = $this->repository->findByReturnId($request['id']);
-        $exchangeAdditional = $this->exchangeAdditionalRepository->findByExchangeId($exchange->id);
 
         if ($exchange) {
+            $exchangeAdditional = $this->exchangeAdditionalRepository->findByExchangeId($exchange->id);
             $exchangeDTO = UpdateExchangeDTO::fromRequest($request);
             $updatedExchange = $this->repository->update($exchange->id, $exchangeDTO->toArray());
             $currentTotal = $this->getCurrentTotal($updatedExchange, $sale, $exchangeAdditional);
@@ -133,6 +135,34 @@ class ExchangeService
         } else {
             return $this->updateClientCredit($sale->client_id);
         }
+    }
+
+    public function export($request)
+    {
+        $dateTime = now()->format('Ymd_His');
+        $couponData = $this->repository->getCouponInfos($request->exchangeID);
+
+        if ($couponData) {
+            $fileName = "cupom_fiscal_{$dateTime}.pdf";
+
+            $pdf = Pdf::loadView('exports.exchange-tax-coupon-pdf', [
+                'couponData' => $couponData,
+            ]);
+
+            return $pdf->download($fileName);
+        }
+    }
+
+    public function sendToEmail($request)
+    {
+        if ($request->email) {
+
+            $couponData = $this->repository->getCouponInfos($request->exchangeID);
+
+            SendCouponToEmailJob::dispatch($request->email, $couponData, 'exchange');
+        }
+
+        return 'O cupom será enviado ao e-mail informado';
     }
 
     private function updateClientCredit(int $clientID, ?float $creditValue = null)
@@ -151,7 +181,7 @@ class ExchangeService
 
     private function checkIfExistsCredit(array $payments)
     {
-        foreach ($payments['payment'] as $payment) {
+        foreach ($payments as $payment) {
             if ($payment['paymentType'] === 'CREDIT') {
                 return $payment['value'];
             }
@@ -164,20 +194,24 @@ class ExchangeService
     {
         $exchange = $this->repository->findById($exchangeID);
 
-        $sale = $this->saleRepository->findById($saleID);
+        if ($exchange) {
+            $sale = $this->saleRepository->findById($saleID);
 
-        $currentTotal = $exchange->exchange_value > 0 ? $sale->current_total - $exchange->exchange_value : $sale->current_total + $exchange->difference_value;
-        if ($change) {
-            $currentTotal -= $change;
-        }
-        if ($fees) {
-            $currentTotal += $fees;
-        }
-        if ($creditValue) {
-            $currentTotal -= $creditValue;
+            $currentTotal = $exchange->exchange_value > 0 ? $sale->current_total - $exchange->exchange_value : $sale->current_total + $exchange->difference_value;
+            if ($change) {
+                $currentTotal -= $change;
+            }
+            if ($fees) {
+                $currentTotal += $fees;
+            }
+            if ($creditValue) {
+                $currentTotal -= $creditValue;
+            }
+
+            return $this->saleRepository->update($sale->id, ['current_total' => $currentTotal]);
         }
 
-        return $this->saleRepository->update($sale->id, ['current_total' => $currentTotal]);
+        return true;
     }
 
     private function updateProductMovement(int $exchangeID, int $enterpriseID)

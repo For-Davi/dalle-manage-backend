@@ -25,6 +25,16 @@ class Exchange extends Model
         'description',
     ];
 
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class, 'sale_id');
+    }
+
+    public function return()
+    {
+        return $this->belongsTo(Returns::class, 'return_id');
+    }
+
     public function paymentExchange()
     {
         return $this->hasMany(ExchangePaymentMethod::class, 'exchange_id');

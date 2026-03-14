@@ -278,6 +278,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/{saleID}', [SaleController::class, 'show']);
         Route::post('/', [SaleController::class, 'store']);
         Route::post('/cancel', [SaleController::class, 'update']);
+        Route::post('/filter', [SaleController::class, 'filter']);
         Route::delete('/{saleID}', [SaleController::class, 'destroy']);
         Route::get('/cancel/{saleID}', [SaleController::class, 'showCancellation']);
         Route::get('/product/{saleID}', [SaleController::class, 'showProducts']);
@@ -317,5 +318,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/exchange/{exchangeID}', [ExchangeController::class, 'show']);
         Route::post('/', [ExchangeController::class, 'createExchangePayment']);
         Route::post('/difference', [ExchangeController::class, 'createDifferencePayment']);
+        Route::post('/export', [ExchangeController::class, 'export']);
+        Route::post('/send-to-email', [ExchangeController::class, 'sendToEmail']);
     });
 });

@@ -39,11 +39,13 @@ class ReturnService
         $enterpriseID = Auth::user()->enterprise_id;
 
         // Verificação dos produtos da devolução
-        $this->validateReturnProducts($request['returnData'], $request['saleID']);
+        if (! $request['returnID']) {
+            $this->validateReturnProducts($request['returnData'], $request['saleID']);
+        }
 
         // Verificação dos produtos da vinculação de devolução(caso tenha)
         if ($request['returnID']) {
-            $this->validateVinculateReturnProducts($request['returnData'], $request['returnID']);
+            $this->validateVinculateReturnProducts($request['returnData'], $request['returnID'], $request['saleID']);
         }
 
         // Verificação dos produtos da troca (caso tenha)
@@ -99,7 +101,7 @@ class ReturnService
     {
         $seller = null;
 
-        if ($request['sellerID']) {
+        if ($request['sellerID'] && $request['exchangeProducts']) {
             $seller = $this->employeeRepository->findById($request['sellerID']);
         }
         $returnDTO = CreateReturnDTO::fromRequest($request, $seller?->name, $seller?->email);
@@ -133,8 +135,8 @@ class ReturnService
 
         foreach ($products as $product) {
             $this->stockReentryReturnItemRepository->updateStockReentry(
-                $product['product_variant_id'],
-                $product['quantity'],
+                $product->product_variant_id,
+                $product->quantity,
                 $status,
                 $enterpriseID,
                 $returnID
@@ -163,11 +165,11 @@ class ReturnService
         }
     }
 
-    private function validateVinculateReturnProducts($returnData, int $returnID)
+    private function validateVinculateReturnProducts($returnData, int $returnID, int $saleID)
     {
         foreach ($returnData as $item) {
             foreach ($item['products'] as $product) {
-                ReturnItemHelper::quantityExceedsQuantityExchangeItem($product['product_variant_id'], $returnID, $product['returnQuantity']);
+                ReturnItemHelper::quantityExceedsQuantityExchangeItem($product['product_variant_id'], $saleID, $returnID, $product['returnQuantity']);
             }
         }
     }
@@ -181,6 +183,7 @@ class ReturnService
                     'productVariantID' => $product['product_variant_id'],
                     'productName' => $product['product_name'],
                     'productSKU' => $product['product_sku'] ?? null,
+                    'productCode' => $product['product_code'] ?? null,
                     'productPrice' => $product['product_price'],
                     'productColor' => $product['color'] ?? null,
                     'productColorName' => $product['color_name'] ?? null,
@@ -225,6 +228,7 @@ class ReturnService
                     'productVariantID' => $product['product_variant_id'],
                     'productName' => $product['name'],
                     'productSKU' => $product['sku'] ?? null,
+                    'productCode' => $product['code'] ?? null,
                     'productPrice' => $product['price'],
                     'productColor' => $product['color']['hex_color_code'] ?? null,
                     'productColorName' => $product['color']['name'] ?? null,

@@ -20,12 +20,12 @@ class ClientHelper
                 return true;
             } else {
                 throw ValidationException::withMessages([
-                    $field => ['O cliente informado não existe.'],
+                    $field => ['O cliente informado não possui cadastro.'],
                 ]);
             }
         } else {
             throw ValidationException::withMessages([
-                $field => ['O cliente informado não existe.'],
+                $field => ['O cliente informado não possui cadastro.'],
             ]);
         }
     }

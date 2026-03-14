@@ -21,4 +21,16 @@ class ExchangeRepository extends BaseRepository
     {
         return $this->model->where('return_id', $id)->first();
     }
+
+    public function getCouponInfos($id)
+    {
+        $exchange = $this->findById($id, ['additionalExchange', 'return.returnExchangeItems', 'sale.enterprise']);
+
+        return [
+            'exchange' => $exchange,
+            'additional' => $exchange->additionalExchange,
+            'enterprise' => $exchange->sale->enterprise,
+            'products' => $exchange->return->returnExchangeItems,
+        ];
+    }
 }

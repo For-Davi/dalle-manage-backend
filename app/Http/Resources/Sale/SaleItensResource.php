@@ -17,7 +17,7 @@ class SaleItensResource extends JsonResource
             'quantity' => $this->quantity,
             'total' => $this->total,
             'grid' => $this->product_grid_name,
-            'code' => $this->product_code,
+            'product_code' => $this->product_code,
             'color' => $this->product_color,
             'color_name' => $this->product_color_name,
         ];

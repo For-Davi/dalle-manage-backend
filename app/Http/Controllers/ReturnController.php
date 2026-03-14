@@ -102,7 +102,7 @@ class ReturnController
 
             ErrorLogger::log('Erro ao criar devolução:', $e, $request);
 
-            return response()->json(['message' => 'Erro ao criar devolução'], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -123,7 +123,7 @@ class ReturnController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            ErrorLogger::log('Erro ao criar devolução:', $e, $request);
+            ErrorLogger::log('Erro ao atualizar devolução:', $e, $request);
 
             return response()->json(['message' => 'Erro ao atualizar devolução'], 500);
         }

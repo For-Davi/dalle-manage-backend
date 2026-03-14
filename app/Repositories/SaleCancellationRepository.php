@@ -17,10 +17,10 @@ class SaleCancellationRepository extends BaseRepository
 
     public function findBySaleId($id)
     {
-        $sale = $this->saleRepository->findById($id);
+        $sale = $this->saleRepository->getAllByEnterprise(filters: ['id' => $id]);
 
         if ($sale) {
-            return $this->findById($id);
+            return $this->model->where('sale_id', $id)->first();
         }
 
         return null;

@@ -11,6 +11,7 @@ class ShowLinkedReturnProductsResource extends JsonResource
     {
         return $this->returnExchangeItems->map(function ($exchangeItem) {
             return [
+                'product_variant_id' => $exchangeItem->product_variant_id,
                 'product_name' => $exchangeItem->product_name,
                 'product_sku' => $exchangeItem->product_sku,
                 'product_price' => $exchangeItem->product_price,
