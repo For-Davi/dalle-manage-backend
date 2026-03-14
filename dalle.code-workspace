@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../dalle-manage-frontend"
+		}
+	],
+	"settings": {}
+}
