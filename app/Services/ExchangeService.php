@@ -286,7 +286,10 @@ class ExchangeService
     private function savePaymentDifferenceData($exchangeData, int $exchangeID, int $saleID, int $enterpriseID)
     {
         foreach ($exchangeData as $payment) {
-            ExchangePaymentHelper::existsReceipt($payment['receiptID']);
+            if ($payment['paymentType'] !== 'CREDIT') {
+                ExchangePaymentHelper::existsReceipt($payment['receiptID']);
+            }
+
             $paymentMethodID = ExchangePaymentHelper::findPaymentMethodID($payment['paymentType'], $enterpriseID, $payment['receiptID']);
 
             $installment = $payment['installment'] ?? ['value' => null, 'amount' => null];
@@ -326,13 +329,13 @@ class ExchangeService
             return $sale->current_total - $exchange->exchange_value;
         }
         if ($exchange->status === 'active' && $exchange->difference_value > 0) {
-            return $sale->current_total + ($exchange->difference_value + $additionalExchange->fees - $additionalExchange->change);
+            return $sale->current_total + ($exchange->difference_value + ($additionalExchange->fees ?? 0) - ($additionalExchange->change ?? 0));
         }
         if ($exchange->status === 'canceled' && $exchange->exchange_value > 0) {
             return $sale->current_total + $exchange->exchange_value;
         }
         if ($exchange->status === 'canceled' && $exchange->difference_value > 0) {
-            return $sale->current_total - ($exchange->difference_value + $additionalExchange->fees - $additionalExchange->change);
+            return $sale->current_total - ($exchange->difference_value + ($additionalExchange->fees ?? 0) - ($additionalExchange->change ?? 0));
         }
     }
 }

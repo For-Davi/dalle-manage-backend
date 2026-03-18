@@ -13,17 +13,21 @@ class ExchangePaymentHelper
 
         if ($existPaymentMethod) {
 
-            $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
-                ->where('type_receipt_id', $existPaymentMethod->id)
-                ->first();
+            if ($existPaymentMethod->name !== 'CREDIT') {
+                $isTypePaymentReceiptCorrect = DB::table('receipts')->where('id', $receiptId)
+                    ->where('type_receipt_id', $existPaymentMethod->id)
+                    ->first();
 
-            if (! $isTypePaymentReceiptCorrect) {
-                throw ValidationException::withMessages([
-                    'exchangeData.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
-                ]);
-            } else {
-                return $existPaymentMethod->id;
+                if ($isTypePaymentReceiptCorrect) {
+                    return $existPaymentMethod->id;
+                } else {
+                    throw ValidationException::withMessages([
+                        'paymentData.payment.*.receiptID' => ['O tipo de pagamento informado não condiz com o tipo do recebimento.'],
+                    ]);
+                }
             }
+
+            return $existPaymentMethod->id;
         } else {
             throw ValidationException::withMessages([
                 'exchangeData.*.paymentType' => ['O tipo de pagamento informado não existe.'],
