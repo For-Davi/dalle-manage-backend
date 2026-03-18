@@ -22,6 +22,7 @@ use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\SellerRegistrationController;
 use App\Http\Controllers\SettingAppearanceController;
 use App\Http\Controllers\SettingSystemController;
 use App\Http\Controllers\SubscriptionControlller;
@@ -40,6 +41,7 @@ Route::post('/login', [UserController::class, 'login']);
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/verify', [UserController::class, 'verify']);
+Route::post('/seller-registration', [SellerRegistrationController::class, 'store']);
 Route::post('/newPassword', [UserController::class, 'newPassword']);
 Route::get('/auth/google/redirect', [UserController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [UserController::class, 'handleGoogleCallback']);
@@ -305,6 +307,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('commission')->group(function () {
         Route::get('/{saleID}', [CommissionController::class, 'index']);
     });
+
     Route::prefix('returns')->group(function () {
         Route::get('/{saleID}', [ReturnController::class, 'index']);
         Route::get('/return/{returnID}', [ReturnController::class, 'show']);
@@ -314,6 +317,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::put('/', [ReturnController::class, 'update']);
         Route::delete('/{saleID}/{returnID}', [ReturnController::class, 'destroy']);
     });
+
     Route::prefix('exchange')->group(function () {
         Route::get('/{saleID}', [ExchangeController::class, 'index']);
         Route::get('/exchange/{exchangeID}', [ExchangeController::class, 'show']);

@@ -7,16 +7,30 @@ use Illuminate\Validation\ValidationException;
 
 class SellerHelper
 {
-    public static function existsCode($code)
+    public static function existsPhone($phone)
     {
 
-        $existCode = DB::connection('dalle_adm')->table('sellers')
-            ->where('code', $code)
+        $existPhone = DB::connection('dalle_manage_adm')->table('sellers')
+            ->where('phone', $phone)
             ->first();
 
-        if (! $existCode) {
+        if ($existPhone) {
             throw ValidationException::withMessages([
-                'sellerCode' => ['O código do vendedor informado não existe.'],
+                'sellerCode' => ['O telefone informado já está sendo utilizado.'],
+            ]);
+        }
+    }
+
+    public static function existsEmail($email, $mode, $sellerID = null)
+    {
+
+        $existEmail = DB::connection('dalle_manage_adm')->table('sellers')
+            ->where('email', $email)
+            ->first();
+
+        if ($existEmail) {
+            throw ValidationException::withMessages([
+                'sellerEmail' => ['O e-mail informado já está sendo utilizado.'],
             ]);
         }
     }

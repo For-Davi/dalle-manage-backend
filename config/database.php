@@ -62,13 +62,13 @@ return [
             ]) : [],
         ],
 
-        'dalle_adm' => [
+        'dalle_manage_adm' => [
             'driver' => 'mysql',
-            'host' => env('DB_ADM_HOST', '127.0.0.1'),
-            'port' => env('DB_ADM_PORT', '3306'),
-            'database' => env('DB_ADM_DATABASE', 'dalle_adm'),
-            'username' => env('DB_ADM_USERNAME', 'root'),
-            'password' => env('DB_ADM_PASSWORD', 'root'),
+            'host' => env('DM_ADM_HOST', '127.0.0.1'),
+            'port' => env('DM_ADM_PORT', '3306'),
+            'database' => env('DM_ADM_DATABASE', 'dalle_adm'),
+            'username' => env('DM_ADM_USERNAME', 'root'),
+            'password' => env('DM_ADM_PASSWORD', 'root'),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
