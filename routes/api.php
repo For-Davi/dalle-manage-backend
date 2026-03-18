@@ -25,7 +25,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SellerRegistrationController;
 use App\Http\Controllers\SettingAppearanceController;
 use App\Http\Controllers\SettingSystemController;
-use App\Http\Controllers\SubscriptionControlller;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SupplierCatalogController;
 use App\Http\Controllers\SupplierCategoryController;
 use App\Http\Controllers\SupplierController;
@@ -291,7 +291,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     });
 
     Route::prefix('subscription')->group(function () {
-        Route::get('/', [SubscriptionControlller::class, 'index']);
+        Route::get('/', [SubscriptionController::class, 'index']);
 
         Route::prefix('payment')->group(function () {
             Route::post('pix/', [PixController::class, 'store']);
