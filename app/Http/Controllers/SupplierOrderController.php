@@ -14,11 +14,9 @@ use App\Repositories\SupplierOrderItemRepository;
 use App\Repositories\SupplierOrderRepository;
 use App\Repositories\SupplierOrderStatusHistoryRepository;
 use App\Services\SupplierOrderService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class SupplierOrderController
+class SupplierOrderController extends BaseController
 {
     public function __construct(
         private SupplierOrderService $service,
@@ -29,20 +27,16 @@ class SupplierOrderController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $orders = $this->repository->getAllByEnterprise();
 
             return response()->json(['orders' => SupplierOrderListResource::collection($orders)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar pedidos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar pedidos'], 500);
-        }
+        }, 'Erro ao buscar pedidos', $request);
     }
 
     public function getHistory(ShowSupplierOrderRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $history = $this->orderStatusHistoryRepository->getAllByEnterprise(
                 ['order', 'changed'],
                 ['*'],
@@ -50,147 +44,73 @@ class SupplierOrderController
             );
 
             return response()->json(['history' => $history], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar histórico de pedido:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar histórico de pedido'], 500);
-        }
+        }, 'Erro ao buscar histórico de pedido', $request);
     }
 
     public function show(ShowSupplierOrderRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $order = $this->repository->findById($request->route('orderID'), ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
 
             return response()->json(['order' => $order], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar pedido:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar pedido', $request);
     }
 
     public function received(UpdateSupplierOrderReceivedRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $received = $this->service->received($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->received($request);
+            $item = $this->orderItemRepository->findById($request->items[0]['id']);
+            $order = $this->repository->findById($item->supplier_order_id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
 
-            if ($received) {
-                DB::commit();
-
-                $item = $this->orderItemRepository->findById($request->items[0]['id']);
-
-                $order = $this->repository->findById($item->supplier_order_id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
-
-                return response()->json(['order' => $order, 'message' => 'Quantidade recebida de produtos atualizado no pedido'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar quantidade recebida de item do pedido:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar quantidade recebida de item do pedido'], 500);
-        }
+            return response()->json(['order' => $order, 'message' => 'Quantidade recebida de produtos atualizado no pedido'], 200);
+        }, 'Erro ao atualizar quantidade recebida de item do pedido', $request);
     }
 
     public function store(CreateSupplierOrderRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $order = $this->service->create($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $orders = $this->repository->getAllByEnterprise();
 
-            if ($order) {
-                DB::commit();
-                $orders = $this->repository->getAllByEnterprise();
-
-                return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido cadastrado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar pedido:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar pedido'], 500);
-        }
+            return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido cadastrado'], 201);
+        }, 'Erro ao cadastrar pedido', $request);
     }
 
     public function update(UpdateSupplierOrderRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $order = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $orders = $this->repository->getAllByEnterprise();
 
-            if ($order) {
-                DB::commit();
-
-                $orders = $this->repository->getAllByEnterprise();
-
-                return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar pedido:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar pedido'], 500);
-        }
+            return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido atualizado'], 200);
+        }, 'Erro ao atualizar pedido', $request);
     }
 
     public function updateStatus(UpdateSupplierOrderStatusRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $status = $this->service->updateStatus($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->updateStatus($request);
+            $order = $this->repository->findById($request->id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
 
-            if ($status) {
-                DB::commit();
-
-                $order = $this->repository->findById($request->id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
-
-                return response()->json(['order' => $order, 'message' => 'Status de pedido atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar status do pedido:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar status do pedido'], 500);
-        }
+            return response()->json(['order' => $order, 'message' => 'Status de pedido atualizado'], 200);
+        }, 'Erro ao atualizar status do pedido', $request);
     }
 
     public function export(ExportSupplierOrderRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             return $this->service->export($request);
-        } catch (\Exception $e) {
-
-            ErrorLogger::log('Erro ao exportar pedido:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao exportar pedido'], 500);
-        }
+        }, 'Erro ao exportar pedido', $request);
     }
 
     public function destroy(DeleteSupplierOrderRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('orderID'));
+            $orders = $this->repository->getAllByEnterprise();
 
-            $order = $this->repository->delete($request->route('orderID'));
-
-            if ($order) {
-                DB::commit();
-                $orders = $this->repository->getAllByEnterprise();
-
-                return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir pedido:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir pedido'], 500);
-        }
+            return response()->json(['orders' => SupplierOrderListResource::collection($orders), 'message' => 'Pedido excluído'], 200);
+        }, 'Erro ao excluir pedido', $request);
     }
 }

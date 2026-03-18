@@ -19,11 +19,9 @@ use App\Repositories\SaleCancellationRepository;
 use App\Repositories\SaleItemRepository;
 use App\Repositories\SaleRepository;
 use App\Services\SaleService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class SaleController
+class SaleController extends BaseController
 {
     public function __construct(
         private SaleService $service,
@@ -34,172 +32,102 @@ class SaleController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $sales = $this->repository->getAllByEnterprise();
 
             return response()->json(['sales' => SalesIndexResource::collection($sales)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao fazer busca de vendas:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao fazer busca de vendas'], 500);
-        }
+        }, 'Erro ao fazer busca de vendas', $request);
     }
 
     public function filter(FilterSaleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $saleFilterDTO = FilterSaleDTO::fromRequest($request);
             $sales = $this->repository->getAllWithFilter($saleFilterDTO->toArray());
 
             return response()->json(['sales' => SalesIndexResource::collection($sales)], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar vendas:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar vendas', $request);
     }
 
     public function show(ShowSaleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $sale = $this->repository->findById($request->route('saleID'));
-
             $sale->load(['delivery', 'paymentWithCredit.type', 'items.product.color']);
 
             return response()->json(['sale' => new SaleResource($sale)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar venda:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar venda'], 500);
-        }
+        }, 'Erro ao buscar venda', $request);
     }
 
     public function store(CreateSaleRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
             $sale = $this->service->create($request);
-            if ($sale) {
-                DB::commit();
 
-                return response()->json(['sale' => $sale, 'message' => 'Venda realizada'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao fazer a venda:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao fazer a venda'], 500);
-        }
+            return response()->json(['sale' => $sale, 'message' => 'Venda realizada'], 201);
+        }, 'Erro ao fazer a venda', $request);
     }
 
     public function update(UpdateSaleRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $sale = $this->service->update($request);
-            if ($sale) {
-                DB::commit();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
 
-                return response()->json(['message' => 'Venda cancelada'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cancelar a venda:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cancelar a venda'], 500);
-        }
+            return response()->json(['message' => 'Venda cancelada'], 201);
+        }, 'Erro ao cancelar a venda', $request);
     }
 
     public function destroy(DeleteSaleRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->deleteSale($request->route('saleID'));
+            $sales = $this->repository->getAllByEnterprise();
 
-            $sale = $this->repository->deleteSale($request->route('saleID'));
-
-            if ($sale) {
-                DB::commit();
-                $sales = $this->repository->getAllByEnterprise();
-
-                return response()->json(['sales' => SalesIndexResource::collection($sales), 'message' => 'Venda excluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir venda:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir venda'], 500);
-        }
+            return response()->json(['sales' => SalesIndexResource::collection($sales), 'message' => 'Venda excluída'], 200);
+        }, 'Erro ao excluir venda', $request);
     }
 
     public function showProducts(ShowSaleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $products = $this->saleItemRepository->findBySaleId($request->route('saleID'));
-
             $products->load(['product.color']);
 
             return response()->json(['saleItens' => SaleItensResource::collection($products)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar produtos da venda:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar produtos da venda'], 500);
-        }
+        }, 'Erro ao buscar produtos da venda', $request);
     }
 
     public function showCancellation(ShowCancellationRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $cancellation = $this->saleCancellationRepository->findBySaleId($request->route('saleID'));
 
-            if ($cancellation) {
-                return response()->json(['cancellation' => new SaleCancellationResource($cancellation)], 200);
-            }
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar cancelamento da venda:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar cancelamento da venda'], 500);
-        }
+            return response()->json(['cancellation' => new SaleCancellationResource($cancellation)], 200);
+        }, 'Erro ao buscar cancelamento da venda', $request);
     }
 
     public function showCouponInfos(ShowSaleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $couponData = $this->repository->getCouponInfos($request->route('saleID'));
 
             return response()->json(['couponData' => $couponData], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao localizar os itens da venda:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao localizar os itens da venda', $request);
     }
 
     public function export(ExportSaleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             return $this->service->export($request);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao exportar venda:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao exportar venda'], 500);
-        }
+        }, 'Erro ao exportar venda', $request);
     }
 
     public function sendToEmail(SendToEmailRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $result = $this->service->sendToEmail($request);
 
             return response()->json(['message' => $result], 200);
-        } catch (\Exception $e) {
-
-            ErrorLogger::log('Erro ao enviar cupom para o email:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao enviar cupom para o email', $request);
     }
 }

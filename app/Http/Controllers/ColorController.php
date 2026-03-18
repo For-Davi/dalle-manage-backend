@@ -7,11 +7,9 @@ use App\Http\Requests\Product\Color\DeleteProductColorRequest;
 use App\Http\Requests\Product\Color\UpdateProductColorRequest;
 use App\Repositories\ProductColorRepository;
 use App\Services\ProductColorService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class ColorController
+class ColorController extends BaseController
 {
     public function __construct(
         private ProductColorService $service,
@@ -20,79 +18,40 @@ class ColorController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $colors = $this->repository->getAllByEnterprise();
 
             return response()->json(['colors' => $colors], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar cores:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar cores'], 500);
-        }
+        }, 'Erro ao buscar cores', $request);
     }
 
     public function store(CreateProductColorRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $color = $this->service->create($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $colors = $this->repository->getAllByEnterprise();
 
-            if ($color) {
-                DB::commit();
-                $colors = $this->repository->getAllByEnterprise();
-
-                return response()->json(['colors' => $colors, 'message' => 'Cor cadastrada'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar cor:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar cor'], 500);
-        }
+            return response()->json(['colors' => $colors, 'message' => 'Cor cadastrada'], 201);
+        }, 'Erro ao cadastrar cor', $request);
     }
 
     public function update(UpdateProductColorRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $color = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $colors = $this->repository->getAllByEnterprise();
 
-            if ($color) {
-                DB::commit();
-
-                $colors = $this->repository->getAllByEnterprise();
-
-                return response()->json(['colors' => $colors, 'message' => 'Cor atualizada'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar cor:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar cor'], 500);
-        }
+            return response()->json(['colors' => $colors, 'message' => 'Cor atualizada'], 200);
+        }, 'Erro ao atualizar cor', $request);
     }
 
     public function destroy(DeleteProductColorRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('colorID'));
+            $colors = $this->repository->getAllByEnterprise();
 
-            $color = $this->repository->delete($request->route('colorID'));
-
-            if ($color) {
-                DB::commit();
-                $colors = $this->repository->getAllByEnterprise();
-
-                return response()->json(['colors' => $colors, 'message' => 'Cor excluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir cor:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir cor'], 500);
-        }
+            return response()->json(['colors' => $colors, 'message' => 'Cor excluída'], 200);
+        }, 'Erro ao excluir cor', $request);
     }
 }

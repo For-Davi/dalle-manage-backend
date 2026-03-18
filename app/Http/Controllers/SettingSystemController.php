@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Setting\System\UpdateSettingSystemRequest;
 use App\Repositories\SettingSystemRepository;
 use App\Services\SettingSystemService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class SettingSystemController
+class SettingSystemController extends BaseController
 {
     public function __construct(
         private SettingSystemService $service,
@@ -18,36 +16,20 @@ class SettingSystemController
 
     public function show(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $system = $this->repository->getByEnterprise();
 
             return response()->json(['system' => $system], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar sistema:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar sistema', $request);
     }
 
     public function update(UpdateSettingSystemRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $system = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $system = $this->repository->getByEnterprise();
 
-            if ($system) {
-                DB::commit();
-
-                $system = $this->repository->getByEnterprise();
-
-                return response()->json(['system' => $system, 'message' => 'Sistema atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar sistema:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar sistema'], 500);
-        }
+            return response()->json(['system' => $system, 'message' => 'Sistema atualizado'], 200);
+        }, 'Erro ao atualizar sistema', $request);
     }
 }

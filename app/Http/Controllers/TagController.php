@@ -7,11 +7,9 @@ use App\Http\Requests\Tag\DeleteTagRequest;
 use App\Http\Requests\Tag\UpdateTagRequest;
 use App\Repositories\TagRepository;
 use App\Services\TagService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class TagController
+class TagController extends BaseController
 {
     public function __construct(
         private TagService $service,
@@ -20,79 +18,40 @@ class TagController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $tags = $this->repository->getAllByEnterprise();
 
             return response()->json(['tags' => $tags], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar tags:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar tags'], 500);
-        }
+        }, 'Erro ao buscar tags', $request);
     }
 
     public function store(CreateTagRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $tag = $this->service->create($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $tags = $this->repository->getAllByEnterprise();
 
-            if ($tag) {
-                DB::commit();
-                $tags = $this->repository->getAllByEnterprise();
-
-                return response()->json(['tags' => $tags, 'message' => 'Tag cadastrada'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar tag:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar tag'], 500);
-        }
+            return response()->json(['tags' => $tags, 'message' => 'Tag cadastrada'], 201);
+        }, 'Erro ao cadastrar tag', $request);
     }
 
     public function update(UpdateTagRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $tag = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $tags = $this->repository->getAllByEnterprise();
 
-            if ($tag) {
-                DB::commit();
-
-                $tags = $this->repository->getAllByEnterprise();
-
-                return response()->json(['tags' => $tags, 'message' => 'Tag atualizada'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar tag:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar tag'], 500);
-        }
+            return response()->json(['tags' => $tags, 'message' => 'Tag atualizada'], 200);
+        }, 'Erro ao atualizar tag', $request);
     }
 
     public function destroy(DeleteTagRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('tagID'));
+            $tags = $this->repository->getAllByEnterprise();
 
-            $tag = $this->repository->delete($request->route('tagID'));
-
-            if ($tag) {
-                DB::commit();
-                $tags = $this->repository->getAllByEnterprise();
-
-                return response()->json(['tags' => $tags, 'message' => 'Tag excluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir tag:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir tag'], 500);
-        }
+            return response()->json(['tags' => $tags, 'message' => 'Tag excluída'], 200);
+        }, 'Erro ao excluir tag', $request);
     }
 }

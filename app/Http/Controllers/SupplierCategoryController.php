@@ -8,11 +8,9 @@ use App\Http\Requests\Supplier\Category\ShowSupplierCategoryRequest;
 use App\Http\Requests\Supplier\Category\UpdateSupplierCategoryRequest;
 use App\Repositories\SupplierCategoryRepository;
 use App\Services\SupplierCategoryService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class SupplierCategoryController
+class SupplierCategoryController extends BaseController
 {
     public function __construct(
         private SupplierCategoryService $service,
@@ -21,94 +19,49 @@ class SupplierCategoryController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $categories = $this->repository->getAllByEnterprise();
 
             return response()->json(['categories' => $categories], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar categorias:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar categorias'], 500);
-        }
+        }, 'Erro ao buscar categorias', $request);
     }
 
     public function show(ShowSupplierCategoryRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $category = $this->repository->findById($request->route('categoryID'));
 
             return response()->json(['category' => $category], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar categoria:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar categoria', $request);
     }
 
     public function store(CreateSupplierCategoryRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $category = $this->service->create($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $categories = $this->repository->getAllByEnterprise();
 
-            if ($category) {
-                DB::commit();
-
-                $categories = $this->repository->getAllByEnterprise();
-
-                return response()->json(['categories' => $categories, 'message' => 'Categoria cadastrada'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar categoria:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar categoria'], 500);
-        }
+            return response()->json(['categories' => $categories, 'message' => 'Categoria cadastrada'], 201);
+        }, 'Erro ao cadastrar categoria', $request);
     }
 
     public function update(UpdateSupplierCategoryRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $category = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $categories = $this->repository->getAllByEnterprise();
 
-            if ($category) {
-                DB::commit();
-
-                $categories = $this->repository->getAllByEnterprise();
-
-                return response()->json(['categories' => $categories, 'message' => 'Categoria atualizada'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar categoria:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar categoria'], 500);
-        }
+            return response()->json(['categories' => $categories, 'message' => 'Categoria atualizada'], 200);
+        }, 'Erro ao atualizar categoria', $request);
     }
 
     public function destroy(DeleteSupplierCategoryRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('categoryID'));
+            $categories = $this->repository->getAllByEnterprise();
 
-            $category = $this->repository->delete($request->route('categoryID'));
-
-            if ($category) {
-                DB::commit();
-                $categories = $this->repository->getAllByEnterprise();
-
-                return response()->json(['categories' => $categories, 'message' => 'Categoria excluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir categoria:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir categoria'], 500);
-        }
+            return response()->json(['categories' => $categories, 'message' => 'Categoria excluída'], 200);
+        }, 'Erro ao excluir categoria', $request);
     }
 }

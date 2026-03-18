@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Subscription\Payment\CreditCard\CreatePaymentCreditCardRequest;
 use App\Services\CreditCardService;
-use App\Utils\ErrorLogger;
-use Illuminate\Support\Facades\DB;
 
-class CreditCardController
+class CreditCardController extends BaseController
 {
     public function __construct(
         private CreditCardService $service,
@@ -15,26 +13,10 @@ class CreditCardController
 
     public function store(CreatePaymentCreditCardRequest $request)
     {
-        try {
-            DB::beginTransaction();
-
+        return $this->safeTransaction(function () use ($request) {
             $result = $this->service->store($request);
 
-            if ($result) {
-                DB::commit();
-
-                return response()->json(['result' => $result], 200);
-            } else {
-                return response()->json([
-                    'message' => 'Falha ao processar pagamento',
-                ], 400);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao processar pagamento de cartão de crédito:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao processar pagamento de cartão de crédito'], 500);
-        }
+            return response()->json(['result' => $result], 200);
+        }, 'Erro ao processar pagamento de cartão de crédito', $request);
     }
 }

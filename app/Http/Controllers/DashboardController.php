@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Dashboard\FilterDashboardRequest;
 use App\Services\DashboardService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
 
-class DashboardController
+class DashboardController extends BaseController
 {
     public function __construct(
         private DashboardService $service,
@@ -15,27 +14,19 @@ class DashboardController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $info = $this->service->getInfo();
 
             return response()->json(['info' => $info], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar dados do dashboard:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar dados do dashboard'], 500);
-        }
+        }, 'Erro ao buscar dados do dashboard', $request);
     }
 
     public function filter(FilterDashboardRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $info = $this->service->getInfoFilter($request);
 
             return response()->json(['info' => $info], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar dashboard:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao filtrar dashboard'], 500);
-        }
+        }, 'Erro ao filtrar dashboard', $request);
     }
 }

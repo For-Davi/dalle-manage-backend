@@ -22,11 +22,9 @@ use App\Http\Resources\Product\ProductVariantTableResource;
 use App\Repositories\ProductRepository;
 use App\Repositories\ProductVariantRepository;
 use App\Services\ProductService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class ProductController
+class ProductController extends BaseController
 {
     public function __construct(
         private ProductService $service,
@@ -36,20 +34,16 @@ class ProductController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem']);
 
             return response()->json(['products' => ProductVariantTableResource::collection($productsVariants)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar produtos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar produtos'], 500);
-        }
+        }, 'Erro ao buscar produtos', $request);
     }
 
     public function show(ShowProductRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $product = $this->repository->findById((int) $request->route('productID'), [
                 'variants.gridItem.gridGroup',
                 'variants.color',
@@ -59,7 +53,6 @@ class ProductController
                 'images',
                 'category',
             ]);
-
             $product->images->transform(function ($image) {
                 $image->url = asset($image->url);
 
@@ -67,18 +60,13 @@ class ProductController
             });
 
             return response()->json(['product' => $product]);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar produto'], 500);
-        }
+        }, 'Erro ao buscar produto', $request);
     }
 
     public function showVariant(ShowProductVariantRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $variant = $this->productVariantRepository->findById($request->route('variantID'));
-
             $variant->load([
                 'product' => function ($query) {
                     $query->select(['id', 'name', 'type', 'product_category_id']);
@@ -89,17 +77,12 @@ class ProductController
             ]);
 
             return response()->json(['variant' => $variant]);
-        } catch (\Exception $e) {
-
-            ErrorLogger::log('Erro ao buscar variante:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar variante'], 500);
-        }
+        }, 'Erro ao buscar variante', $request);
     }
 
     public function checkCodes(CheckCodesRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $codes = $request->input('codes', []);
             $skus = $request->input('skus', []);
 
@@ -107,13 +90,10 @@ class ProductController
             $usedSkus = ProductVariantHelper::getUsedSkus($skus);
 
             if (! empty($usedCodes) || ! empty($usedSkus)) {
-
                 $messages = [];
-
                 if (! empty($usedCodes)) {
                     $messages[] = 'Códigos já em uso: '.implode(', ', $usedCodes);
                 }
-
                 if (! empty($usedSkus)) {
                     $messages[] = 'SKUs já em uso: '.implode(', ', $usedSkus);
                 }
@@ -132,241 +112,119 @@ class ProductController
                 'used_codes' => [],
                 'used_skus' => [],
             ], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao validar códigos e SKUs das variantes:', $e, $request);
-
-            return response()->json([
-                'available' => false,
-                'message' => 'Erro interno ao validar códigos e SKUs.',
-            ], 500);
-        }
+        }, 'Erro ao validar códigos e SKUs das variantes', $request);
     }
 
     public function store(CreateProductRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $product = $this->service->create($request);
-            if ($product) {
-                DB::commit();
-                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
-                return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto cadastrado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar produto'], 500);
-        }
+            return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto cadastrado'], 201);
+        }, 'Erro ao cadastrar produto', $request);
     }
 
     public function export(ExportProductRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             return $this->service->export($request);
-        } catch (\Exception $e) {
-
-            ErrorLogger::log('Erro ao exportar produtos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao exportar produtos'], 500);
-        }
+        }, 'Erro ao exportar produtos', $request);
     }
 
     public function filter(FilterProductRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $productFilterDTO = FilterProductDTO::fromRequest([
                 ...$request->only(['name', 'active', 'stockCritical', 'sku', 'category']),
             ]);
             $productsVariants = $this->productVariantRepository->getAllWithFilter($productFilterDTO);
 
             return response()->json(['products' => ProductVariantTableResource::collection($productsVariants)], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar produtos:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar produtos', $request);
     }
 
     public function search(SearchProductRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $productsVariants = $this->productVariantRepository->getAllBySearch($request->value, ['product', 'color', 'gridItem.gridGroup', 'suppliers']);
 
             return response()->json(['products' => $productsVariants], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar produtos:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar produtos', $request);
     }
 
     public function updateBasic(UpdateProductBasicRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
             $product = $this->service->updateBasic($request);
+            $product->load(['category', 'logs']);
 
-            if ($product) {
-                DB::commit();
-
-                $product->load(['category', 'logs']);
-
-                return response()->json(['basic' => $product, 'logs' => $product->logs, 'message' => 'Dados básicos de produto atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar dados básicos de produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar dados básicos de produto'], 500);
-        }
+            return response()->json(['basic' => $product, 'logs' => $product->logs, 'message' => 'Dados básicos de produto atualizado'], 200);
+        }, 'Erro ao atualizar dados básicos de produto', $request);
     }
 
     public function updateAdvanced(UpdateProductAdvancedRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
             $advanced = $this->service->updateAdvanced($request);
+            $product = $this->repository->findById($request->productID, ['logs']);
 
-            if ($advanced) {
-                DB::commit();
-
-                $product = $this->repository->findById($request->productID, [
-                    'logs',
-                ]);
-
-                return response()->json(['advanced' => $advanced, 'logs' => $product->logs, 'message' => 'Configurações avançadas de produto atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar configurações avançadas de produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar configurações avançadas de produto'], 500);
-        }
+            return response()->json(['advanced' => $advanced, 'logs' => $product->logs, 'message' => 'Configurações avançadas de produto atualizado'], 200);
+        }, 'Erro ao atualizar configurações avançadas de produto', $request);
     }
 
     public function updateTag(UpdateProductTagRequest $request)
     {
-        try {
-            DB::beginTransaction();
-
+        return $this->safeTransaction(function () use ($request) {
             $this->service->updateTag($request);
+            $product = $this->repository->findById($request->productID, ['tags', 'logs']);
 
-            DB::commit();
-
-            $product = $this->repository->findById($request->productID, [
-                'tags', 'logs',
-            ]);
-
-            return response()->json(['tags' => $product->tags, 'logs' => $product->logs,  'message' => 'Tags do produto atualizada'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar as tags do produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar as tags do produto'], 500);
-        }
+            return response()->json(['tags' => $product->tags, 'logs' => $product->logs, 'message' => 'Tags do produto atualizada'], 200);
+        }, 'Erro ao atualizar as tags do produto', $request);
     }
 
     public function updateMedia(UpdateProductMediaRequest $request)
     {
-        try {
-            DB::beginTransaction();
-
+        return $this->safeTransaction(function () use ($request) {
             $this->service->updateMedia($request);
-
-            DB::commit();
-
-            $product = $this->repository->findById($request->productID, [
-                'images', 'logs',
-            ]);
-
+            $product = $this->repository->findById($request->productID, ['images', 'logs']);
             $product->images->transform(function ($image) {
                 $image->url = asset($image->url);
 
                 return $image;
             });
 
-            return response()->json(['images' => $product->images, 'logs' => $product->logs,  'message' => 'Imagens do produto atualizada'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar as imagens do produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar as imagens do produto'], 500);
-        }
+            return response()->json(['images' => $product->images, 'logs' => $product->logs, 'message' => 'Imagens do produto atualizada'], 200);
+        }, 'Erro ao atualizar as imagens do produto', $request);
     }
 
     public function updateVariant(UpdateProductVariantRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $variant = $this->service->updateVariant($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->updateVariant($request);
+            $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color']);
 
-            if ($variant) {
-                DB::commit();
-
-                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color']);
-
-                return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar prodputo:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar produto'], 500);
-        }
+            return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto atualizado'], 200);
+        }, 'Erro ao atualizar produto', $request);
     }
 
     public function destroy(DeleteProductRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('productID'));
+            $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
-            $product = $this->repository->delete($request->route('productID'));
-
-            if ($product) {
-                DB::commit();
-                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
-
-                return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir produto'], 500);
-        }
+            return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Produto excluído'], 200);
+        }, 'Erro ao excluir produto', $request);
     }
 
     public function destroyVariant(DeleteProductVariantRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->productVariantRepository->delete($request->route('variantID'));
+            $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
-            $variant = $this->productVariantRepository->delete($request->route('variantID'));
-
-            if ($variant) {
-                DB::commit();
-                $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
-
-                return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Variante excluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir variante:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir variante'], 500);
-        }
+            return response()->json(['products' => ProductVariantTableResource::collection($productsVariants), 'message' => 'Variante excluída'], 200);
+        }, 'Erro ao excluir variante', $request);
     }
 }

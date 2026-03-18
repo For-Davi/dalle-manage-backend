@@ -13,11 +13,9 @@ use App\Http\Resources\Return\ShowReturnResource;
 use App\Repositories\ReturnRepository;
 use App\Repositories\StockReentryReturnItemRepository;
 use App\Services\ReturnService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class ReturnController
+class ReturnController extends BaseController
 {
     public function __construct(
         protected ReturnRepository $repository,
@@ -27,127 +25,70 @@ class ReturnController
 
     public function index(IndexReturnRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $returns = $this->repository->getAllBySale($request->route('saleID'));
-
             $returns->load(['returnExchangeItems']);
 
             return response()->json(['returns' => ReturnResource::collection($returns)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar devoluções:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar devoluções'], 500);
-        }
+        }, 'Erro ao buscar devoluções', $request);
     }
 
     public function show(ShowReturnRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $return = $this->repository->findById($request->route('returnID'));
-
             $return->load(['items', 'returnExchangeItems']);
 
             return response()->json(['return' => new ShowReturnResource($return)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar devoluções:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar devoluções'], 500);
-        }
+        }, 'Erro ao buscar devolução', $request);
     }
 
     public function showLinked(ShowReturnRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $return = $this->repository->findById($request->route('returnID'));
-
             $return->load(['returnExchangeItems']);
 
             return response()->json(['products' => new ShowLinkedReturnProductsResource($return)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar devoluções:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar devoluções'], 500);
-        }
+        }, 'Erro ao buscar devoluções vinculadas', $request);
     }
 
     public function showStockReentry(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $stockReentryItem = $this->stockReentryReturnItemRepository->getAllByEnterprise();
 
             return response()->json(['products' => $stockReentryItem], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar produtos de reentrada de estoque:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar produtos de reentrada de estoque'], 500);
-        }
+        }, 'Erro ao buscar produtos de reentrada de estoque', $request);
     }
 
     public function store(CreateReturnRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $returns = $this->repository->getAllBySale($request['saleID']);
 
-            $result = $this->service->create($request);
-
-            if ($result) {
-                DB::commit();
-
-                $returns = $this->repository->getAllBySale($request['saleID']);
-
-                return response()->json(['returns' => ReturnResource::collection($returns), 'message' => 'Registro de devolução criado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao criar devolução:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['returns' => ReturnResource::collection($returns), 'message' => 'Registro de devolução criado'], 201);
+        }, 'Erro ao criar devolução', $request);
     }
 
     public function update(UpdateReturnRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $returns = $this->repository->getAllBySale($request['saleID']);
 
-            $result = $this->service->update($request);
-
-            if ($result) {
-                DB::commit();
-
-                $returns = $this->repository->getAllBySale($request['saleID']);
-
-                return response()->json(['returns' => ReturnResource::collection($returns), 'message' => 'Devolução atualizada'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar devolução:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar devolução'], 500);
-        }
+            return response()->json(['returns' => ReturnResource::collection($returns), 'message' => 'Devolução atualizada'], 200);
+        }, 'Erro ao atualizar devolução', $request);
     }
 
     public function destroy(DeleteReturnRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->deleteReturn($request->route('returnID'));
+            $returns = $this->repository->getAllBySale($request->route('saleID'));
 
-            $return = $this->repository->deleteReturn($request->route('returnID'));
-
-            if ($return) {
-                DB::commit();
-                $returns = $this->repository->getAllBySale($request->route('saleID'));
-
-                return response()->json(['returns' => ReturnResource::collection($returns), 'message' => 'Devolução excluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir devolução:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir devolução'], 500);
-        }
+            return response()->json(['returns' => ReturnResource::collection($returns), 'message' => 'Devolução excluída'], 200);
+        }, 'Erro ao excluir devolução', $request);
     }
 }

@@ -11,11 +11,9 @@ use App\Http\Requests\Movement\ShowMovementRequest;
 use App\Http\Requests\Movement\UpdateMovementRequest;
 use App\Repositories\MovementRepository;
 use App\Services\MovementService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class MovementController
+class MovementController extends BaseController
 {
     public function __construct(
         private MovementService $service,
@@ -24,134 +22,75 @@ class MovementController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
             return response()->json(['movements' => $movements], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar movimentações:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar movimentações'], 500);
-        }
+        }, 'Erro ao buscar movimentações', $request);
     }
 
     public function indexPeriod(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $periods = $this->repository->getPeriods();
 
             return response()->json(['periods' => $periods], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar períodos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar períodos'], 500);
-        }
+        }, 'Erro ao buscar períodos', $request);
     }
 
     public function show(ShowMovementRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $movement = $this->repository->findById($request->route('movementID'), ['category']);
 
             return response()->json(['movement' => $movement], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar movimentação:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar movimentação', $request);
     }
 
     public function filter(FilterMovementRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $movementFilterDTO = FilterMovementDTO::fromRequest($request);
             $movements = $this->repository->getAllWithFilter($movementFilterDTO->toArray(), ['category']);
 
             return response()->json(['movements' => $movements], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar movimentações:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar movimentações', $request);
     }
 
     public function store(CreateMovementRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
-            $movement = $this->service->create($request);
-            if ($movement) {
-                DB::commit();
-
-                $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
-
-                return response()->json(['movements' => $movements, 'message' => 'Movimentação inserida'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao inserir movimentação:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao inserir movimentação'], 500);
-        }
+            return response()->json(['movements' => $movements, 'message' => 'Movimentação inserida'], 201);
+        }, 'Erro ao inserir movimentação', $request);
     }
 
     public function export(ExportMovementRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             return $this->service->export($request);
-        } catch (\Exception $e) {
-
-            ErrorLogger::log('Erro ao exportar movimentações:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao exportar movimentações'], 500);
-        }
+        }, 'Erro ao exportar movimentações', $request);
     }
 
     public function update(UpdateMovementRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $movement = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
-            if ($movement) {
-                DB::commit();
-
-                $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
-
-                return response()->json(['movements' => $movements, 'message' => 'Movimentação atualizada'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar movimentação:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar movimentação'], 500);
-        }
+            return response()->json(['movements' => $movements, 'message' => 'Movimentação atualizada'], 200);
+        }, 'Erro ao atualizar movimentação', $request);
     }
 
     public function destroy(DeleteMovementRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('movementID'));
+            $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
-            $movement = $this->repository->delete($request->route('movementID'));
-
-            if ($movement) {
-                DB::commit();
-                $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
-
-                return response()->json(['movements' => $movements, 'message' => 'Movimentação excluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir movimentação:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir movimentação'], 500);
-        }
+            return response()->json(['movements' => $movements, 'message' => 'Movimentação excluída'], 200);
+        }, 'Erro ao excluir movimentação', $request);
     }
 }

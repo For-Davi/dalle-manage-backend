@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\DTO\Receipt\FilterReceiptDTO;
 use App\Http\Requests\Receipt\FilterReceiptRequest;
 use App\Repositories\TypeReceiptRepository;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
 
-class TypeReceiptController
+class TypeReceiptController extends BaseController
 {
     public function __construct(
         private TypeReceiptRepository $repository
@@ -16,41 +15,29 @@ class TypeReceiptController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $types = $this->repository->getAllByEnterprise();
 
             return response()->json(['types' => $types], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar os tipos de recebimentos', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar os tipos de recebimentos'], 500);
-        }
+        }, 'Erro ao buscar os tipos de recebimentos', $request);
     }
 
     public function indexWithoutCredit(FilterReceiptRequest $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $types = $this->repository->getAllWithoutCredit();
 
             return response()->json(['types' => $types], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar os tipos de recebimentos', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar os tipos de recebimentos'], 500);
-        }
+        }, 'Erro ao buscar os tipos de recebimentos', $request);
     }
 
     public function filter(FilterReceiptRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $typeReceiptFilterDTO = FilterReceiptDTO::fromRequest($request);
             $types = $this->repository->getAllWithFilter($typeReceiptFilterDTO);
 
             return response()->json(['types' => $types], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar os tipos de recebimentos', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar os tipos de recebimentos'], 500);
-        }
+        }, 'Erro ao buscar os tipos de recebimentos', $request);
     }
 }

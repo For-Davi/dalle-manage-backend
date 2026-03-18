@@ -11,11 +11,9 @@ use App\Http\Requests\Client\ShowClientRequest;
 use App\Http\Requests\Client\UpdateClientRequest;
 use App\Repositories\ClientRepository;
 use App\Services\ClientService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class ClientController
+class ClientController extends BaseController
 {
     public function __construct(
         private ClientService $service,
@@ -24,121 +22,68 @@ class ClientController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $clients = $this->repository->getAllByEnterprise();
 
             return response()->json(['clients' => $clients], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar clientes:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar clientes'], 500);
-        }
+        }, 'Erro ao buscar clientes', $request);
     }
 
     public function show(ShowClientRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $client = $this->repository->findById($request->route('clientID'));
 
             return response()->json(['client' => $client], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar cliente:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar cliente', $request);
     }
 
     public function filter(FilterClientRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $clientFilterDTO = FilterClientDTO::fromRequest($request);
             $clients = $this->repository->getAllWithFilter($clientFilterDTO);
 
             return response()->json(['clients' => $clients], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar clientes:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar clientes', $request);
     }
 
     public function store(CreateClientRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $client = $this->service->create($request);
-            if ($client) {
-                DB::commit();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $clients = $this->repository->getAllByEnterprise();
 
-                $clients = $this->repository->getAllByEnterprise();
-
-                return response()->json(['clients' => $clients, 'message' => 'Cliente cadastrado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar cliente:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar cliente'], 500);
-        }
+            return response()->json(['clients' => $clients, 'message' => 'Cliente cadastrado'], 201);
+        }, 'Erro ao cadastrar cliente', $request);
     }
 
     public function update(UpdateClientRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $supplier = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $clients = $this->repository->getAllByEnterprise();
 
-            if ($supplier) {
-                DB::commit();
-
-                $clients = $this->repository->getAllByEnterprise();
-
-                return response()->json(['clients' => $clients, 'message' => 'Cliente atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar cliente:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar fornecedor'], 500);
-        }
+            return response()->json(['clients' => $clients, 'message' => 'Cliente atualizado'], 200);
+        }, 'Erro ao atualizar cliente', $request);
     }
 
     public function destroy(DeleteClientRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('clientID'));
+            $clients = $this->repository->getAllByEnterprise();
 
-            $client = $this->repository->delete($request->route('clientID'));
-
-            if ($client) {
-                DB::commit();
-                $clients = $this->repository->getAllByEnterprise();
-
-                return response()->json(['clients' => $clients, 'message' => 'Cliente excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir cliente:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir cliente'], 500);
-        }
+            return response()->json(['clients' => $clients, 'message' => 'Cliente excluído'], 200);
+        }, 'Erro ao excluir cliente', $request);
     }
 
     public function getCredit(GetClientCreditRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $credit = $this->service->getCredit($request);
 
             return response()->json(['credit' => $credit], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar crédito do cliente:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar crédito do cliente', $request);
     }
 }

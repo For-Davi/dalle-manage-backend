@@ -13,11 +13,9 @@ use App\Http\Requests\Employee\UpdateEmployeeRequest;
 use App\Http\Resources\Employee\EmployeeTableResource;
 use App\Repositories\EmployeeRepository;
 use App\Services\EmployeeService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class EmployeeController
+class EmployeeController extends BaseController
 {
     public function __construct(
         private EmployeeService $service,
@@ -26,149 +24,79 @@ class EmployeeController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $employees = $this->repository->getAllByEnterprise();
 
             return response()->json(['employees' => EmployeeTableResource::collection($employees)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar funcionários:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar funcionários'], 500);
-        }
+        }, 'Erro ao buscar funcionários', $request);
     }
 
     public function show(ShowEmployeeRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $employee = $this->repository->findById($request->route('employeeID'));
 
             return response()->json(['employee' => $employee], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar funcionário:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar funcionário', $request);
     }
 
     public function removeAccessLogin(CheckIDEmployeeRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->removeAccessLogin($request->employeeId);
+            $employees = $this->repository->getAllByEnterprise();
 
-            $employee = $this->service->removeAccessLogin($request->employeeId);
-
-            if ($employee) {
-                DB::commit();
-                $employees = $this->repository->getAllByEnterprise();
-
-                return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Removido acesso ao sistema'], 200);
-            }
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao remover acesso ao sistema:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Removido acesso ao sistema'], 200);
+        }, 'Erro ao remover acesso ao sistema', $request);
     }
 
     public function createAccessLogin(CreateAccessLoginRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->createAccessLogin($request);
+            $employees = $this->repository->getAllByEnterprise();
 
-            $employee = $this->service->createAccessLogin($request);
-
-            if ($employee) {
-                DB::commit();
-                $employees = $this->repository->getAllByEnterprise();
-
-                return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Criado acesso ao sistema'], 201);
-            }
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao criar acesso ao sistema:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Criado acesso ao sistema'], 201);
+        }, 'Erro ao criar acesso ao sistema', $request);
     }
 
     public function filter(FilterEmployeeRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $employeeFilterDTO = FilterEmployeeDTO::fromRequest($request);
             $employees = $this->repository->getAllWithFilter($employeeFilterDTO);
 
             return response()->json(['employees' => EmployeeTableResource::collection($employees)], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar funcionários:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar funcionários', $request);
     }
 
     public function store(CreateEmployeeRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $employee = $this->service->create($request);
-            if ($employee) {
-                DB::commit();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $employees = $this->repository->getAllByEnterprise();
 
-                $employees = $this->repository->getAllByEnterprise();
-
-                return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário cadastrado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar funcionário:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar funcionário'], 500);
-        }
+            return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário cadastrado'], 201);
+        }, 'Erro ao cadastrar funcionário', $request);
     }
 
     public function update(UpdateEmployeeRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $employee = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $employees = $this->repository->getAllByEnterprise();
 
-            if ($employee) {
-                DB::commit();
-
-                $employees = $this->repository->getAllByEnterprise();
-
-                return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar funcionário:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar funcionário'], 500);
-        }
+            return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário atualizado'], 200);
+        }, 'Erro ao atualizar funcionário', $request);
     }
 
     public function destroy(DeleteEmployeeRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('employeeID'));
+            $employees = $this->repository->getAllByEnterprise();
 
-            $employee = $this->repository->delete($request->route('employeeID'));
-
-            if ($employee) {
-                DB::commit();
-                $employees = $this->repository->getAllByEnterprise();
-
-                return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir funcionário:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir funcionário'], 500);
-        }
+            return response()->json(['employees' => EmployeeTableResource::collection($employees), 'message' => 'Funcionário excluído'], 200);
+        }, 'Erro ao excluir funcionário', $request);
     }
 }

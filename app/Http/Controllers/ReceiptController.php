@@ -10,11 +10,9 @@ use App\Http\Requests\Receipt\ShowReceiptRequest;
 use App\Http\Requests\Receipt\UpdateReceiptRequest;
 use App\Repositories\ReceiptRepository;
 use App\Services\ReceiptService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class ReceiptController
+class ReceiptController extends BaseController
 {
     public function __construct(
         private ReceiptService $service,
@@ -23,106 +21,59 @@ class ReceiptController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $receipts = $this->repository->getAllByEnterprise(['type']);
 
             return response()->json(['receipts' => $receipts], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar os recebimentos', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar os recebimentos'], 500);
-        }
+        }, 'Erro ao buscar os recebimentos', $request);
     }
 
     public function show(ShowReceiptRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $receipt = $this->repository->findById($request->route('receiptID'));
 
             return response()->json(['receipt' => $receipt], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar recebimento:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar recebimento', $request);
     }
 
     public function filter(FilterReceiptRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $receiptFilterDTO = FilterReceiptDTO::fromRequest($request);
             $receipts = $this->repository->getAllWithFilter($receiptFilterDTO);
 
             return response()->json(['receipts' => $receipts], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar os recebimentos', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar os recebimentos'], 500);
-        }
+        }, 'Erro ao filtrar os recebimentos', $request);
     }
 
     public function store(CreateReceiptRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $receipt = $this->service->create($request);
-            if ($receipt) {
-                DB::commit();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $receipts = $this->repository->getAllByEnterprise(['type']);
 
-                $receipts = $this->repository->getAllByEnterprise(['type']);
-
-                return response()->json(['receipts' => $receipts, 'message' => 'Recebimento cadastrado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar tipo:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar recebimento'], 500);
-        }
+            return response()->json(['receipts' => $receipts, 'message' => 'Recebimento cadastrado'], 201);
+        }, 'Erro ao cadastrar recebimento', $request);
     }
 
     public function update(UpdateReceiptRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $receipt = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $receipts = $this->repository->getAllByEnterprise(['type']);
 
-            if ($receipt) {
-                DB::commit();
-                $receipts = $this->repository->getAllByEnterprise(['type']);
-
-                return response()->json(['receipts' => $receipts, 'message' => 'Recebimento atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar categoria:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar recebimento'], 500);
-        }
+            return response()->json(['receipts' => $receipts, 'message' => 'Recebimento atualizado'], 200);
+        }, 'Erro ao atualizar recebimento', $request);
     }
 
     public function destroy(DeleteReceiptRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('receiptID'));
+            $receipts = $this->repository->getAllByEnterprise(['type']);
 
-            $receipt = $this->repository->delete($request->route('receiptID'));
-
-            if ($receipt) {
-                DB::commit();
-                $receipts = $this->repository->getAllByEnterprise(['type']);
-
-                return response()->json(['receipts' => $receipts, 'message' => 'Recebimento excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir tipo de recebimento:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir o recebimento'], 500);
-        }
+            return response()->json(['receipts' => $receipts, 'message' => 'Recebimento excluído'], 200);
+        }, 'Erro ao excluir recebimento', $request);
     }
 }

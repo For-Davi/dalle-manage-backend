@@ -9,11 +9,9 @@ use App\Http\Requests\Supplier\Catalog\UpdateCatalogSupplierRequest;
 use App\Http\Resources\Product\ProductsLinkedResource;
 use App\Repositories\SupplierCatalogRepository;
 use App\Services\SupplierCatalogService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class SupplierCatalogController
+class SupplierCatalogController extends BaseController
 {
     public function __construct(
         private SupplierCatalogService $service,
@@ -22,103 +20,49 @@ class SupplierCatalogController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $catalog = $this->repository->getBySupplier($request->route('supplierID'), ['variant.product', 'variant.color', 'supplier']);
 
             return response()->json(['catalog' => ProductsLinkedResource::collection($catalog)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar catálogos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar catálogos'], 500);
-        }
+        }, 'Erro ao buscar catálogos', $request);
     }
 
     public function getByVariant(GetByVariantCatalogSupplierRequest $request)
     {
-        try {
-
+        return $this->safeExecute(function () use ($request) {
             $catalog = $this->repository->getByVariant($request->variantID, ['variant.product', 'variant.color', 'supplier']);
 
-            return response()->json([
-                'catalog' => ProductsLinkedResource::collection($catalog),
-            ], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar fornecedores por produto:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar fornecedores'], 500);
-        }
+            return response()->json(['catalog' => ProductsLinkedResource::collection($catalog)], 200);
+        }, 'Erro ao buscar fornecedores por produto', $request);
     }
 
     public function store(CreateCatalogSupplierRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $item = $this->service->create($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
 
-            if ($item) {
-                DB::commit();
-
-                $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
-
-                return response()->json(['catalog' => ProductsLinkedResource::collection($catalog), 'message' => 'Item de catálogo cadastrado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar item de catálogo:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar item de catálogo'], 500);
-        }
+            return response()->json(['catalog' => ProductsLinkedResource::collection($catalog), 'message' => 'Item de catálogo cadastrado'], 201);
+        }, 'Erro ao cadastrar item de catálogo', $request);
     }
 
     public function update(UpdateCatalogSupplierRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $catalog = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
 
-            if ($catalog) {
-                DB::commit();
-
-                $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
-
-                return response()->json(['catalog' => ProductsLinkedResource::collection($catalog), 'message' => 'Categoria atualizada'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar item do catálogo:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar item do catálogo'], 500);
-        }
+            return response()->json(['catalog' => ProductsLinkedResource::collection($catalog), 'message' => 'Item de catálogo atualizado'], 200);
+        }, 'Erro ao atualizar item do catálogo', $request);
     }
 
     public function destroy(DeleteCatalogSupplierRequest $request, $supplierID, $productVariantID)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request, $supplierID, $productVariantID) {
+            $this->repository->delete($supplierID, $productVariantID);
+            $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
 
-            $deleted = $this->repository->delete($supplierID, $productVariantID);
-
-            if ($deleted) {
-                DB::commit();
-                $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
-
-                return response()->json([
-                    'catalog' => ProductsLinkedResource::collection($catalog),
-                    'message' => 'Item de catálogo excluído',
-                ], 200);
-            }
-
-            DB::rollBack();
-
-            return response()->json(['message' => 'Item não encontrado'], 404);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            ErrorLogger::log('Erro ao excluir categoria:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir categoria'], 500);
-        }
+            return response()->json(['catalog' => ProductsLinkedResource::collection($catalog), 'message' => 'Item de catálogo excluído'], 200);
+        }, 'Erro ao excluir item de catálogo', $request);
     }
 }

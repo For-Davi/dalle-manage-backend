@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
-class UserController
+class UserController extends BaseController
 {
     public function __construct(
         protected UserService $service,
@@ -47,14 +47,12 @@ class UserController
 
     public function login(LoginRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $user = $this->service->login($request);
             $user->load(['enterprise', 'image']);
-
             if ($user->image) {
                 $user->image->url = asset($user->image->url);
             }
-
             $token = $this->configureToken($user);
 
             return response()->json([
@@ -62,48 +60,27 @@ class UserController
                 'token' => $token,
                 'enterprise_name' => $user->enterprise->name,
             ], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao logar com usuário:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao logar com usuário', $request);
     }
 
     public function register(RegisterRequest $request)
     {
-        try {
-            DB::beginTransaction();
-
+        return $this->safeTransaction(function () use ($request) {
             $user = $this->service->register($request);
-
-            if ($user) {
-                DB::commit();
-                $user->load(['enterprise', 'image']);
-
-                if ($user->image) {
-                    $user->image->url = asset($user->image->url);
-                }
-
-                $token = $this->configureToken($user);
-
-                dispatch(new SendWelcomeMailJob($user));
-
-                return response()->json([
-                    'user' => $user,
-                    'token' => $token,
-                    'message' => 'Cadastro realizado com sucesso',
-                    'enterprise_name' => $user->enterprise->name,
-                ], 201);
+            $user->load(['enterprise', 'image']);
+            if ($user->image) {
+                $user->image->url = asset($user->image->url);
             }
+            $token = $this->configureToken($user);
+            dispatch(new SendWelcomeMailJob($user));
 
-            throw new \Exception('Falha ao criar usuário');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao registrar com usuário:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json([
+                'user' => $user,
+                'token' => $token,
+                'message' => 'Cadastro realizado com sucesso',
+                'enterprise_name' => $user->enterprise->name,
+            ], 201);
+        }, 'Erro ao registrar com usuário', $request);
     }
 
     public function redirectToGoogle()
@@ -118,7 +95,6 @@ class UserController
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-
             $user = User::where('email', $googleUser->email)->first();
 
             if (! $user) {
@@ -131,7 +107,6 @@ class UserController
                     'sellerCode' => null,
                     'google_id' => $googleUser->id,
                 ]);
-
                 $user = $this->service->register($data);
                 DB::commit();
                 dispatch(new SendWelcomeMailJob($user));
@@ -140,10 +115,9 @@ class UserController
             $token = $this->configureToken($user);
 
             return redirect(rtrim(config('app.url'), '/')."/auth?token={$token}");
-
         } catch (\Exception $e) {
             DB::rollBack();
-            ErrorLogger::log('Erro no Callback Google:', $e);
+            ErrorLogger::critical('Erro no Callback Google', $e);
 
             return redirect(rtrim(config('app.url'), '/').'/login?error');
         }
@@ -151,196 +125,99 @@ class UserController
 
     public function reset(ResetPasswordRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $result = $this->service->reset($request);
 
             return response()->json(['message' => $result], 200);
-        } catch (\Exception $e) {
-
-            ErrorLogger::log('Erro ao solicitar redefinição de senha:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao solicitar redefinição de senha', $request);
     }
 
     public function newPassword(NewPasswordRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $user = $this->service->newPassword($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->newPassword($request);
 
-            if ($user) {
-                DB::commit();
-
-                return response()->json(['message' => 'Sua senha foi redefinida'], 200);
-            }
-
-            throw new \Exception('Falha ao redefinir senha');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao redefinir senha', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['message' => 'Sua senha foi redefinida'], 200);
+        }, 'Erro ao redefinir senha', $request);
     }
 
     public function updateData(UpdateUserDataRequest $request)
     {
-        try {
-            DB::beginTransaction();
-
+        return $this->safeTransaction(function () use ($request) {
             $user = $this->service->updateData($request);
-
-            if ($user) {
-                DB::commit();
-
-                $user->load(['enterprise', 'image']);
-
-                if ($user->image) {
-                    $user->image->url = asset($user->image->url);
-                }
-
-                return response()->json(['user' => $user, 'message' => 'Dados atualizados']);
+            $user->load(['enterprise', 'image']);
+            if ($user->image) {
+                $user->image->url = asset($user->image->url);
             }
-        } catch (\Exception $e) {
-            DB::rollBack();
 
-            ErrorLogger::log('Erro ao atualizar dados', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['user' => $user, 'message' => 'Dados atualizados']);
+        }, 'Erro ao atualizar dados', $request);
     }
 
     public function updatePassword(UpdateUserPasswordRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->updatePassword($request);
 
-            $password = $this->service->updatePassword($request);
-
-            if ($password) {
-                DB::commit();
-
-                return response()->json(['message' => 'Senha atualizada']);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar senha', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['message' => 'Senha atualizada']);
+        }, 'Erro ao atualizar senha', $request);
     }
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
             return response()->json(['users' => UserListResource::collection($users)], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao listar membros da organização:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao listar membros da organização', $request);
     }
 
     public function filter(FilterUserRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $userFilterDTO = FilterUserDTO::fromRequest($request);
             $users = $this->repository->getAllWithFilter($userFilterDTO);
 
             return response()->json(['users' => UserListResource::collection($users)], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar usuários da organização:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar usuários da organização', $request);
     }
 
     public function show(ShowUserRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $user = $this->repository->findById($request->route('userID'));
 
             return response()->json(['user' => $user], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar usuário:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar usuário', $request);
     }
 
     public function store(CreateUserRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->store($request);
+            $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
-            $user = $this->service->store($request);
-
-            if ($user) {
-                DB::commit();
-                $users = $this->repository->getAllByEnterprise(['department', 'role']);
-
-                return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro adicionado á sua organização'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao registrar membro da organização:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro adicionado á sua organização'], 201);
+        }, 'Erro ao registrar membro da organização', $request);
     }
 
     public function update(UpdateUserRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
-            $user = $this->service->update($request);
-
-            if ($user) {
-                DB::commit();
-
-                $users = $this->repository->getAllByEnterprise(['department', 'role']);
-
-                return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar membro da organização:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro atualizado'], 200);
+        }, 'Erro ao atualizar membro da organização', $request);
     }
 
     public function destroy(DeleteUserRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('userID'), $request->deleteEmployee);
+            $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
-            $user = $this->repository->delete($request->route('userID'), $request->deleteEmployee);
-
-            if ($user) {
-                DB::commit();
-
-                $users = $this->repository->getAllByEnterprise(['department', 'role']);
-
-                return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir membro da organização:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['users' => UserListResource::collection($users), 'message' => 'Membro excluído'], 200);
+        }, 'Erro ao excluir membro da organização', $request);
     }
 }

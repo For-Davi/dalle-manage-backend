@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\WebhookAsaasService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class WebhookAsaasController
+class WebhookAsaasController extends BaseController
 {
     public function __construct(
         protected WebhookAsaasService $service,
@@ -15,22 +13,10 @@ class WebhookAsaasController
 
     public function update(Request $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
 
-            $result = $this->service->update($request);
-
-            if ($result) {
-                DB::commit();
-
-                return response()->noContent();
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao confirmar o pagamento:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao confirmar o pagamento'], 500);
-        }
+            return response()->noContent();
+        }, 'Erro ao confirmar o pagamento', $request);
     }
 }

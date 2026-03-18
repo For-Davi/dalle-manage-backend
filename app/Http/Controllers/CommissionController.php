@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Commission\IndexCommissionRequest;
 use App\Http\Resources\Commission\CommissionResource;
 use App\Repositories\CommissionRepository;
-use App\Utils\ErrorLogger;
 
-class CommissionController
+class CommissionController extends BaseController
 {
     public function __construct(
         private CommissionRepository $repository
@@ -15,14 +14,10 @@ class CommissionController
 
     public function index(IndexCommissionRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $commissions = $this->repository->getAllBySale($request->route('saleID'));
 
             return response()->json(['commissions' => CommissionResource::collection($commissions)], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar comissões:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar comissões'], 500);
-        }
+        }, 'Erro ao buscar comissões', $request);
     }
 }

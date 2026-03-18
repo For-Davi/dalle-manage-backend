@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Enterprise\UpdateEnterpriseRequest;
 use App\Repositories\EnterpriseRepository;
 use App\Services\EnterpriseService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class EnterpriseController
+class EnterpriseController extends BaseController
 {
     public function __construct(
         private EnterpriseRepository $repository,
@@ -18,56 +16,28 @@ class EnterpriseController
 
     public function show(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $enterprise = $this->repository->findMyEnterprise();
 
             return response()->json(['enterprise' => $enterprise], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar empresa:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar empresa'], 500);
-        }
+        }, 'Erro ao buscar empresa', $request);
     }
 
     public function update(UpdateEnterpriseRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $enterprise = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
 
-            if ($enterprise) {
-                DB::commit();
-
-                return response()->json(['message' => 'Dados da empresa atualizados'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar dados da empresa:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar dados da empresa'], 500);
-        }
+            return response()->json(['message' => 'Dados da empresa atualizados'], 200);
+        }, 'Erro ao atualizar dados da empresa', $request);
     }
 
     public function destroy(Request $request)
     {
-        try {
-            DB::beginTransaction();
-            $enterprise = $this->repository->delete();
+        return $this->safeTransaction(function () {
+            $this->repository->delete();
 
-            if ($enterprise) {
-                $this->repository->delete($enterprise);
-
-                DB::commit();
-
-                return response()->json(['message' => 'Empresa deletada'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao deletar a empresa:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao deletar a empresa'], 500);
-        }
+            return response()->json(['message' => 'Empresa deletada'], 200);
+        }, 'Erro ao deletar a empresa', $request);
     }
 }

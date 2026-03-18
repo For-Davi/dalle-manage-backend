@@ -12,11 +12,9 @@ use App\Http\Requests\Schedule\ShowScheduleRequest;
 use App\Http\Requests\Schedule\UpdateScheduleRequest;
 use App\Repositories\ScheduleRepository;
 use App\Services\ScheduleService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class ScheduleController
+class ScheduleController extends BaseController
 {
     public function __construct(
         private ScheduleService $service,
@@ -25,158 +23,87 @@ class ScheduleController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
             return response()->json(['schedules' => $schedules], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar agendamentos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar agendamentos'], 500);
-        }
+        }, 'Erro ao buscar agendamentos', $request);
     }
 
     public function indexPeriod(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $periods = $this->repository->getPeriods();
 
             return response()->json(['periods' => $periods], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar períodos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar períodos'], 500);
-        }
+        }, 'Erro ao buscar períodos', $request);
     }
 
     public function show(ShowScheduleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $schedule = $this->repository->findById($request->route('scheduleID'), ['category']);
 
             return response()->json(['schedule' => $schedule], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar agendamento:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar agendamento', $request);
     }
 
     public function filter(FilterScheduleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $scheduleFilterDTO = FilterScheduleDTO::fromRequest([
                 ...$request->only(['period', 'category', 'type']),
             ]);
             $schedules = $this->repository->getAllWithFilter($scheduleFilterDTO->toArray(), ['category']);
 
             return response()->json(['schedules' => $schedules], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar agendamentos:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar agendamentos', $request);
     }
 
     public function store(CreateScheduleRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $schedule = $this->service->create($request);
-            if ($schedule) {
-                DB::commit();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
-                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
-
-                return response()->json(['schedules' => $schedules, 'message' => 'Agendamento inserido'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao inserir agendamento:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao inserir agendamento'], 500);
-        }
+            return response()->json(['schedules' => $schedules, 'message' => 'Agendamento inserido'], 201);
+        }, 'Erro ao inserir agendamento', $request);
     }
 
     public function export(ExportScheduleRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             return $this->service->export($request);
-        } catch (\Exception $e) {
-
-            ErrorLogger::log('Erro ao exportar agendamentos:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao exportar agendamentos'], 500);
-        }
+        }, 'Erro ao exportar agendamentos', $request);
     }
 
     public function update(UpdateScheduleRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $schedule = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
-            if ($schedule) {
-                DB::commit();
-
-                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
-
-                return response()->json(['schedules' => $schedules, 'message' => 'Agendamento atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar agendamento:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar agendamento'], 500);
-        }
+            return response()->json(['schedules' => $schedules, 'message' => 'Agendamento atualizado'], 200);
+        }, 'Erro ao atualizar agendamento', $request);
     }
 
     public function destroy(DeleteScheduleRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('scheduleID'));
+            $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
-            $schedule = $this->repository->delete($request->route('scheduleID'));
-
-            if ($schedule) {
-                DB::commit();
-                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
-
-                return response()->json(['schedules' => $schedules, 'message' => 'Agendamento excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir agendamento:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir agendamento'], 500);
-        }
+            return response()->json(['schedules' => $schedules, 'message' => 'Agendamento excluído'], 200);
+        }, 'Erro ao excluir agendamento', $request);
     }
 
     public function finishSchedule(FinishScheduleRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->finishSchedule($request);
+            $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
-            $schedule = $this->service->finishSchedule($request);
-
-            if ($schedule) {
-                DB::commit();
-
-                $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
-
-                return response()->json(['schedules' => $schedules, 'message' => 'Finalização concluída'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao finalizar agendamento:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao finalizar agendamento'], 500);
-        }
+            return response()->json(['schedules' => $schedules, 'message' => 'Finalização concluída'], 200);
+        }, 'Erro ao finalizar agendamento', $request);
     }
 }

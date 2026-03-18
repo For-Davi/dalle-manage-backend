@@ -10,11 +10,9 @@ use App\Http\Requests\Supplier\ShowSupplierRequest;
 use App\Http\Requests\Supplier\UpdateSupplierRequest;
 use App\Repositories\SupplierRepository;
 use App\Services\SupplierService;
-use App\Utils\ErrorLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class SupplierController
+class SupplierController extends BaseController
 {
     public function __construct(
         protected SupplierService $service,
@@ -23,121 +21,68 @@ class SupplierController
 
     public function index(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $suppliers = $this->repository->getAllByEnterprise();
 
             return response()->json(['suppliers' => $suppliers], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar fornecedores:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar fornecedores'], 500);
-        }
+        }, 'Erro ao buscar fornecedores', $request);
     }
 
     public function list(Request $request)
     {
-        try {
+        return $this->safeExecute(function () {
             $suppliers = $this->repository->getAllByEnterprise([], ['id', 'name']);
 
             return response()->json(['suppliers' => $suppliers], 200);
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar fornecedores:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao buscar fornecedores'], 500);
-        }
+        }, 'Erro ao buscar fornecedores', $request);
     }
 
     public function show(ShowSupplierRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $supplier = $this->repository->findById($request->route('supplierID'));
 
             return response()->json(['supplier' => $supplier], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao buscar fornecedor:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao buscar fornecedor', $request);
     }
 
     public function filter(FilterSupplierRequest $request)
     {
-        try {
+        return $this->safeExecute(function () use ($request) {
             $supplierFilterDTO = FilterSupplierDTO::fromRequest($request);
             $suppliers = $this->repository->getAllWithFilter($supplierFilterDTO);
 
             return response()->json(['suppliers' => $suppliers], 200);
-
-        } catch (\Exception $e) {
-            ErrorLogger::log('Erro ao filtrar fornecedores:', $e, $request);
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        }, 'Erro ao filtrar fornecedores', $request);
     }
 
     public function store(CreateSupplierRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $supplier = $this->service->create($request);
-            if ($supplier) {
-                DB::commit();
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $suppliers = $this->repository->getAllByEnterprise();
 
-                $suppliers = $this->repository->getAllByEnterprise();
-
-                return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor cadastrado'], 201);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao cadastrar fornecedor:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao cadastrar fornecedor'], 500);
-        }
+            return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor cadastrado'], 201);
+        }, 'Erro ao cadastrar fornecedor', $request);
     }
 
     public function update(UpdateSupplierRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $supplier = $this->service->update($request);
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->update($request);
+            $suppliers = $this->repository->getAllByEnterprise();
 
-            if ($supplier) {
-                DB::commit();
-
-                $suppliers = $this->repository->getAllByEnterprise();
-
-                return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor atualizado'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao atualizar fornecedor:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao atualizar fornecedor'], 500);
-        }
+            return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor atualizado'], 200);
+        }, 'Erro ao atualizar fornecedor', $request);
     }
 
     public function destroy(DeleteSupplierRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        return $this->safeTransaction(function () use ($request) {
+            $this->repository->delete($request->route('supplierID'));
+            $suppliers = $this->repository->getAllByEnterprise();
 
-            $supplier = $this->repository->delete($request->route('supplierID'));
-
-            if ($supplier) {
-                DB::commit();
-                $suppliers = $this->repository->getAllByEnterprise();
-
-                return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor excluído'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            ErrorLogger::log('Erro ao excluir fornecedor:', $e, $request);
-
-            return response()->json(['message' => 'Erro ao excluir fornecedor'], 500);
-        }
+            return response()->json(['suppliers' => $suppliers, 'message' => 'Fornecedor excluído'], 200);
+        }, 'Erro ao excluir fornecedor', $request);
     }
 }
