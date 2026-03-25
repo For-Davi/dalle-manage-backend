@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Payment;
 
 use App\Events\EventPaymentMade;
 use Illuminate\Bus\Queueable;

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\Subscription\Subscription;
-use App\Jobs\PaymentMadeJob;
+use App\Jobs\Payment\PaymentMadeJob;
 use App\Notification\SendNotification;
 use App\Repositories\EnterpriseRepository;
 use App\Repositories\SubscriptionRepository;
