@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Employee extends Model
+class Employee extends Model implements HasCacheTags
 {
-    use HasFactory, Notifiable;
+    use HasFactory, InvalidatesCache, Notifiable;
 
     protected $table = 'employees';
 
@@ -43,6 +45,17 @@ class Employee extends Model
     protected static function booted()
     {
         static::addGlobalScope(new EnterpriseScope);
+    }
+
+    public function getCacheTags(): array
+    {
+        if (! $this->enterprise_id) {
+            return [];
+        }
+
+        return [
+            "employee:enterprise:{$this->enterprise_id}",
+        ];
     }
 
     public function enterprise()

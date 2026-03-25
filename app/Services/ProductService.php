@@ -333,7 +333,7 @@ class ProductService
     {
         $dateTime = now()->format('Ymd_His');
 
-        $exportProductDTO = FilterProductDtO::fromRequest([
+        $exportProductDTO = FilterProductDTO::fromRequest([
             ...$request->only(['name', 'sku', 'category', 'active', 'stockCritical']),
         ]);
 

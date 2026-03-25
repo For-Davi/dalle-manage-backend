@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class ProductTag extends Model
+class ProductTag extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'product_tag';
 
@@ -17,6 +19,28 @@ class ProductTag extends Model
         'product_id',
         'tag_id',
     ];
+
+    public function getCacheTags(): array
+    {
+        $enterpriseId = $this->getEnterpriseID();
+
+        if (! $enterpriseId) {
+            return [];
+        }
+
+        return [
+            "product_tag:enterprise:{$enterpriseId}",
+        ];
+    }
+
+    protected function getEnterpriseID(): ?int
+    {
+        if (! $this->relationLoaded('product')) {
+            $this->load('product');
+        }
+
+        return $this->product?->enterprise_id;
+    }
 
     public function tag()
     {

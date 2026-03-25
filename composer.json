@@ -13,6 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "*",
         "laravel/tinker": "^2.10.1",
+        "predis/predis": "^3.4",
         "rap2hpoutre/fast-excel": "^5.6",
         "spatie/laravel-prometheus": "^1.3"
     },

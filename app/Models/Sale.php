@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Sale extends Model
+class Sale extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'sales';
 
@@ -29,6 +31,22 @@ class Sale extends Model
         'change',
         'date',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new EnterpriseScope);
+    }
+
+    public function getCacheTags(): array
+    {
+        if (! $this->enterprise_id) {
+            return [];
+        }
+
+        return [
+            "sale:enterprise:{$this->enterprise_id}",
+        ];
+    }
 
     public function delivery()
     {
@@ -72,10 +90,5 @@ class Sale extends Model
     public function commission()
     {
         return $this->hasMany(Commission::class, 'sale_id');
-    }
-
-    protected static function booted()
-    {
-        static::addGlobalScope(new EnterpriseScope);
     }
 }

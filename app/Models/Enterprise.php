@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Enterprise extends Model
+class Enterprise extends Model implements HasCacheTags
 {
-    use HasFactory, Notifiable;
+    use HasFactory, InvalidatesCache, Notifiable;
 
     protected $table = 'enterprises';
 
@@ -34,6 +36,17 @@ class Enterprise extends Model
     public function setSellerCodeAttribute($value)
     {
         $this->attributes['seller_id'] = strtoupper($value);
+    }
+
+    public function getCacheTags(): array
+    {
+        if (! $this->id) {
+            return [];
+        }
+
+        return [
+            "enterprise:{$this->id}",
+        ];
     }
 
     public function users()

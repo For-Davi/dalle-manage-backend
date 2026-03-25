@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class SupplierOrderStatusHistory extends Model
+class SupplierOrderStatusHistory extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'supplier_order_status_history';
 
@@ -16,6 +18,28 @@ class SupplierOrderStatusHistory extends Model
         'status',
         'changed_by',
     ];
+
+    public function getCacheTags(): array
+    {
+        $enterpriseId = $this->getEnterpriseID();
+
+        if (! $enterpriseId) {
+            return [];
+        }
+
+        return [
+            "supplier_order_status_history:enterprise:{$enterpriseId}",
+        ];
+    }
+
+    protected function getEnterpriseID(): ?int
+    {
+        if (! $this->relationLoaded('order')) {
+            $this->load('order');
+        }
+
+        return $this->order?->enterprise_id;
+    }
 
     public function changed()
     {

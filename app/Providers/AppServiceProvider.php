@@ -15,6 +15,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         ProductVariant::observe(StockCriticalProductObserver::class);
-        Prometheus::addGauge('user_count')->value(fn () => User::count());
+        // Prometheus::addGauge('user_count')->value(fn () => User::count());
     }
 }

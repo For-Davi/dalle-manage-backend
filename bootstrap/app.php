@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\CheckTokenExpiration;
+use App\Http\Middleware\CheckWebhookAsaasToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,8 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'token.expiration' => \App\Http\Middleware\CheckTokenExpiration::class,
-            'webhook.asaas' => \App\Http\Middleware\CheckWebhookAsaasToken::class,
+            'token.expiration' => CheckTokenExpiration::class,
+            'webhook.asaas' => CheckWebhookAsaasToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

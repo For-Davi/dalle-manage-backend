@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class ProductAdvanced extends Model
+class ProductAdvanced extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'product_advanced';
 
@@ -28,6 +30,28 @@ class ProductAdvanced extends Model
         'has_commission',
         'commission_percentage',
     ];
+
+    public function getCacheTags(): array
+    {
+        $enterpriseId = $this->getEnterpriseID();
+
+        if (! $enterpriseId) {
+            return [];
+        }
+
+        return [
+            "product_advanced:enterprise:{$enterpriseId}",
+        ];
+    }
+
+    protected function getEnterpriseID(): ?int
+    {
+        if (! $this->relationLoaded('product')) {
+            $this->load('product');
+        }
+
+        return $this->product?->enterprise_id;
+    }
 
     public function product()
     {

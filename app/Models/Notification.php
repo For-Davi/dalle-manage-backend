@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Notification extends Model
+class Notification extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'notifications';
 
@@ -18,6 +20,17 @@ class Notification extends Model
         'read',
         'enterprise_id',
     ];
+
+    public function getCacheTags(): array
+    {
+        if (! $this->enterprise_id) {
+            return [];
+        }
+
+        return [
+            "notification:enterprise:{$this->enterprise_id}",
+        ];
+    }
 
     public function enterprise()
     {
