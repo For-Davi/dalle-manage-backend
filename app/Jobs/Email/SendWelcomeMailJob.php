@@ -21,7 +21,7 @@ class SendWelcomeMailJob implements ShouldQueue
     {
         $this->user = $user;
 
-        $this->onQueue('emails-high');
+        $this->onQueue('emails');
     }
 
     public function handle(): void

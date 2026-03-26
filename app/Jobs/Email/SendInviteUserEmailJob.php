@@ -30,7 +30,7 @@ class SendInviteUserEmailJob implements ShouldQueue
         $this->enterprise = $enterprise;
         $this->token = $token;
 
-        $this->onQueue('emails-low');
+        $this->onQueue('emails');
     }
 
     public function handle(): void

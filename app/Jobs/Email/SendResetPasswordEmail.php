@@ -24,7 +24,7 @@ class SendResetPasswordEmail implements ShouldQueue
         $this->user = $user;
         $this->token = $token;
 
-        $this->onQueue('emails-high');
+        $this->onQueue('emails');
     }
 
     public function handle()

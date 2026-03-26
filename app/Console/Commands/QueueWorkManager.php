@@ -15,7 +15,7 @@ class QueueWorkManager extends Command
     protected $description = 'Start all queue workers';
 
     protected array $queues = [
-        'emails' => 'emails-high,emails-low',
+        'emails' => 'emails',
         'payments' => 'payments',
         'notifications' => 'notifications',
     ];

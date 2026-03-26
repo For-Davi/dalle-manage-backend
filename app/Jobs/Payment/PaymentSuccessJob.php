@@ -15,7 +15,6 @@ class PaymentSuccessJob implements ShouldQueue
 
     public function __construct()
     {
-
         $this->onQueue('payments');
     }
 
