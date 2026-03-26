@@ -31,4 +31,9 @@ class SendNotificationEvent implements ShouldBroadcast
     {
         return 'notifications';
     }
+
+    public function broadcastQueue(): string
+    {
+        return 'notifications';
+    }
 }

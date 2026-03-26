@@ -21,4 +21,9 @@ class PaymentSuccessEvent implements ShouldBroadcast
     {
         return 'payment.success';
     }
+
+    public function broadcastQueue(): string
+    {
+        return 'payments';
+    }
 }
