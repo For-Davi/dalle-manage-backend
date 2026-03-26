@@ -26,6 +26,8 @@ class SendCouponToEmailJob implements ShouldQueue
         $this->email = $email;
         $this->coupon = $coupon;
         $this->type = $type;
+
+        $this->onQueue('emails-low');
     }
 
     public function handle(): void

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace App\Events\Payment;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -8,7 +8,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EventPaymentMade implements ShouldBroadcast
+class PaymentSuccessEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,6 +19,6 @@ class EventPaymentMade implements ShouldBroadcast
 
     public function broadcastAs()
     {
-        return 'payment.made';
+        return 'payment.success';
     }
 }

@@ -36,17 +36,15 @@ class CacheInvalidationObserver
         }
 
         $redis = Redis::connection('cache');
-        $cachePrefix = config('cache.prefix').':';
 
         foreach ($tags as $tag) {
             $indexKey = 'cache_index:'.$tag;
-
             $keys = $redis->smembers($indexKey);
 
             if (! empty($keys)) {
-                $redis->pipeline(function ($pipe) use ($keys, $cachePrefix, $indexKey) {
+                $redis->pipeline(function ($pipe) use ($keys, $indexKey) {
                     foreach ($keys as $key) {
-                        $pipe->unlink($cachePrefix.$key);
+                        $pipe->unlink($key);
                     }
                     $pipe->del($indexKey);
                 });

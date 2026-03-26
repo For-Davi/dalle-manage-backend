@@ -2,19 +2,25 @@
 
 namespace App\Jobs\Payment;
 
-use App\Events\EventPaymentMade;
+use App\Events\Payment\PaymentSuccessEvent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class PaymentMadeJob implements ShouldQueue
+class PaymentSuccessJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public function __construct()
+    {
+
+        $this->onQueue('payments');
+    }
+
     public function handle(): void
     {
-        EventPaymentMade::dispatch();
+        PaymentSuccessEvent::dispatch();
     }
 }

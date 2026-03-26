@@ -28,9 +28,11 @@ abstract class BaseRepository
         return Str::snake(class_basename($this->model));
     }
 
-    protected function enterprisePrefix(): string
+    protected function enterprisePrefix(?int $enterpriseID = null): string
     {
-        return "{$this->modelKey()}:enterprise:".Auth::user()->enterprise_id;
+        $id = $enterpriseID ?? Auth::user()->enterprise_id;
+
+        return "{$this->modelKey()}:enterprise:{$id}";
     }
 
     protected function enterpriseCacheKey(string $suffix = 'all'): string
@@ -95,15 +97,17 @@ abstract class BaseRepository
         return $this->model->get();
     }
 
-    public function getAllByUser(array $relations = [])
+    public function getAllByUser(?int $userID = null, array $relations = [])
     {
-        $userId = Auth::id() ?? 'guest';
+        $userId = $userID ?? Auth::user()->id;
         $suffix = md5(serialize($relations));
-        $key = "{$this->enterprisePrefix()}:user_{$userId}:{$suffix}";
 
-        return $this->remember($key, function () use ($relations) {
+        $key = "notification:user:{$userId}:{$suffix}";
+
+        return $this->remember($key, function () use ($userId, $relations) {
             return $this->model->query()
                 ->with($relations)
+                ->where('user_id', $userId)
                 ->when($this->model instanceof Notification, fn ($q) => $q->latest())
                 ->get();
         });

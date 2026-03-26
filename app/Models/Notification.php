@@ -23,12 +23,12 @@ class Notification extends Model implements HasCacheTags
 
     public function getCacheTags(): array
     {
-        if (! $this->enterprise_id) {
+        if (! $this->user_id) {
             return [];
         }
 
         return [
-            "notification:enterprise:{$this->enterprise_id}",
+            "notification:user:{$this->user_id}",
         ];
     }
 

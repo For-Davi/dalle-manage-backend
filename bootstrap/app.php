@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhook.asaas' => CheckWebhookAsaasToken::class,
         ]);
     })
+    ->withBroadcasting(
+        channels: __DIR__.'/../routes/channels.php',
+    )
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
