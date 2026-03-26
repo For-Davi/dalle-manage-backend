@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class ProductMovement extends Model
+class ProductMovement extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'product_movements';
 
@@ -40,6 +42,17 @@ class ProductMovement extends Model
     protected static function booted()
     {
         static::addGlobalScope(new EnterpriseScope);
+    }
+
+    public function getCacheTags(): array
+    {
+        if (! $this->enterprise_id) {
+            return [];
+        }
+
+        return [
+            "product_movement:enterprise:{$this->enterprise_id}",
+        ];
     }
 
     public function enterprise()

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class SupplierOrderItem extends Model
+class SupplierOrderItem extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'supplier_order_items';
 
@@ -21,6 +23,28 @@ class SupplierOrderItem extends Model
         'date_received',
         'finished',
     ];
+
+    public function getCacheTags(): array
+    {
+        $enterpriseId = $this->getEnterpriseID();
+
+        if (! $enterpriseId) {
+            return [];
+        }
+
+        return [
+            "supplier_order_item:enterprise:{$enterpriseId}",
+        ];
+    }
+
+    protected function getEnterpriseID(): ?int
+    {
+        if (! $this->relationLoaded('variant')) {
+            $this->load('variant');
+        }
+
+        return $this->variant?->enterprise_id;
+    }
 
     public function enterprise()
     {

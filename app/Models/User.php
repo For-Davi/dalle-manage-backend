@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasCacheTags
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, InvalidatesCache, Notifiable;
 
     protected $fillable = [
         'name',
@@ -41,6 +43,17 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::addGlobalScope(new EnterpriseScope);
+    }
+
+    public function getCacheTags(): array
+    {
+        if (! $this->enterprise_id) {
+            return [];
+        }
+
+        return [
+            "user:enterprise:{$this->enterprise_id}",
+        ];
     }
 
     public function image()

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SettingSystem extends Model
+class SettingSystem extends Model implements HasCacheTags
 {
-    use HasFactory;
+    use HasFactory, InvalidatesCache;
 
     protected $table = 'setting_system';
 
@@ -22,6 +24,17 @@ class SettingSystem extends Model
     protected static function booted()
     {
         static::addGlobalScope(new EnterpriseScope);
+    }
+
+    public function getCacheTags(): array
+    {
+        if (! $this->enterprise_id) {
+            return [];
+        }
+
+        return [
+            "setting_system:enterprise:{$this->enterprise_id}",
+        ];
     }
 
     public function enterprise()

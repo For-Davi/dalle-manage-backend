@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Email;
 
 use App\Mail\InviteUserMail;
 use App\Models\PasswordResetToken;
@@ -29,6 +29,8 @@ class SendInviteUserEmailJob implements ShouldQueue
         $this->admin = $admin;
         $this->enterprise = $enterprise;
         $this->token = $token;
+
+        $this->onQueue('emails');
     }
 
     public function handle(): void

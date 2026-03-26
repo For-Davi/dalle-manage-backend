@@ -11,7 +11,7 @@ use App\DTO\Sale\SalePayment\CreateSalePaymentDTO;
 use App\Helpers\ClientHelper;
 use App\Helpers\ExchangePaymentHelper;
 use App\Helpers\SaleHelper;
-use App\Jobs\SendCouponToEmailJob;
+use App\Jobs\Email\SendCouponToEmailJob;
 use App\Repositories\ClientRepository;
 use App\Repositories\ExchangeAdditionalRepository;
 use App\Repositories\ExchangePaymentMethodRepository;

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class ReturnItem extends Model
+class ReturnItem extends Model implements HasCacheTags
 {
-    use HasFactory, Notifiable;
+    use HasFactory, InvalidatesCache, Notifiable;
 
     protected $table = 'return_items';
 
@@ -26,4 +28,31 @@ class ReturnItem extends Model
         'reason',
         'description',
     ];
+
+    public function getCacheTags(): array
+    {
+        $enterpriseId = $this->getEnterpriseID();
+
+        if (! $enterpriseId) {
+            return [];
+        }
+
+        return [
+            "return_item:enterprise:{$enterpriseId}",
+        ];
+    }
+
+    protected function getEnterpriseID(): ?int
+    {
+        if (! $this->relationLoaded('variant')) {
+            $this->load('variant');
+        }
+
+        return $this->variant?->enterprise_id;
+    }
+
+    public function variant()
+    {
+        return $this->belongsTo(ProductVariant::class);
+    }
 }

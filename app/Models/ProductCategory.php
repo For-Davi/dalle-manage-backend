@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class ProductCategory extends Model
+class ProductCategory extends Model implements HasCacheTags
 {
-    use HasFactory, Notifiable;
+    use HasFactory, InvalidatesCache, Notifiable;
 
     protected $table = 'product_categories';
 
@@ -21,6 +23,19 @@ class ProductCategory extends Model
     protected static function booted()
     {
         static::addGlobalScope(new EnterpriseScope);
+    }
+
+    public function getCacheTags(): array
+    {
+        $enterpriseId = $this->getEnterpriseID();
+
+        if (! $enterpriseId) {
+            return [];
+        }
+
+        return [
+            "product_category:enterprise:{$enterpriseId}",
+        ];
     }
 
     public function enterprise()

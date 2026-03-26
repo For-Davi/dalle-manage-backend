@@ -135,9 +135,7 @@ class ProductController extends BaseController
     public function filter(FilterProductRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
-            $productFilterDTO = FilterProductDTO::fromRequest([
-                ...$request->only(['name', 'active', 'stockCritical', 'sku', 'category']),
-            ]);
+            $productFilterDTO = FilterProductDTO::fromRequest($request);
             $productsVariants = $this->productVariantRepository->getAllWithFilter($productFilterDTO);
 
             return response()->json(['products' => ProductVariantTableResource::collection($productsVariants)], 200);

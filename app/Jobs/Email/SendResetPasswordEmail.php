@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Email;
 
 use App\Mail\ResetPasswordMail;
 use App\Models\PasswordResetToken;
@@ -23,6 +23,8 @@ class SendResetPasswordEmail implements ShouldQueue
     {
         $this->user = $user;
         $this->token = $token;
+
+        $this->onQueue('emails');
     }
 
     public function handle()

@@ -1,29 +1,25 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Payment;
 
-use App\Mail\WelcomeMail;
-use App\Models\User;
+use App\Events\Payment\PaymentSuccessEvent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 
-class SendWelcomeMailJob implements ShouldQueue
+class PaymentSuccessJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected User $user;
-
-    public function __construct(User $user)
+    public function __construct()
     {
-        $this->user = $user;
+        $this->onQueue('payments');
     }
 
     public function handle(): void
     {
-        Mail::to($this->user->email)->send(new WelcomeMail($this->user));
+        PaymentSuccessEvent::dispatch();
     }
 }

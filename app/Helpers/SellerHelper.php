@@ -21,6 +21,20 @@ class SellerHelper
         }
     }
 
+    public static function existsCode($code)
+    {
+
+        $existCode = DB::connection('dalle_manage_adm')->table('sellers')
+            ->where('code', $code)
+            ->first();
+
+        if ($existCode) {
+            throw ValidationException::withMessages([
+                'sellerCode' => ['O código informado já está sendo utilizado.'],
+            ]);
+        }
+    }
+
     public static function existsEmail($email, $mode, $sellerID = null)
     {
 

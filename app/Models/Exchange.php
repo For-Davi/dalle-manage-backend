@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Exchange extends Model
+class Exchange extends Model implements HasCacheTags
 {
-    use HasFactory, Notifiable;
+    use HasFactory, InvalidatesCache, Notifiable;
 
     protected $table = 'exchanges';
 
@@ -24,6 +26,28 @@ class Exchange extends Model
         'updated_by_email',
         'description',
     ];
+
+    public function getCacheTags(): array
+    {
+        $enterpriseId = $this->getEnterpriseID();
+
+        if (! $enterpriseId) {
+            return [];
+        }
+
+        return [
+            "exchange:enterprise:{$enterpriseId}",
+        ];
+    }
+
+    protected function getEnterpriseID(): ?int
+    {
+        if (! $this->relationLoaded('sale')) {
+            $this->load('sale');
+        }
+
+        return $this->sale?->enterprise_id;
+    }
 
     public function sale()
     {

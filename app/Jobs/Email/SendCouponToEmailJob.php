@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Email;
 
 use App\Mail\CouponMail;
 use App\Mail\ExchangeCouponMail;
@@ -26,6 +26,8 @@ class SendCouponToEmailJob implements ShouldQueue
         $this->email = $email;
         $this->coupon = $coupon;
         $this->type = $type;
+
+        $this->onQueue('emails');
     }
 
     public function handle(): void

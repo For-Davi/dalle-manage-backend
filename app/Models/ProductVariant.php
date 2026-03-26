@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class ProductVariant extends Model
+class ProductVariant extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache, Notifiable;
 
     protected $table = 'product_variants';
 
@@ -39,6 +41,13 @@ class ProductVariant extends Model
                 $variant->saveQuietly();
             }
         });
+    }
+
+    public function getCacheTags(): array
+    {
+        return [
+            "product_variant:enterprise:{$this->enterprise_id}",
+        ];
     }
 
     public function setSkuAttribute($value)

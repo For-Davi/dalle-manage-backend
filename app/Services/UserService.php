@@ -18,8 +18,8 @@ use App\DTO\User\UserStartDTO;
 use App\Helpers\SellerHelper;
 use App\Helpers\UserHelper;
 use App\Http\Client\PaymentsHttpClient;
-use App\Jobs\SendInviteUserEmailJob;
-use App\Jobs\SendResetPasswordEmail;
+use App\Jobs\Email\SendInviteUserEmailJob;
+use App\Jobs\Email\SendResetPasswordEmail;
 use App\Models\PasswordResetToken;
 use App\Repositories\EmployeeRepository;
 use App\Repositories\EnterpriseRepository;
@@ -229,11 +229,7 @@ class UserService
 
         if ($request->createEmployee) {
             $employeeDTO = StartEmployeeDTO::fromRequest([
-                ...$request->only([
-                    'name',
-                    'email',
-                    'departmentId',
-                ]),
+                $request,
                 'userId' => $user->id,
                 'hasLoginAccess' => 1,
             ]);

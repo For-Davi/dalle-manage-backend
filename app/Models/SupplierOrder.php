@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\HasCacheTags;
 use App\Scopes\EnterpriseScope;
+use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class SupplierOrder extends Model
+class SupplierOrder extends Model implements HasCacheTags
 {
-    use Notifiable;
+    use InvalidatesCache,Notifiable;
 
     protected $table = 'supplier_orders';
 
@@ -28,6 +30,17 @@ class SupplierOrder extends Model
     protected static function booted()
     {
         static::addGlobalScope(new EnterpriseScope);
+    }
+
+    public function getCacheTags(): array
+    {
+        if (! $this->enterprise_id) {
+            return [];
+        }
+
+        return [
+            "supplier_order:enterprise:{$this->enterprise_id}",
+        ];
     }
 
     public function enterprise()

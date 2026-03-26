@@ -35,7 +35,12 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/broadcasting/auth', function () {
+    return Broadcast::auth(request());
+})->middleware('auth:sanctum');
 
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/register', [UserController::class, 'register']);

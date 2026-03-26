@@ -30,6 +30,22 @@ services:
             - mysql_manage
             - smtp
             - prometheus
+            - redis
+
+    redis:
+        image: 'redis:7-alpine'
+        container_name: redis
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sail-redis:/data'
+        networks:
+            - manage-network
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
+
     prometheus:
         image: prom/prometheus
         container_name: prometheus
@@ -84,11 +100,15 @@ services:
             - '8025:8025'
         networks:
             - manage-network
+
 networks:
     manage-network:
         driver: bridge
         external: true
+
 volumes:
     sail-mysql:
+        driver: local
+    sail-redis:
         driver: local
     grafana_data: null

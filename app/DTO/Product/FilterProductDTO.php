@@ -16,7 +16,7 @@ class FilterProductDTO extends BaseDTO
         public readonly ?int $enterpriseID,
     ) {}
 
-    public static function fromRequest(array $data): self
+    public static function fromRequest($data): self
     {
         return new self(
             name: $data['name'],
