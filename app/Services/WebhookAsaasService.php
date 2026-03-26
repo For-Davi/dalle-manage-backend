@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Enums\Subscription\Subscription;
+use App\Jobs\Notification\SendNotificationJob;
 use App\Jobs\Payment\PaymentSuccessJob;
-use App\Notification\SendNotification;
 use App\Repositories\EnterpriseRepository;
 use App\Repositories\SubscriptionRepository;
 use App\Repositories\UserRepository;
@@ -15,7 +15,6 @@ class WebhookAsaasService
         protected SubscriptionRepository $subscriptionRepository,
         protected UserRepository $userRepository,
         protected EnterpriseRepository $enterpriseRepository,
-        protected SendNotification $notification
     ) {}
 
     public function update(array $request): bool
@@ -60,10 +59,11 @@ class WebhookAsaasService
         $subscription = $this->subscriptionRepository->findById($subscriptionID);
         $subscriptionName = Subscription::from($subscription->name)->label();
 
-        $this->notification->notifyAllUsersByEnterprise(
-            $user->enterprise_id,
-            '💲 Assinatura Renovada',
-            $this->buildRenewalMessage($user->name, $subscriptionName, $expiredDate)
+        SendNotificationJob::dispatch(
+            'Assinatura Renovada',
+            $this->buildRenewalMessage($user->name, $subscriptionName, $expiredDate),
+            null,
+            $user->enterprise_id
         );
     }
 
