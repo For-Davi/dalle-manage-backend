@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits\Repositories;
+namespace App\Repositories;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
