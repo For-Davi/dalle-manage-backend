@@ -64,6 +64,7 @@ class ReturnController extends BaseController
 
     public function store(CreateReturnRequest $request)
     {
+        dd('dados', $request);
         return $this->safeTransaction(function () use ($request) {
             $this->service->create($request);
             $returns = $this->repository->getAllBySale($request['saleID']);

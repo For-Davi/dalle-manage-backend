@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Return;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateReturnRequest extends FormRequest
 {
@@ -33,6 +34,22 @@ class CreateReturnRequest extends FormRequest
                 'exchangeProducts' => collect($this->input('exchangeProducts', []))
                     ->map(fn ($p) => is_string($p) ? json_decode($p, true) : $p)
                     ->toArray(),
+            ]);
+        }
+        if ($this->has('paymentData.payment')) {
+            $this->merge([
+                'paymentData' => array_merge($this->input('paymentData', []), [
+                    'payment' => collect($this->input('paymentData.payment', []))
+                        ->map(function ($p) {
+                            $p = is_string($p) ? json_decode($p, true) : $p;
+                            if ($p['paymentType'] === 'CREDIT') {
+                                $p['receiptID'] = null;
+                            }
+
+                            return $p;
+                        })
+                        ->toArray(),
+                ]),
             ]);
         }
     }
@@ -83,6 +100,38 @@ class CreateReturnRequest extends FormRequest
             'exchangeProducts.*.quantity' => 'required|numeric|min:1',
             'exchangeProducts.*.color.name' => 'nullable|string',
             'exchangeProducts.*.color.hex_color_code' => 'nullable|string',
+
+            //ENTREGA E PAGAMENTO (DIFERENÇA OU ESTORNO)
+            'paymentData' => [
+                'nullable',
+                'array',
+                Rule::requiredIf(function () {
+                    return 
+                    ($this->input('exchangeData.exchangeValue') > 0 || $this->input('exchangeData.differenceValue') > 0) && 
+                    !$this->input('exchangeData.generatesCredit');
+                }),
+            ],
+            'paymentData.freight' => 'required|boolean',
+            'paymentData.freightValue' => 'required|numeric|min:0',
+            'paymentData.cep' => 'nullable|numeric',
+            'paymentData.state' => 'nullable|string|max:20',
+            'paymentData.city' => 'nullable|string|max:50',
+            'paymentData.neighborhood' => 'nullable|string|max:50',
+            'paymentData.address' => 'nullable|string|max:100',
+            'paymentData.numberAddress' => 'nullable|numeric',
+            'paymentData.complement' => 'nullable|string|max:100',
+            'paymentData.recipientName' => 'nullable|string|min:3|max:100',
+            'paymentData.recipientPhone' => 'nullable|string|max:20',
+            'paymentData.observation' => 'nullable|string|max:5000',
+            'paymentData.change' => 'required|numeric|min:0',
+            'paymentData.fees' => 'required|numeric|min:0',
+            'paymentData.payment' => 'required_with:paymentData|array',
+            'paymentData.payment.*.paymentType' => 'required|string|exists:types_receipt,name',
+            'paymentData.payment.*.value' => 'nullable|numeric|min:0',
+            'paymentData.payment.*.receiptID' => 'required|exists:receipts,id',
+            'paymentData.payment.*.installment' => 'nullable',
+            'paymentData.payment.*.installment.value' => 'nullable|integer|min:1|max:12',
+            'paymentData.payment.*.installment.amount' => 'nullable|numeric',
         ];
     }
 
@@ -155,6 +204,53 @@ class CreateReturnRequest extends FormRequest
             'exchangeProducts.*.quantity.min' => 'A quantidade do produto da troca deve ser no mínimo 1.',
             'exchangeProducts.*.color.name.string' => 'O nome da cor deve ser um texto válido.',
             'exchangeProducts.*.color.hex_color_code.string' => 'O código hexadecimal da cor deve ser um texto válido.',
+
+            // ENTREGA
+            'paymentData.freight.required' => 'Informe se a entrega possui frete.',
+            'paymentData.freight.boolean' => 'O campo de frete deve ser verdadeiro ou falso.',
+            'paymentData.freightValue.required' => 'Informe o valor do frete.',
+            'paymentData.freightValue.numeric' => 'O valor do frete deve ser numérico.',
+            'paymentData.freightValue.min' => 'O valor do frete não pode ser negativo.',
+            'paymentData.cep.numeric' => 'O CEP deve ser numérico.',
+            'paymentData.state.string' => 'O estado deve ser um texto válido.',
+            'paymentData.state.max' => 'O estado não pode ultrapassar 20 caracteres.',
+            'paymentData.city.string' => 'A cidade deve ser um texto válido.',
+            'paymentData.city.max' => 'A cidade não pode ultrapassar 50 caracteres.',
+            'paymentData.neighborhood.string' => 'O bairro deve ser um texto válido.',
+            'paymentData.neighborhood.max' => 'O bairro não pode ultrapassar 50 caracteres.',
+            'paymentData.address.string' => 'O endereço deve ser um texto válido.',
+            'paymentData.address.max' => 'O endereço não pode ultrapassar 100 caracteres.',
+            'paymentData.numberAddress.numeric' => 'O número do endereço deve ser numérico.',
+            'paymentData.complement.string' => 'O complemento deve ser um texto válido.',
+            'paymentData.complement.max' => 'O complemento não pode ultrapassar 100 caracteres.',
+            'paymentData.recipientName.string' => 'O nome do destinatário deve ser um texto válido.',
+            'paymentData.recipientName.min' => 'O nome do destinatário deve ter no mínimo 3 caracteres.',
+            'paymentData.recipientName.max' => 'O nome do destinatário não pode ultrapassar 100 caracteres.',
+            'paymentData.recipientPhone.string' => 'O telefone do destinatário deve ser um texto válido.',
+            'paymentData.recipientPhone.max' => 'O telefone não pode ultrapassar 20 caracteres.',
+            'paymentData.observation.string' => 'A observação deve ser um texto válido.',
+            'paymentData.observation.max' => 'A observação não pode ultrapassar 5000 caracteres.',
+
+            // PAGAMENTO
+            'paymentData.payment.required_with' => 'Informe os dados de pagamento.',
+            'paymentData.payment.array' => 'Os dados de pagamento devem ser um array.',
+            'paymentData.payment.change.required' => 'Informe o valor do troco.',
+            'paymentData.payment.change.numeric' => 'O valor do troco deve ser numérico.',
+            'paymentData.payment.change.min' => 'O valor do troco deve ser no mínimo 0.',
+            'paymentData.payment.fees.required' => 'Informe o valor das tarifas.',
+            'paymentData.payment.fees.numeric' => 'O valor das tarifas deve ser numérico.',
+            'paymentData.payment.fees.min' => 'O valor das tarifas deve ser no mínimo 0.',
+            'paymentData.payment.*.paymentType.required' => 'Informe o tipo de pagamento.',
+            'paymentData.payment.*.paymentType.string' => 'O tipo de pagamento deve ser um texto válido.',
+            'paymentData.payment.*.paymentType.exists' => 'O tipo de pagamento informado não é existe.',
+            'paymentData.payment.*.value.numeric' => 'O valor do pagamento deve ser numérico.',
+            'paymentData.payment.*.value.min' => 'O valor do pagamento deve ser no mínimo 0.',
+            'paymentData.payment.*.receiptID.required' => 'Informe o identificador do recebimento.',
+            'paymentData.payment.*.receiptID.exists' => 'O identificador do recebimento informado não é válido.',
+            'paymentData.payment.*.installment.value.integer' => 'O número de parcelas deve ser um inteiro.',
+            'paymentData.payment.*.installment.value.min' => 'O mínimo de parcelas é 1.',
+            'paymentData.payment.*.installment.value.max' => 'O máximo de parcelas é 12.',
+            'paymentData.payment.*.installment.amount.numeric' => 'O valor da parcela deve ser numérico.',
         ];
     }
 }
