@@ -41,12 +41,7 @@ class MovementService
         }
 
         $movementDTO = CreateOrUpdateMovementDTO::fromRequest([
-            ...$request->only([
-                'value',
-                'transactionCategoryID',
-                'description',
-                'type',
-            ]),
+            $request,
             'date' => $requestDate->format('d-m-Y'),
         ]);
 
@@ -58,12 +53,7 @@ class MovementService
         $requestDate = Carbon::createFromFormat('d/m/Y', $request->date);
 
         $movementDTO = CreateOrUpdateMovementDTO::fromRequest([
-            ...$request->only([
-                'value',
-                'transactionCategoryID',
-                'description',
-                'type',
-            ]),
+            $request,
             'date' => $requestDate->format('d-m-Y'),
         ]);
 

@@ -229,11 +229,7 @@ class UserService
 
         if ($request->createEmployee) {
             $employeeDTO = StartEmployeeDTO::fromRequest([
-                ...$request->only([
-                    'name',
-                    'email',
-                    'departmentId',
-                ]),
+                $request,
                 'userId' => $user->id,
                 'hasLoginAccess' => 1,
             ]);

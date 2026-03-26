@@ -32,12 +32,7 @@ class ScheduleService
                 }
 
                 $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest([
-                    ...$request->only([
-                        'value',
-                        'transactionCategoryID',
-                        'description',
-                        'type',
-                    ]),
+                    $request,
                     'date' => $date->format('d-m-Y'),
                 ]);
 
@@ -48,12 +43,7 @@ class ScheduleService
         }
 
         $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest([
-            ...$request->only([
-                'value',
-                'transactionCategoryID',
-                'description',
-                'type',
-            ]),
+            $request,
             'date' => $requestDate->format('d-m-Y'),
         ]);
 
@@ -65,12 +55,7 @@ class ScheduleService
         $requestDate = Carbon::createFromFormat('d/m/Y', $request->date);
 
         $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest([
-            ...$request->only([
-                'value',
-                'transactionCategoryID',
-                'description',
-                'type',
-            ]),
+            $request,
             'date' => $requestDate->format('d-m-Y'),
         ]);
 

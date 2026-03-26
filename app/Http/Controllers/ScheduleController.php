@@ -51,9 +51,7 @@ class ScheduleController extends BaseController
     public function filter(FilterScheduleRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
-            $scheduleFilterDTO = FilterScheduleDTO::fromRequest([
-                ...$request->only(['period', 'category', 'type']),
-            ]);
+            $scheduleFilterDTO = FilterScheduleDTO::fromRequest($request);
             $schedules = $this->repository->getAllWithFilter($scheduleFilterDTO->toArray(), ['category']);
 
             return response()->json(['schedules' => $schedules], 200);
