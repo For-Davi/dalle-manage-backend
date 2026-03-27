@@ -18,7 +18,6 @@ class Commission extends Model implements HasCacheTags
         'sale_id',
         'return_id',
         'type',
-        'status',
         'product_id',
         'product_name',
         'seller_id',

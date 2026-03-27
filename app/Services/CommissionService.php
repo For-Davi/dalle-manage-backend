@@ -56,7 +56,6 @@ class CommissionService
                 'sale_id' => $saleID,
                 'return_id' => $returnID,
                 'type' => $type,
-                'status' => 'active',
                 'product_id' => $item['product_id'],
                 'product_name' => $item['product_name'],
                 'seller_id' => $seller->id,
