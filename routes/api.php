@@ -310,7 +310,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     });
 
     Route::prefix('commission')->group(function () {
-        Route::get('/', [CommissionController::class, 'index']);
+        Route::post('/', [CommissionController::class, 'index']);
         Route::get('/{saleID}', [CommissionController::class, 'showBySale']);
     });
 
