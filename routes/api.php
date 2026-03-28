@@ -311,6 +311,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('commission')->group(function () {
         Route::post('/', [CommissionController::class, 'index']);
+        Route::post('/export', [CommissionController::class, 'export']);
         Route::get('/{saleID}', [CommissionController::class, 'showBySale']);
     });
 

@@ -38,8 +38,9 @@ class CommissionRepository extends BaseRepository
                 DB::raw("DATE_FORMAT(sales.date, '%m/%Y') as period"),
                 'employees.id as seller_id',
                 'employees.name as seller_name',
-                DB::raw('COUNT(sales.id) as sales_count'),
-                DB::raw('SUM(commissions.commission_value) as total_commission')
+                DB::raw('COUNT(DISTINCT sales.id) as sales_count'),
+                DB::raw('SUM(commissions.commission_value) as total_commission'),
+                DB::raw("DATE_FORMAT(sales.date, '%Y%m') as period_sort")
             )
             ->where('sales.enterprise_id', $filters['enterprise_id'])
             ->when(! empty($filters['seller_id']), function ($query) use ($filters) {
@@ -59,6 +60,41 @@ class CommissionRepository extends BaseRepository
             )
             ->orderBy('period_sort', 'desc')
             ->orderBy('employees.name', 'asc')
+            ->get()
+            ->map(function ($item) {
+                unset($item->period_sort);
+
+                return $item;
+            });
+    }
+
+    public function getCommissionDetailsBySellerAndPeriod($sellerId, $period)
+    {
+        return DB::table('sales')
+            ->join('commissions', 'sales.id', '=', 'commissions.sale_id')
+            ->select(
+                'sales.id as sale_id',
+                'sales.date as sale_date',
+                'sales.client_name',
+                'sales.current_total as sale_total',
+                'commissions.seller_id',
+                'commissions.seller_name',
+                'commissions.seller_email',
+                DB::raw('SUM(commissions.commission_value) as commission_value'),
+                DB::raw("DATE_FORMAT(sales.date, '%m/%Y') as period"),
+            )
+            ->groupBy(
+                'sales.id',
+                'sales.date',
+                'sales.client_name',
+                'sales.current_total',
+                'commissions.seller_id',
+                'commissions.seller_name',
+                'commissions.seller_email',
+            )
+            ->when($sellerId, fn ($q) => $q->where('commissions.seller_id', $sellerId))
+            ->when($period, fn ($q) => $q->whereRaw("DATE_FORMAT(sales.date, '%m/%Y') = ?", [$period]))
+            ->orderBy('sales.date', 'desc')
             ->get();
     }
 

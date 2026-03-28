@@ -3,18 +3,18 @@
 namespace App\Services;
 
 use App\DTO\Commission\CreateCommissionDTO;
-use App\Repositories\ClientRepository;
 use App\Repositories\CommissionRepository;
 use App\Repositories\EmployeeRepository;
 use App\Repositories\ProductAdvancedRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\ProductVariantRepository;
 use App\Repositories\SaleRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CommissionService
 {
     public function __construct(
-        protected ClientRepository $repository,
+        protected CommissionRepository $repository,
         protected ProductRepository $productRepository,
         protected ProductAdvancedRepository $productAdavancedRepository,
         protected EmployeeRepository $employeeRepository,
@@ -139,5 +139,20 @@ class CommissionService
         }
 
         return $commissionProducts;
+    }
+
+    public function export($request)
+    {
+        $dateTime = now()->format('Ymd_His');
+
+        $commissionDetails = $this->repository->getCommissionDetailsBySellerAndPeriod($request->sellerID, $request->period);
+
+        $fileName = "commission_details_{$dateTime}.pdf";
+
+        $pdf = Pdf::loadView('exports.commissions-pdf', [
+            'commissionDetails' => $commissionDetails,
+        ]);
+
+        return $pdf->download($fileName);
     }
 }
