@@ -18,6 +18,8 @@ class CreateSaleItemDTO
         public readonly ?string $product_category,
         public readonly int $quantity,
         public readonly float $total,
+        public readonly int $delivered,
+        public readonly int $quantity_delivered,
     ) {}
 
     public static function fromRequest($data): self
@@ -36,6 +38,8 @@ class CreateSaleItemDTO
             product_category: $data['productCategory'] ?? null,
             quantity: $data['quantity'],
             total: $data['total'],
+            delivered: $data['delivered'],
+            quantity_delivered: $data['quantityDelivered'],
         );
     }
 
@@ -55,6 +59,8 @@ class CreateSaleItemDTO
             'product_category' => $this->product_category,
             'quantity' => $this->quantity,
             'total' => $this->total,
+            'delivered' => $this->delivered,
+            'quantity_delivered' => $this->quantity_delivered,
         ];
     }
 }

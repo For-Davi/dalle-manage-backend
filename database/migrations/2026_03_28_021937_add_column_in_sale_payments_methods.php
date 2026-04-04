@@ -9,16 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sale_payments_methods', function (Blueprint $table) {
-            $table->unsignedBigInteger('exchange_id')->nullable();
-            $table->foreign('exchange_id')->references('id')->on('exchanges');
+            $table->unsignedBigInteger('return_id')->nullable();
+            $table->foreign('return_id')->references('id')->on('returns');
         });
     }
 
     public function down(): void
     {
         Schema::table('sale_payments_methods', function (Blueprint $table) {
-            $table->dropForeign(['exchange_id']);
-            $table->dropColumn('exchange_id');
+            $table->dropForeign(['return_id']);
+            $table->dropColumn('return_id');
         });
     }
 };

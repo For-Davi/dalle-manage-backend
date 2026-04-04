@@ -7,6 +7,7 @@ use App\Http\Requests\Return\DeleteReturnRequest;
 use App\Http\Requests\Return\IndexReturnRequest;
 use App\Http\Requests\Return\ShowReturnRequest;
 use App\Http\Requests\Return\UpdateReturnRequest;
+use App\Http\Resources\Return\ReturnExchangeTaxCouponResource;
 use App\Http\Resources\Return\ReturnResource;
 use App\Http\Resources\Return\ShowLinkedReturnProductsResource;
 use App\Http\Resources\Return\ShowReturnResource;
@@ -64,12 +65,12 @@ class ReturnController extends BaseController
 
     public function store(CreateReturnRequest $request)
     {
-        dd('dados', $request);
         return $this->safeTransaction(function () use ($request) {
-            $this->service->create($request);
+            $couponData =  $this->service->create($request);
             $returns = $this->repository->getAllBySale($request['saleID']);
+            $coupon = is_object($couponData) ? new ReturnExchangeTaxCouponResource($couponData) : null;
 
-            return response()->json(['returns' => ReturnResource::collection($returns), 'message' => 'Registro de devolução criado'], 201);
+            return response()->json(['returns' => ReturnResource::collection($returns), 'coupon' => $coupon,'message' => 'Registro de devolução criado'], 201);
         }, 'Erro ao criar devolução', $request);
     }
 

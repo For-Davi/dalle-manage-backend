@@ -18,6 +18,11 @@ class Returns extends Model implements HasCacheTags
         'sale_id',
         'linked_return_id',
         'status',
+        'exchange_value',
+        'difference_value',
+        'current_value',
+        'fees',
+        'change',
         'created_by_name',
         'created_by_email',
         'updated_by_name',
@@ -54,6 +59,11 @@ class Returns extends Model implements HasCacheTags
         return $this->belongsTo(Sale::class);
     }
 
+    public function delivery()
+    {
+        return $this->hasOne(SaleDelivery::class, 'return_id');
+    }
+
     public function items()
     {
         return $this->hasMany(ReturnItem::class, 'return_id');
@@ -67,10 +77,5 @@ class Returns extends Model implements HasCacheTags
     public function returns()
     {
         return $this->hasOne(Returns::class, 'linked_return_id');
-    }
-
-    public function exchanges()
-    {
-        return $this->hasOne(Exchange::class, 'return_id');
     }
 }

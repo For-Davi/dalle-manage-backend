@@ -36,10 +36,10 @@ class CreateReturnRequest extends FormRequest
                     ->toArray(),
             ]);
         }
-        if ($this->has('paymentData.payment')) {
+        if ($this->has('paymentData.paymentExchangeOrDifferenceData.payment')) {
             $this->merge([
-                'paymentData' => array_merge($this->input('paymentData', []), [
-                    'payment' => collect($this->input('paymentData.payment', []))
+                'paymentData.paymentExchangeOrDifferenceData' => array_merge($this->input('paymentData.paymentExchangeOrDifferenceData', []), [
+                    'payment' => collect($this->input('paymentData.paymentExchangeOrDifferenceData.payment', []))
                         ->map(function ($p) {
                             $p = is_string($p) ? json_decode($p, true) : $p;
                             if ($p['paymentType'] === 'CREDIT') {
@@ -52,6 +52,35 @@ class CreateReturnRequest extends FormRequest
                 ]),
             ]);
         }
+        if ($this->has('paymentData.freightPaymentData.payment')) {
+            $this->merge([
+                'paymentData.freightPaymentData' => array_merge($this->input('paymentData.freightPaymentData', []), [
+                    'payment' => collect($this->input('paymentData.freightPaymentData.payment', []))
+                        ->map(function ($p) {
+                            $p = is_string($p) ? json_decode($p, true) : $p;
+                            if ($p['paymentType'] === 'CREDIT') {
+                                $p['receiptID'] = null;
+                            }
+
+                            return $p;
+                        })
+                        ->toArray(),
+                ]),
+            ]);
+        }
+    }
+
+    private function mustHaveExchangeOrDifferencePayment(): bool
+    {
+        return
+            ($this->input('exchangeData.exchangeValue') > 0 ||
+             $this->input('exchangeData.differenceValue') > 0)
+            && ! $this->input('exchangeData.generatesCredit');
+    }
+
+    private function mustHaveFreightPayment(): bool
+    {
+        return $this->input('paymentData.deliveryData.freight') && $this->input('paymentData.deliveryData.freightValue') > 0 && $this->input('exchangeData.differenceValue') === 0;
     }
 
     public function rules(): array
@@ -101,37 +130,99 @@ class CreateReturnRequest extends FormRequest
             'exchangeProducts.*.color.name' => 'nullable|string',
             'exchangeProducts.*.color.hex_color_code' => 'nullable|string',
 
-            //ENTREGA E PAGAMENTO (DIFERENÇA OU ESTORNO)
-            'paymentData' => [
+            // PAGAMENTO (DIFERENÇA OU ESTORNO)
+            'paymentData.paymentExchangeOrDifferenceData' => [
                 'nullable',
                 'array',
-                Rule::requiredIf(function () {
-                    return 
-                    ($this->input('exchangeData.exchangeValue') > 0 || $this->input('exchangeData.differenceValue') > 0) && 
-                    !$this->input('exchangeData.generatesCredit');
-                }),
+                Rule::requiredIf(fn () => $this->mustHaveExchangeOrDifferencePayment()),
             ],
-            'paymentData.freight' => 'required|boolean',
-            'paymentData.freightValue' => 'required|numeric|min:0',
-            'paymentData.cep' => 'nullable|numeric',
-            'paymentData.state' => 'nullable|string|max:20',
-            'paymentData.city' => 'nullable|string|max:50',
-            'paymentData.neighborhood' => 'nullable|string|max:50',
-            'paymentData.address' => 'nullable|string|max:100',
-            'paymentData.numberAddress' => 'nullable|numeric',
-            'paymentData.complement' => 'nullable|string|max:100',
-            'paymentData.recipientName' => 'nullable|string|min:3|max:100',
-            'paymentData.recipientPhone' => 'nullable|string|max:20',
-            'paymentData.observation' => 'nullable|string|max:5000',
-            'paymentData.change' => 'required|numeric|min:0',
-            'paymentData.fees' => 'required|numeric|min:0',
-            'paymentData.payment' => 'required_with:paymentData|array',
-            'paymentData.payment.*.paymentType' => 'required|string|exists:types_receipt,name',
-            'paymentData.payment.*.value' => 'nullable|numeric|min:0',
-            'paymentData.payment.*.receiptID' => 'required|exists:receipts,id',
-            'paymentData.payment.*.installment' => 'nullable',
-            'paymentData.payment.*.installment.value' => 'nullable|integer|min:1|max:12',
-            'paymentData.payment.*.installment.amount' => 'nullable|numeric',
+
+            // DADOS DA ENTREGA
+            'paymentData.deliveryData.freight' => 'required|boolean',
+            'paymentData.deliveryData.freightValue' => 'required|numeric|min:0',
+            'paymentData.deliveryData.cep' => 'nullable|numeric',
+            'paymentData.deliveryData.state' => 'nullable|string|max:20',
+            'paymentData.deliveryData.city' => 'nullable|string|max:50',
+            'paymentData.deliveryData.neighborhood' => 'nullable|string|max:50',
+            'paymentData.deliveryData.address' => 'nullable|string|max:100',
+            'paymentData.deliveryData.numberAddress' => 'nullable|numeric',
+            'paymentData.deliveryData.complement' => 'nullable|string|max:100',
+            'paymentData.deliveryData.recipientName' => 'nullable|string|min:3|max:100',
+            'paymentData.deliveryData.recipientPhone' => 'nullable|string|max:20',
+            'paymentData.deliveryData.observation' => 'nullable|string|max:5000',
+
+            // PAGAMENTO DA DIFERENÇA OU DO ESTORNO
+            'paymentData.paymentExchangeOrDifferenceData.change' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(fn () => $this->mustHaveExchangeOrDifferencePayment()),
+            ],
+            'paymentData.paymentExchangeOrDifferenceData.fees' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(fn () => $this->mustHaveExchangeOrDifferencePayment()),
+            ],
+            'paymentData.paymentExchangeOrDifferenceData.payment' => [
+                'nullable',
+                'array',
+                Rule::requiredIf(fn () => $this->mustHaveExchangeOrDifferencePayment()),
+            ],
+            'paymentData.paymentExchangeOrDifferenceData.payment.*.paymentType' => [
+                'nullable',
+                'string',
+                'exists:types_receipt,name',
+                Rule::requiredIf(fn () => $this->mustHaveExchangeOrDifferencePayment()),
+            ],
+            'paymentData.paymentExchangeOrDifferenceData.payment.*.value' => 'nullable|numeric|min:0',
+            'paymentData.paymentExchangeOrDifferenceData.payment.*.receiptID' => [
+                'nullable',
+                'exists:receipts,id',
+                Rule::requiredIf(fn () => $this->mustHaveExchangeOrDifferencePayment()),
+            ],
+            'paymentData.paymentExchangeOrDifferenceData.payment.*.installment' => 'nullable',
+            'paymentData.paymentExchangeOrDifferenceData.payment.*.installment.value' => 'nullable|integer|min:1|max:12',
+            'paymentData.paymentExchangeOrDifferenceData.payment.*.installment.amount' => 'nullable|numeric',
+
+            // PAGAMENTO DO FRETE DO CLIENTE
+            'paymentData.freightPaymentData' => [
+                'nullable',
+                'array',
+                Rule::requiredIf(fn () => $this->mustHaveExchangeOrDifferencePayment()),
+            ],
+            'paymentData.freightPaymentData.change' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(fn () => $this->mustHaveFreightPayment()),
+            ],
+            'paymentData.freightPaymentData.fees' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                Rule::requiredIf(fn () => $this->mustHaveFreightPayment()),
+            ],
+            'paymentData.freightPaymentData.payment' => [
+                'nullable',
+                'array',
+                Rule::requiredIf(fn () => $this->mustHaveFreightPayment()),
+            ],
+            'paymentData.freightPaymentData.payment.*.paymentType' => [
+                'nullable',
+                'string',
+                'exists:types_receipt,name',
+                Rule::requiredIf(fn () => $this->mustHaveFreightPayment()),
+            ],
+            'paymentData.freightPaymentData.payment.*.value' => 'nullable|numeric|min:0',
+            'paymentData.freightPaymentData.payment.*.receiptID' => [
+                'nullable',
+                'exists:receipts,id',
+                Rule::requiredIf(fn () => $this->mustHaveFreightPayment()),
+            ],
+            'paymentData.freightPaymentData.payment.*.installment' => 'nullable',
+            'paymentData.freightPaymentData.payment.*.installment.value' => 'nullable|integer|min:1|max:12',
+            'paymentData.freightPaymentData.payment.*.installment.amount' => 'nullable|numeric',
         ];
     }
 
@@ -206,51 +297,72 @@ class CreateReturnRequest extends FormRequest
             'exchangeProducts.*.color.hex_color_code.string' => 'O código hexadecimal da cor deve ser um texto válido.',
 
             // ENTREGA
-            'paymentData.freight.required' => 'Informe se a entrega possui frete.',
-            'paymentData.freight.boolean' => 'O campo de frete deve ser verdadeiro ou falso.',
-            'paymentData.freightValue.required' => 'Informe o valor do frete.',
-            'paymentData.freightValue.numeric' => 'O valor do frete deve ser numérico.',
-            'paymentData.freightValue.min' => 'O valor do frete não pode ser negativo.',
-            'paymentData.cep.numeric' => 'O CEP deve ser numérico.',
-            'paymentData.state.string' => 'O estado deve ser um texto válido.',
-            'paymentData.state.max' => 'O estado não pode ultrapassar 20 caracteres.',
-            'paymentData.city.string' => 'A cidade deve ser um texto válido.',
-            'paymentData.city.max' => 'A cidade não pode ultrapassar 50 caracteres.',
-            'paymentData.neighborhood.string' => 'O bairro deve ser um texto válido.',
-            'paymentData.neighborhood.max' => 'O bairro não pode ultrapassar 50 caracteres.',
-            'paymentData.address.string' => 'O endereço deve ser um texto válido.',
-            'paymentData.address.max' => 'O endereço não pode ultrapassar 100 caracteres.',
-            'paymentData.numberAddress.numeric' => 'O número do endereço deve ser numérico.',
-            'paymentData.complement.string' => 'O complemento deve ser um texto válido.',
-            'paymentData.complement.max' => 'O complemento não pode ultrapassar 100 caracteres.',
-            'paymentData.recipientName.string' => 'O nome do destinatário deve ser um texto válido.',
-            'paymentData.recipientName.min' => 'O nome do destinatário deve ter no mínimo 3 caracteres.',
-            'paymentData.recipientName.max' => 'O nome do destinatário não pode ultrapassar 100 caracteres.',
-            'paymentData.recipientPhone.string' => 'O telefone do destinatário deve ser um texto válido.',
-            'paymentData.recipientPhone.max' => 'O telefone não pode ultrapassar 20 caracteres.',
-            'paymentData.observation.string' => 'A observação deve ser um texto válido.',
-            'paymentData.observation.max' => 'A observação não pode ultrapassar 5000 caracteres.',
+            'paymentData.deliveryData.freight.required' => 'Informe se a entrega possui frete.',
+            'paymentData.deliveryData.freight.boolean' => 'O campo de frete deve ser verdadeiro ou falso.',
+            'paymentData.deliveryData.freightValue.required' => 'Informe o valor do frete.',
+            'paymentData.deliveryData.freightValue.numeric' => 'O valor do frete deve ser numérico.',
+            'paymentData.deliveryData.freightValue.min' => 'O valor do frete não pode ser negativo.',
+            'paymentData.deliveryData.cep.numeric' => 'O CEP deve ser numérico.',
+            'paymentData.deliveryData.state.string' => 'O estado deve ser um texto válido.',
+            'paymentData.deliveryData.state.max' => 'O estado não pode ultrapassar 20 caracteres.',
+            'paymentData.deliveryData.city.string' => 'A cidade deve ser um texto válido.',
+            'paymentData.deliveryData.city.max' => 'A cidade não pode ultrapassar 50 caracteres.',
+            'paymentData.deliveryData.neighborhood.string' => 'O bairro deve ser um texto válido.',
+            'paymentData.deliveryData.neighborhood.max' => 'O bairro não pode ultrapassar 50 caracteres.',
+            'paymentData.deliveryData.address.string' => 'O endereço deve ser um texto válido.',
+            'paymentData.deliveryData.address.max' => 'O endereço não pode ultrapassar 100 caracteres.',
+            'paymentData.deliveryData.numberAddress.numeric' => 'O número do endereço deve ser numérico.',
+            'paymentData.deliveryData.complement.string' => 'O complemento deve ser um texto válido.',
+            'paymentData.deliveryData.complement.max' => 'O complemento não pode ultrapassar 100 caracteres.',
+            'paymentData.deliveryData.recipientName.string' => 'O nome do destinatário deve ser um texto válido.',
+            'paymentData.deliveryData.recipientName.min' => 'O nome do destinatário deve ter no mínimo 3 caracteres.',
+            'paymentData.deliveryData.recipientName.max' => 'O nome do destinatário não pode ultrapassar 100 caracteres.',
+            'paymentData.deliveryData.recipientPhone.string' => 'O telefone do destinatário deve ser um texto válido.',
+            'paymentData.deliveryData.recipientPhone.max' => 'O telefone não pode ultrapassar 20 caracteres.',
+            'paymentData.deliveryData.observation.string' => 'A observação deve ser um texto válido.',
+            'paymentData.deliveryData.observation.max' => 'A observação não pode ultrapassar 5000 caracteres.',
 
             // PAGAMENTO
-            'paymentData.payment.required_with' => 'Informe os dados de pagamento.',
-            'paymentData.payment.array' => 'Os dados de pagamento devem ser um array.',
-            'paymentData.payment.change.required' => 'Informe o valor do troco.',
-            'paymentData.payment.change.numeric' => 'O valor do troco deve ser numérico.',
-            'paymentData.payment.change.min' => 'O valor do troco deve ser no mínimo 0.',
-            'paymentData.payment.fees.required' => 'Informe o valor das tarifas.',
-            'paymentData.payment.fees.numeric' => 'O valor das tarifas deve ser numérico.',
-            'paymentData.payment.fees.min' => 'O valor das tarifas deve ser no mínimo 0.',
-            'paymentData.payment.*.paymentType.required' => 'Informe o tipo de pagamento.',
-            'paymentData.payment.*.paymentType.string' => 'O tipo de pagamento deve ser um texto válido.',
-            'paymentData.payment.*.paymentType.exists' => 'O tipo de pagamento informado não é existe.',
-            'paymentData.payment.*.value.numeric' => 'O valor do pagamento deve ser numérico.',
-            'paymentData.payment.*.value.min' => 'O valor do pagamento deve ser no mínimo 0.',
-            'paymentData.payment.*.receiptID.required' => 'Informe o identificador do recebimento.',
-            'paymentData.payment.*.receiptID.exists' => 'O identificador do recebimento informado não é válido.',
-            'paymentData.payment.*.installment.value.integer' => 'O número de parcelas deve ser um inteiro.',
-            'paymentData.payment.*.installment.value.min' => 'O mínimo de parcelas é 1.',
-            'paymentData.payment.*.installment.value.max' => 'O máximo de parcelas é 12.',
-            'paymentData.payment.*.installment.amount.numeric' => 'O valor da parcela deve ser numérico.',
+            'paymentData.paymentExchangeOrDifferenceData.payment.required' => 'Informe os dados de pagamento.',
+            'paymentData.paymentExchangeOrDifferenceData.payment.array' => 'Os dados de pagamento devem ser um array.',
+            'paymentData.paymentExchangeOrDifferenceData.change.required' => 'Informe o valor do troco.',
+            'paymentData.paymentExchangeOrDifferenceData.change.numeric' => 'O valor do troco deve ser numérico.',
+            'paymentData.paymentExchangeOrDifferenceData.change.min' => 'O valor do troco deve ser no mínimo 0.',
+            'paymentData.paymentExchangeOrDifferenceData.fees.required' => 'Informe o valor das tarifas.',
+            'paymentData.paymentExchangeOrDifferenceData.fees.numeric' => 'O valor das tarifas deve ser numérico.',
+            'paymentData.paymentExchangeOrDifferenceData.fees.min' => 'O valor das tarifas deve ser no mínimo 0.',
+            'paymentData.paymentExchangeOrDifferenceData.*.paymentType.required' => 'Informe o tipo de pagamento.',
+            'paymentData.paymentExchangeOrDifferenceData.*.paymentType.string' => 'O tipo de pagamento deve ser um texto válido.',
+            'paymentData.paymentExchangeOrDifferenceData.*.paymentType.exists' => 'O tipo de pagamento informado não é existe.',
+            'paymentData.paymentExchangeOrDifferenceData.*.value.numeric' => 'O valor do pagamento deve ser numérico.',
+            'paymentData.paymentExchangeOrDifferenceData.*.value.min' => 'O valor do pagamento deve ser no mínimo 0.',
+            'paymentData.paymentExchangeOrDifferenceData.*.receiptID.required' => 'Informe o identificador do recebimento.',
+            'paymentData.paymentExchangeOrDifferenceData.*.receiptID.exists' => 'O identificador do recebimento informado não é válido.',
+            'paymentData.paymentExchangeOrDifferenceData.*.installment.value.integer' => 'O número de parcelas deve ser um inteiro.',
+            'paymentData.paymentExchangeOrDifferenceData.*.installment.value.min' => 'O mínimo de parcelas é 1.',
+            'paymentData.paymentExchangeOrDifferenceData.*.installment.value.max' => 'O máximo de parcelas é 12.',
+            'paymentData.paymentExchangeOrDifferenceData.*.installment.amount.numeric' => 'O valor da parcela deve ser numérico.',
+
+            // PAGAMENTO DO FRETE
+            'paymentData.freightPaymentData.payment.required' => 'Informe os dados de pagamento do frete.',
+            'paymentData.freightPaymentData.payment.array' => 'Os dados de pagamento do frete devem ser um array.',
+            'paymentData.freightPaymentData.change.required' => 'Informe o valor do troco do frete.',
+            'paymentData.freightPaymentData.change.numeric' => 'O valor do troco do frete deve ser numérico.',
+            'paymentData.freightPaymentData.change.min' => 'O valor do troco do frete deve ser no mínimo 0.',
+            'paymentData.freightPaymentData.fees.required' => 'Informe o valor das tarifas do frete.',
+            'paymentData.freightPaymentData.fees.numeric' => 'O valor das tarifas do frete deve ser numérico.',
+            'paymentData.freightPaymentData.fees.min' => 'O valor das tarifas do frete deve ser no mínimo 0.',
+            'paymentData.freightPaymentData.*.paymentType.required' => 'Informe o tipo de pagamento do frete.',
+            'paymentData.freightPaymentData.*.paymentType.string' => 'O tipo de pagamento do frete deve ser um texto válido.',
+            'paymentData.freightPaymentData.*.paymentType.exists' => 'O tipo de pagamento do frete informado não é existe.',
+            'paymentData.freightPaymentData.*.value.numeric' => 'O valor do pagamento do frete deve ser numérico.',
+            'paymentData.freightPaymentData.*.value.min' => 'O valor do pagamento do frete deve ser no mínimo 0.',
+            'paymentData.freightPaymentData.*.receiptID.required' => 'Informe o identificador do recebimento do frete.',
+            'paymentData.freightPaymentData.*.receiptID.exists' => 'O identificador do recebimento do frete não é válido.',
+            'paymentData.freightPaymentData.*.installment.value.integer' => 'O número de parcelas do frete deve ser um inteiro.',
+            'paymentData.freightPaymentData.*.installment.value.min' => 'O mínimo de parcelas do frete é 1.',
+            'paymentData.freightPaymentData.*.installment.value.max' => 'O máximo de parcelas do frete é 12.',
+            'paymentData.freightPaymentData.*.installment.amount.numeric' => 'O valor da parcela do frete deve ser numérico.',
         ];
     }
 }

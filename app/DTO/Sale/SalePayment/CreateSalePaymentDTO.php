@@ -6,7 +6,7 @@ class CreateSalePaymentDTO
 {
     public function __construct(
         public readonly int $sale_id,
-        public readonly ?int $exchange_id,
+        public readonly ?int $return_id,
         public readonly int $payment_method_id,
         public readonly ?int $receipt_id,
         public readonly ?string $receipt_name,
@@ -14,16 +14,16 @@ class CreateSalePaymentDTO
         public readonly float $value,
     ) {}
 
-    public static function fromRequest($data): self
+    public static function fromRequest($data, $saleID, $returnID, $receiptName, $paymentMethodID, $installments, $amount): self
     {
         return new self(
-            sale_id: $data['saleID'],
-            exchange_id: $data['exchangeID'] ?? null,
-            payment_method_id: $data['paymentMethodID'],
+            sale_id: $saleID,
+            return_id: $returnID,
+            payment_method_id: $paymentMethodID,
             receipt_id: $data['receiptID'] ?? null,
-            receipt_name: $data['receiptName'] ?? null,
-            installments: $data['installments'] ?? null,
-            value: $data['value'],
+            receipt_name: $receiptName ?? null,
+            installments: $installments ?? null,
+            value: $amount,
         );
     }
 
@@ -31,7 +31,7 @@ class CreateSalePaymentDTO
     {
         return [
             'sale_id' => $this->sale_id,
-            'exchange_id' => $this->exchange_id,
+            'return_id' => $this->return_id,
             'payment_method_id' => $this->payment_method_id,
             'receipt_id' => $this->receipt_id,
             'receipt_name' => $this->receipt_name,

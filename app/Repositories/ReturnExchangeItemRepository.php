@@ -16,4 +16,16 @@ class ReturnExchangeItemRepository extends BaseRepository
     {
         return $this->getAllByEnterprise(filters: ['return_id' => $id]);
     }
+
+    public function updateByProductVariantID(int $productVariantID, int $returnID, array $data)
+    {
+        $product = $this->model->where('product_variant_id', $productVariantID)->where('return_id', $returnID)->first();
+
+        if($product){
+            $product->update($data);
+            return true;
+        }
+
+        return null;
+    }
 }

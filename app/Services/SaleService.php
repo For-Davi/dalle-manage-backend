@@ -56,7 +56,7 @@ class SaleService
         $this->createSalePaymentsMethods($request->paymentData, $sale->id, $enterpriseID);
 
         // Criação do itens da venda
-        $this->createSaleItens($request->saleData, $sale->id, $enterpriseID);
+        $this->createSaleItens($request->saleData, $request->input('deliveryData.freight'),$sale->id, $enterpriseID);
 
         // Criação do frete
         if ($request->input('deliveryData.freight')) {
@@ -154,14 +154,7 @@ class SaleService
                 $receipt = $this->receiptRepository->findById($payment['receiptID']);
             }
 
-            $salePaymentDTO = CreateSalePaymentDTO::fromRequest([
-                'saleID' => $saleID,
-                'paymentMethodID' => $paymentMethodID,
-                'receiptID' => $payment['receiptID'],
-                'receiptName' => $receipt->identifier ?? null,
-                'installments' => $installments,
-                'value' => $amount,
-            ]);
+            $salePaymentDTO = CreateSalePaymentDTO::fromRequest($payment, $saleID, null, $receipt->identifier, $paymentMethodID, $installments, $amount);
 
             $this->salePaymentsRepository->create($salePaymentDTO->toArray());
         }
@@ -173,7 +166,7 @@ class SaleService
         $this->saleDeliveryRepository->create($deliveryDTO->toArray());
     }
 
-    private function createSaleItens(array $products, int $saleID, int $enterpriseID): void
+    private function createSaleItens(array $products, int $hasFreight, int $saleID, int $enterpriseID): void
     {
         foreach ($products['products'] as $product) {
             $productVariant = $this->productVariantRepository
@@ -200,6 +193,8 @@ class SaleService
                 'productCategory' => $productVariant->product->category?->name ?? null,
                 'quantity' => $quantity,
                 'total' => $total,
+                'delivered' => $hasFreight ? 0 : 1,
+                'quantityDelivered' => $hasFreight ? 0 : $quantity,
             ]);
 
             $movementData = [

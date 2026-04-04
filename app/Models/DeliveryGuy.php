@@ -9,15 +9,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class ProductCategory extends Model implements HasCacheTags
+class DeliveryGuy extends Model implements HasCacheTags
 {
     use HasFactory, InvalidatesCache, Notifiable;
 
-    protected $table = 'product_categories';
+    protected $table = 'delivery_guys';
 
     protected $fillable = [
         'name',
-        'enterprise_id',
+        'email',
+        'phone',
+        'cpf',
+        'vehicle',
+        'enterprise_id'
     ];
 
     protected static function booted()
@@ -32,12 +36,12 @@ class ProductCategory extends Model implements HasCacheTags
         }
 
         return [
-            "product_category:enterprise:{$this->enterprise_id}",
+            "delivery_guy:enterprise:{$this->enterprise_id}",
         ];
     }
 
     public function enterprise()
     {
-        return $this->belongsTo(Enterprise::class, 'enterprise_id');
+        return $this->belongsTo(Enterprise::class);
     }
 }

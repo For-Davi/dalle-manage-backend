@@ -15,7 +15,7 @@ class ExchangePaymentMethod extends Model implements HasCacheTags
     protected $table = 'exchange_payments_methods';
 
     protected $fillable = [
-        'exchange_id',
+        'return_id',
         'receipt_id',
         'receipt_name',
         'payment_method_id',

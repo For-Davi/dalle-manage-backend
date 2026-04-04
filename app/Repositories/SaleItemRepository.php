@@ -16,4 +16,16 @@ class SaleItemRepository extends BaseRepository
     {
         return $this->getAllByEnterprise(filters: ['sale_id' => $id]);
     }
+
+    public function updateByProductVariantID(int $productVariantID, int $saleID, array $data)
+    {
+        $product = $this->model->where('product_variant_id', $productVariantID)->where('sale_id', $saleID)->first();
+
+        if($product){
+            $product->update($data);
+            return true;
+        }
+
+        return null;
+    }
 }

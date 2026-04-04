@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
-use App\Contracts\HasCacheTags;
-use App\Traits\InvalidatesCache;
+// use App\Contracts\HasCacheTags;
+// use App\Traits\InvalidatesCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class SaleDelivery extends Model implements HasCacheTags
+// class SaleDelivery extends Model implements HasCacheTags
+class SaleDelivery extends Model
 {
-    use InvalidatesCache, Notifiable;
+    // use InvalidatesCache, Notifiable;
+
+    use Notifiable;
 
     protected $table = 'sale_deliveries';
 
     protected $fillable = [
         'sale_id',
-        'exchange_id',
+        'return_id',
         'freight_value',
         'cep',
         'state',
@@ -27,29 +30,36 @@ class SaleDelivery extends Model implements HasCacheTags
         'recipient_name',
         'recipient_phone',
         'observation',
+        'status',
+        'scheduled_date',
+        'delivery_guy_id',
+        'delivery_guy_name',
+        'delivery_guy_phone',
+        'updated_by_name',
+        'updated_by_email',
     ];
 
-    public function getCacheTags(): array
-    {
-        $enterpriseId = $this->getEnterpriseID();
+    // public function getCacheTags(): array
+    // {
+    //     $enterpriseId = $this->getEnterpriseID();
 
-        if (! $enterpriseId) {
-            return [];
-        }
+    //     if (! $enterpriseId) {
+    //         return [];
+    //     }
 
-        return [
-            "sale_delivery:enterprise:{$enterpriseId}",
-        ];
-    }
+    //     return [
+    //         "sale_delivery:enterprise:{$enterpriseId}",
+    //     ];
+    // }
 
-    protected function getEnterpriseID(): ?int
-    {
-        if (! $this->relationLoaded('sale')) {
-            $this->load('sale');
-        }
+    // protected function getEnterpriseID(): ?int
+    // {
+    //     if (! $this->relationLoaded('sale')) {
+    //         $this->load('sale');
+    //     }
 
-        return $this->sale?->enterprise_id;
-    }
+    //     return $this->sale?->enterprise_id;
+    // }
 
     public function sale()
     {
