@@ -14,8 +14,8 @@ class FilterCommissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'startDate' => 'nullable|date_format:d-m-Y',
-            'endDate' => 'nullable|date_format:d-m-Y',
+            'startPeriod' => 'nullable|date_format:m/Y',
+            'endPeriod' => 'nullable|date_format:m/Y',
             'sellerID' => 'nullable|exists:employees,id',
         ];
     }
@@ -23,8 +23,8 @@ class FilterCommissionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'startDate.date_format' => 'A data inicial deve estar no formato dia-mês-ano (ex: 27-03-2026).',
-            'endDate.date_format' => 'A data final deve estar no formato dia-mês-ano (ex: 27-03-2026).',
+            'startPeriod.date_format' => 'A data inicial deve estar no formato mês-ano (ex: 03/2026).',
+            'endPeriod.date_format' => 'A data final deve estar no formato mês-ano (ex: 03/2026).',
             'sellerID.exists' => 'O vendedor selecionado não existe.',
         ];
     }

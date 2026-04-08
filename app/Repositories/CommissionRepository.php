@@ -18,16 +18,22 @@ class CommissionRepository extends BaseRepository
     {
         $timezone = 'America/Sao_Paulo';
 
-        if (empty($filters['start_date']) && empty($filters['end_date'])) {
+        if (empty($filters['start_period']) && empty($filters['end_period'])) {
             $now = Carbon::now($timezone);
             $start = $now->copy()->startOfYear()->toDateTimeString();
             $end = $now->copy()->endOfYear()->toDateTimeString();
         } else {
-            $start = ! empty($filters['start_date'])
-                ? Carbon::createFromFormat('d-m-Y', $filters['start_date'], $timezone)->startOfDay()->toDateTimeString()
+            $start = ! empty($filters['start_period'])
+                ? Carbon::createFromFormat('m/Y', $filters['start_period'], $timezone)
+                    ->startOfMonth()
+                    ->startOfDay()
+                    ->toDateTimeString()
                 : null;
-            $end = ! empty($filters['end_date'])
-                ? Carbon::createFromFormat('d-m-Y', $filters['end_date'], $timezone)->endOfDay()->toDateTimeString()
+            $end = ! empty($filters['end_period'])
+                ? Carbon::createFromFormat('m/Y', $filters['end_period'], $timezone)
+                    ->endOfMonth()
+                    ->endOfDay()
+                    ->toDateTimeString()
                 : null;
         }
 
