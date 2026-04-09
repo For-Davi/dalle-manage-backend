@@ -56,7 +56,7 @@ class DashboardService
         $salePayments = $sales->flatMap(fn ($sale) => $sale->payment);
 
         $salesMade = $sales->count();
-        $salesValue = $this->getTotalValue($sales, 'total', null, null, 'change');
+        $salesValue = $this->getTotalValue($sales, 'current_total', null, null, 'change');
         $movementsEntryValue = $this->getTotalValue($movements, 'value', 'type', 'entry');
         $movementsOutValue = $this->getTotalValue($movements, 'value', 'type', 'out');
         if ($salesMade !== 0) {
@@ -276,7 +276,7 @@ class DashboardService
 
             if ($seller) {
                 $sellerName = $seller->name;
-                $saleSellerValue = $sale->total - $sale->change;
+                $saleSellerValue = $sale->current_total - $sale->change;
 
                 if (! isset($sellersQuantity[$sellerName])) {
                     $sellersQuantity[$sellerName] = 0;
@@ -375,7 +375,7 @@ class DashboardService
 
             if (isset($quantity[$year])) {
                 $quantity[$year]['data'][$monthIndex]++;
-                $total[$year]['data'][$monthIndex] += (float) $sale->total - $sale->change;
+                $total[$year]['data'][$monthIndex] += (float) $sale->current_total - $sale->change;
             }
         }
 
