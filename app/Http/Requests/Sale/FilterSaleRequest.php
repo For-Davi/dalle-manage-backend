@@ -19,7 +19,7 @@ class FilterSaleRequest extends FormRequest
             'status' => 'nullable|string|in:all,active,canceled',
             'client' => 'nullable|exists:clients,id',
             'seller' => 'nullable|exists:employees,id',
-            'product' => 'nullable|exists:products,name',
+            'product' => 'nullable|exists:product_variants,id',
             'paymentType' => 'nullable|exists:types_receipt,id',
             'receipt' => 'nullable|exists:receipts,id',
             'minTotal' => 'nullable|numeric|min:0',

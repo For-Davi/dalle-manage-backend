@@ -26,6 +26,21 @@ class DeliveryHelper
         return true;
     }
 
+    public static function isAllZero(array $partialDeliveredData)
+    {
+            $allAreZero = collect($partialDeliveredData)->every(fn($item) => 
+            (int)($item['quantityDelivered'] ?? 0) === 0
+        );
+
+        if ($allAreZero) {
+            throw ValidationException::withMessages([
+                'deliveredProducts.*.quantityDelivered' => ['A quantidade entregue de algum produto deve ser pelo menos 1.'],
+            ]);
+        }
+
+        return true;
+    }
+
     public static function checkDeliveredAndSaledQuantity($id, array $partialDeliveredData)
     {
             $delivery = SaleDelivery::where('id', $id)
@@ -78,18 +93,10 @@ class DeliveryHelper
 
     public static function isStatusDelivered(array $partialDeliveredData)
     {
-        $counter = 0;
+        $allAreDelivered = collect($partialDeliveredData)->every(fn($item) => 
+        (int)($item['quantityDelivered'] === $item['quantitySaled'])
+        );
 
-        foreach($partialDeliveredData as $data){
-            if($data['quantitySaled'] === $data['quantityDelivered']){
-                $counter++;
-            }
-        }
-
-        if($counter === count($partialDeliveredData)){
-            return true;
-        }
-
-        return false;
+        return $allAreDelivered;
     }
 }

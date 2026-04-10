@@ -32,7 +32,7 @@ class CreatePartialDeliveryRequest extends FormRequest
             'deliveredProducts' => 'required|array',
             'deliveredProducts.*.productVariantID' => 'required|exists:product_variants,id',
             'deliveredProducts.*.quantitySaled' => 'required|numeric|min:1',
-            'deliveredProducts.*.quantityDelivered' => 'required|numeric|min:1',
+            'deliveredProducts.*.quantityDelivered' => 'required|numeric',
             'status' => 'required|string',
         ];
     }
@@ -51,10 +51,9 @@ class CreatePartialDeliveryRequest extends FormRequest
             'deliveredProducts.*.productVariantID.exists' => 'Um dos produtos selecionados não existe.',
             'deliveredProducts.*.quantitySaled.required' => 'A quantidade vendida é obrigatória.',
             'deliveredProducts.*.quantitySaled.numeric' => 'A quantidade vendida deve ser um número.',
-            'deliveredProducts.*.quantitySaled.min' => 'A quantidade vendida deve ser pelo menos :min.',
+            'deliveredProducts.*.quantitySaled.min' => 'A quantidade vendida deve ser pelo menos 1.',
             'deliveredProducts.*.quantityDelivered.required' => 'A quantidade entregue é obrigatória.',
             'deliveredProducts.*.quantityDelivered.numeric' => 'A quantidade entregue deve ser um número.',
-            'deliveredProducts.*.quantityDelivered.min' => 'A quantidade entregue deve ser pelo menos :min.',
         ];
     }
 

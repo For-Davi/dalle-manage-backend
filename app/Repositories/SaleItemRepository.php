@@ -12,9 +12,13 @@ class SaleItemRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function findBySaleId($id)
+    public function findBySaleId($id, $notDelivered = null)
     {
-        return $this->getAllByEnterprise(filters: ['sale_id' => $id]);
+        if($notDelivered){
+            return $this->getAllByEnterprise(filters: ['sale_id' => $id, 'delivered' => 0]);
+        } else {
+            return $this->getAllByEnterprise(filters: ['sale_id' => $id]);
+        }
     }
 
     public function updateByProductVariantID(int $productVariantID, int $saleID, array $data)

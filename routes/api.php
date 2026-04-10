@@ -291,7 +291,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/filter', [SaleController::class, 'filter']);
         Route::delete('/{saleID}', [SaleController::class, 'destroy']);
         Route::get('/cancel/{saleID}', [SaleController::class, 'showCancellation']);
-        Route::get('/product/{saleID}', [SaleController::class, 'showProducts']);
+        Route::post('/product/{saleID}', [SaleController::class, 'showProducts']);
         Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
@@ -338,8 +338,10 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/dashboard', [DeliveryController::class, 'getDashboard']);
         Route::get('/{deliveryID}', [DeliveryController::class, 'show']);
         Route::post('/', [DeliveryController::class, 'index']);
+        Route::post('/filter', [DeliveryController::class, 'filter']);
         Route::post('/schedule', [DeliveryController::class, 'schedule']);
         Route::post('/partial-delivered', [DeliveryController::class, 'partialDelivered']);
+        Route::put('/', [DeliveryController::class, 'update']);
     });
 
     Route::prefix('delivery-guy')->group(function () {

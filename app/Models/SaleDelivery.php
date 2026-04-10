@@ -65,4 +65,14 @@ class SaleDelivery extends Model
     {
         return $this->belongsTo(Sale::class);
     }
+
+    public function saleItems()
+    {
+        return $this->hasMany(SaleItem::class, 'sale_id', 'sale_id');
+    }
+
+    public function returnExchangeItems()
+    {
+        return $this->hasMany(ReturnExchangeItem::class, 'return_id', 'return_id');
+    }
 }
