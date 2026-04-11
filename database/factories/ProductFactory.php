@@ -84,7 +84,7 @@ class ProductFactory extends Factory
 
             $userName = $user ? $user->name : 'Sistema';
             $userEmail = $user ? $user->email : 'N/A';
-            $date = Carbon::now('America/Sao_Paulo')->locale('pt_BR')->translatedFormat('d/m/Y H:i:s');
+            $date = Carbon::now()->locale('pt_BR')->translatedFormat('d/m/Y H:i:s');
 
             ProductLog::create([
                 'product_id' => $product->id,

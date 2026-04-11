@@ -27,7 +27,6 @@ class ShowExchangeResource extends JsonResource
             'fees' => $this->additionalExchange->fees ?? null,
             'description' => $this->additionalExchange->description ?? null,
             'created_at' => $this->created_at
-                ->timezone('America/Sao_Paulo')
                 ->format('d/m/Y H:i:s'),
             'exchange_payment_method' => $this->paymentExchange
                 ? $this->paymentExchange->map(function ($payment) {

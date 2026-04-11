@@ -114,7 +114,7 @@
       <div class="flex row justify-between align-center full-width">
         <span class="text-bold text-h6">{{ isset($couponData['enterprise']['name']) ? strtoupper($couponData['enterprise']['name']) : '' }}</span>
         <span class="text-bold text-h6">
-          {{ \Carbon\Carbon::parse($couponData['sale']['date'])->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i:s') }}
+          {{ \Carbon\Carbon::parse($couponData['sale']['date'])->format('d/m/Y H:i:s') }}
         </span>
       </div>
 

@@ -21,7 +21,7 @@ class ReturnResource extends JsonResource
             'created_by_email' => $this->created_by_email,
             'updated_by_name' => $this->updated_by_name,
             'updated_by_email' => $this->updated_by_email,
-            'created_at' => $this->created_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+            'created_at' => $this->created_at->format('d/m/Y H:i:s'),
             'return_exchange_items' => $this->returnExchangeItems->map(function ($exchangeItem) {
                 return [
                     'product_name' => $exchangeItem->product_name,

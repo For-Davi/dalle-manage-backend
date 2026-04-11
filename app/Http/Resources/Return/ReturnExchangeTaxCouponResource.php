@@ -21,7 +21,7 @@ class ReturnExchangeTaxCouponResource extends JsonResource
                 'fees' => $this->fees,
                 'change' => $this->change,
                 'freight' => $this->delivery?->freight_value,
-                'date' => $this->created_at?->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+                'date' => $this->created_at?->format('d/m/Y H:i:s'),
             ],
 
             'enterprise' => [

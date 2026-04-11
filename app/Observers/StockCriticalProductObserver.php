@@ -46,7 +46,7 @@ class StockCriticalProductObserver
         $category = $variant->product->category->name ?? 'Não definida';
         $grid = $variant->gridItem->name ?? 'Não definida';
         $sku = $variant->sku ?? 'Não definido';
-        $dataHora = now()->timezone('America/Sao_Paulo')->format('d/m/Y H:i');
+        $dataHora = now()->format('d/m/Y H:i');
 
         return <<<MSG
         O produto **{$variant->product->name}** atingiu o nível crítico de estoque.

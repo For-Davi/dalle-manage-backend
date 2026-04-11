@@ -84,7 +84,7 @@ class ProductService
             $product->id,
             'create',
             "O usuário(a) {$user->name} ({$user->email}) criou este produto em ".
-            Carbon::now('America/Sao_Paulo')->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
+            Carbon::now()->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
         );
 
         return true;
@@ -212,7 +212,7 @@ class ProductService
             $request->productID,
             'update',
             "O usuário(a) {$user->name} ({$user->email}) atualizou os dados básicos deste produto em ".
-            Carbon::now('America/Sao_Paulo')->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
+            Carbon::now()->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
         );
 
         return $result;
@@ -233,7 +233,7 @@ class ProductService
             $request->productID,
             'update',
             "O usuário(a) {$user->name} ({$user->email}) atualizou as tags deste produto em ".
-            Carbon::now('America/Sao_Paulo')->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
+            Carbon::now()->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
         );
     }
 
@@ -248,7 +248,7 @@ class ProductService
             $request->productID,
             'update',
             "O usuário(a) {$user->name} ({$user->email}) atualizou os dados avançados deste produto em ".
-            Carbon::now('America/Sao_Paulo')->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
+            Carbon::now()->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
         );
 
         return $result;
@@ -264,7 +264,7 @@ class ProductService
             $request->productID,
             'update',
             "O usuário(a) {$user->name} ({$user->email}) atualizou as imagens deste produto em ".
-            Carbon::now('America/Sao_Paulo')->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
+            Carbon::now()->locale('pt_BR')->translatedFormat('d/m/Y H:i:s')
         );
     }
 

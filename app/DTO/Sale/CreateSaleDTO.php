@@ -32,7 +32,7 @@ class CreateSaleDTO
             fees: $data['fees'],
             starting_total: $data['totalValue'],
             change: $data['change'],
-            date: Carbon::now('America/Sao_Paulo')->format('Y-m-d H:i:s'),
+            date: Carbon::now()->format('Y-m-d H:i:s'),
             current_total: $data['currentTotal'],
         );
     }

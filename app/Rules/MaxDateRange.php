@@ -25,12 +25,11 @@ class MaxDateRange implements Rule
         }
 
         try {
-            $tz = 'America/Sao_Paulo';
             [$startMonth, $startYear] = explode('-', $startDate);
             [$endMonth, $endYear] = explode('-', $value);
 
-            $start = Carbon::createFromDate($startYear, $startMonth, 1, $tz)->startOfMonth();
-            $end = Carbon::createFromDate($endYear, $endMonth, 1, $tz)->endOfMonth();
+            $start = Carbon::createFromDate($startYear, $startMonth, 1)->startOfMonth();
+            $end = Carbon::createFromDate($endYear, $endMonth, 1)->endOfMonth();
             if ($start->gt($end)) {
                 $this->errorMessage = 'A data inicial não pode ser maior que a data final.';
 

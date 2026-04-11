@@ -10,7 +10,7 @@ class CommissionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'created_at' => $this->created_at?->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+            'created_at' => $this->created_at?->format('d/m/Y H:i:s'),
 
             'status' => match ($this->status) {
                 'active' => 'Ativa',

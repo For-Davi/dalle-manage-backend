@@ -14,7 +14,7 @@ class SaleCancellationResource extends JsonResource
             'created_by_email' => $this->created_by_email,
             'reason' => $this->reason,
             'description' => $this->description,
-            'created_at' => $this->created_at?->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+            'created_at' => $this->created_at?->format('d/m/Y H:i:s'),
         ];
     }
 }

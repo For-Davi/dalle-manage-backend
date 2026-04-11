@@ -23,7 +23,6 @@ class ExchangeResource extends JsonResource
             'created_by_name' => $this->created_by_name,
             'updated_by_name' => $this->updated_by_name,
             'created_at' => $this->created_at
-                ->timezone('America/Sao_Paulo')
                 ->format('d/m/Y H:i:s'),
 
             'exchange_payment_method' => $this->paymentExchange

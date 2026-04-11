@@ -33,7 +33,7 @@ class DashboardService
 
     public function getInfo()
     {
-        $currentYear = now('America/Sao_Paulo')->year;
+        $currentYear = now()->year;
 
         $sales = $this->saleRepository->getAllWithFilter([
             'start_date' => "01/01/{$currentYear}",
@@ -345,9 +345,7 @@ class DashboardService
         }
         $sales = $sales->sortBy('date');
 
-        $tz = 'America/Sao_Paulo';
-
-        $years = $sales->map(fn ($sale) => Carbon::parse($sale->date, $tz)->year)
+        $years = $sales->map(fn ($sale) => Carbon::parse($sale->date)->year)
             ->unique()
             ->sort()
             ->values()
@@ -369,7 +367,7 @@ class DashboardService
         }
 
         foreach ($sales as $sale) {
-            $date = Carbon::parse($sale->date, $tz);
+            $date = Carbon::parse($sale->date);
             $year = $date->year;
             $monthIndex = $date->month - 1;
 

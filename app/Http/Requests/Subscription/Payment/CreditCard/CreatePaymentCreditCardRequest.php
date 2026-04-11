@@ -15,7 +15,7 @@ class CreatePaymentCreditCardRequest extends FormRequest
 
     public function rules(): array
     {
-        $currentYear = Carbon::now('America/Sao_Paulo')->year;
+        $currentYear = Carbon::now()->year;
 
         return [
             'subscriptionID' => 'required|exists:subscriptions,id',
