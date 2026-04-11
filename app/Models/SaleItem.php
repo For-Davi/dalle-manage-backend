@@ -27,6 +27,8 @@ class SaleItem extends Model implements HasCacheTags
         'product_category',
         'quantity',
         'total',
+        'delivered',
+        'quantity_delivered',
     ];
 
     public function getCacheTags(): array

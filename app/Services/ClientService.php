@@ -57,6 +57,7 @@ class ClientService
         }
 
         ClientHelper::existsClient($clientID, $field);
+        ClientHelper::validateCredit($clientID, $credit, $field);
 
         $setting = $this->settingSystemRepository->getByEnterprise(Auth::user()->enterprise_id);
         $client = $this->repository->findById($clientID);

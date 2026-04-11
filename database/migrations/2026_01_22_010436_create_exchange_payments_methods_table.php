@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('exchange_payments_methods', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('exchange_id');
-            $table->foreign('exchange_id')->references('id')->on('exchanges');
+            $table->unsignedBigInteger('return_id');
+            $table->foreign('return_id')->references('id')->on('returns');
             $table->unsignedBigInteger('receipt_id')->nullable();
             $table->foreign('receipt_id')->references('id')->on('receipts');
             $table->string('receipt_name');

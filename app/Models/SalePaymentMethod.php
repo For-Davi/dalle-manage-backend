@@ -15,7 +15,7 @@ class SalePaymentMethod extends Model implements HasCacheTags
 
     protected $fillable = [
         'sale_id',
-        'exchange_id',
+        'return_id',
         'payment_method_id',
         'receipt_id',
         'receipt_name',

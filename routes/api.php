@@ -35,6 +35,8 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
+use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\DeliveryGuyController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -289,7 +291,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/filter', [SaleController::class, 'filter']);
         Route::delete('/{saleID}', [SaleController::class, 'destroy']);
         Route::get('/cancel/{saleID}', [SaleController::class, 'showCancellation']);
-        Route::get('/product/{saleID}', [SaleController::class, 'showProducts']);
+        Route::post('/product/{saleID}', [SaleController::class, 'showProducts']);
         Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
@@ -332,5 +334,23 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/difference', [ExchangeController::class, 'createDifferencePayment']);
         Route::post('/export', [ExchangeController::class, 'export']);
         Route::post('/send-to-email', [ExchangeController::class, 'sendToEmail']);
+    });
+
+    Route::prefix('delivery')->group(function () {
+        Route::get('/dashboard', [DeliveryController::class, 'getDashboard']);
+        Route::get('/{deliveryID}', [DeliveryController::class, 'show']);
+        Route::post('/', [DeliveryController::class, 'index']);
+        Route::post('/filter', [DeliveryController::class, 'filter']);
+        Route::post('/schedule', [DeliveryController::class, 'schedule']);
+        Route::post('/partial-delivered', [DeliveryController::class, 'partialDelivered']);
+        Route::put('/', [DeliveryController::class, 'update']);
+    });
+
+    Route::prefix('delivery-guy')->group(function () {
+        Route::get('/', [DeliveryGuyController::class, 'index']);
+        Route::get('/{deliveryGuyID}', [DeliveryGuyController::class, 'show']);
+        Route::post('/', [DeliveryGuyController::class, 'create']);
+        Route::put('/', [DeliveryGuyController::class, 'update']);
+        Route::delete('/{deliveryGuyID}', [DeliveryGuyController::class, 'destroy']);
     });
 });

@@ -50,13 +50,13 @@ class Sale extends Model implements HasCacheTags
 
     public function delivery()
     {
-        return $this->hasOne(SaleDelivery::class, 'sale_id')->where('exchange_id', null);
+        return $this->hasOne(SaleDelivery::class, 'sale_id')->where('return_id', null);
     }
 
     public function payment()
     {
         return $this->hasMany(SalePaymentMethod::class, 'sale_id')
-            ->whereNull('exchange_id')
+            ->whereNull('return_id')
             ->whereHas('type', function ($query) {
                 $query->where('name', '!=', 'CREDIT');
             });
@@ -64,7 +64,7 @@ class Sale extends Model implements HasCacheTags
 
     public function paymentWithCredit()
     {
-        return $this->hasMany(SalePaymentMethod::class, 'sale_id')->whereNull('exchange_id');
+        return $this->hasMany(SalePaymentMethod::class, 'sale_id')->whereNull('return_id');
     }
 
     public function items()

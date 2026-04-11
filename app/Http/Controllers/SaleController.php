@@ -9,6 +9,7 @@ use App\Http\Requests\Sale\ExportSaleRequest;
 use App\Http\Requests\Sale\FilterSaleRequest;
 use App\Http\Requests\Sale\SendToEmailRequest;
 use App\Http\Requests\Sale\ShowCancellationRequest;
+use App\Http\Requests\Sale\ShowSaleProductRequest;
 use App\Http\Requests\Sale\ShowSaleRequest;
 use App\Http\Requests\Sale\UpdateSaleRequest;
 use App\Http\Resources\Sale\SaleCancellationResource;
@@ -87,10 +88,14 @@ class SaleController extends BaseController
         }, 'Erro ao excluir venda', $request);
     }
 
-    public function showProducts(ShowSaleRequest $request)
+    public function showProducts(ShowSaleProductRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
-            $products = $this->saleItemRepository->findBySaleId($request->route('saleID'));
+            if($request->notDelivered){
+                $products = $this->saleItemRepository->findBySaleId($request->route('saleID'), true);
+            } else {
+                $products = $this->saleItemRepository->findBySaleId($request->route('saleID'));
+            }
             $products->load(['product.color']);
 
             return response()->json(['saleItens' => SaleItensResource::collection($products)], 200);
