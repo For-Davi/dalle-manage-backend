@@ -5,6 +5,8 @@ use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\DeliveryGuyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
@@ -35,8 +37,6 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
-use App\Http\Controllers\DeliveryController;
-use App\Http\Controllers\DeliveryGuyController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -216,6 +216,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('role')->group(function () {
         Route::get('/list-select', [RoleController::class, 'indexSelect']);
+        Route::post('/', [RoleController::class, 'store']);
     });
 
     Route::prefix('transaction')->group(function () {

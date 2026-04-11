@@ -2,8 +2,10 @@
 
 namespace App\Helpers;
 
+use App\Models\Permission;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -66,6 +68,24 @@ class UserHelper
         if (! Hash::check($actualPassword, $user->password)) {
             throw ValidationException::withMessages([
                 'password' => ['A senha atual está incorreta.'],
+            ]);
+        }
+    }
+
+    public static function hasPermission($permissionSlug)
+    {
+        $user = Auth::user();
+
+        if (! $user || ! $user->hasPermission($permissionSlug)) {
+
+            $permissionData = Permission::where('slug', $permissionSlug)->first();
+
+            $description = $permissionData
+                ? $permissionData->description
+                : "ação específica ({$permissionSlug})";
+
+            throw ValidationException::withMessages([
+                'permission' => ["Acesso negado! Você não possui permissão para: {$description}."],
             ]);
         }
     }

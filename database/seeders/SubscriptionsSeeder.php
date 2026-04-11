@@ -13,11 +13,4 @@ class SubscriptionsSeeder extends Seeder
         Subscription::create(['name' => 'basic', 'price' => 282]);
         Subscription::create(['name' => 'premium', 'price' => 709]);
     }
-
-    public function rollback()
-    {
-        Subscription::whereIn('name', [
-            'free', 'basic', 'premium',
-        ])->delete();
-    }
 }

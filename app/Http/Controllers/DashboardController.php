@@ -15,6 +15,7 @@ class DashboardController extends BaseController
     public function index(Request $request)
     {
         return $this->safeExecute(function () {
+            check_permission('dashboard.view');
             $info = $this->service->getInfo();
 
             return response()->json(['info' => $info], 200);
@@ -24,6 +25,7 @@ class DashboardController extends BaseController
     public function filter(FilterDashboardRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
+            check_permission('dashboard.view');
             $info = $this->service->getInfoFilter($request);
 
             return response()->json(['info' => $info], 200);

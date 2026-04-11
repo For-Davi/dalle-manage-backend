@@ -40,4 +40,9 @@ class Role extends Model implements HasCacheTags
             "role:enterprise:{$this->enterprise_id}",
         ];
     }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'permission_role');
+    }
 }

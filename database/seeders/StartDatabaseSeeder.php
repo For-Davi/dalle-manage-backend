@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\Enterprise;
 use App\Models\GridGroup;
 use App\Models\Movement;
+use App\Models\Permission;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductColor;
@@ -86,15 +87,20 @@ class StartDatabaseSeeder extends Seeder
                 $rolesData = [
                     [
                         'name' => 'Master',
-                        'permissions' => [],
+                        'is_system' => 1,
                     ],
                 ];
                 $roles = collect($rolesData)->map(function ($role) use ($enterprise) {
-                    return Role::create([
+                    $createdRole = Role::create([
                         'enterprise_id' => $enterprise->id,
                         'name' => $role['name'],
-                        'permissions' => $role['permissions'],
+                        'is_system' => $role['is_system'],
                     ]);
+
+                    $allPermissionIds = Permission::pluck('id');
+                    $createdRole->permissions()->sync($allPermissionIds);
+
+                    return $createdRole;
                 });
 
                 // ------------------------------------------------------------

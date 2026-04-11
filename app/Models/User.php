@@ -75,4 +75,13 @@ class User extends Authenticatable implements HasCacheTags
     {
         return $this->belongsTo(Department::class);
     }
+
+    public function hasPermission(string $permissionSlug): bool
+    {
+        if (! $this->role) {
+            return false;
+        }
+
+        return $this->role->permissions->contains('slug', $permissionSlug);
+    }
 }

@@ -13,7 +13,6 @@ class RoleFactory extends Factory
     {
         return [
             'name' => strtoupper($this->faker->jobTitle()),
-            'permissions' => [],
         ];
     }
 }

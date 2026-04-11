@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Role\CreateRoleRequest;
 use App\Http\Resources\Role\RoleSelectResource;
 use App\Repositories\RoleRepository;
 use Illuminate\Http\Request;
@@ -17,5 +18,15 @@ class RoleController extends BaseController
 
             return response()->json(['roles' => RoleSelectResource::collection($roles)], 200);
         }, 'Erro ao buscar roles', $request);
+    }
+
+    public function store(CreateRoleRequest $request)
+    {
+        return $this->safeTransaction(function () use ($request) {
+            $this->service->create($request);
+            $categories = $this->repository->getAllByEnterprise();
+
+            return response()->json(['categories' => $categories, 'message' => 'Categoria cadastrada'], 201);
+        }, 'Erro ao cadastrar categoria', $request);
     }
 }
