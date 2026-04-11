@@ -228,11 +228,12 @@ class UserService
         SendInviteUserEmailJob::dispatch($user, $admin, $enterprise, $token);
 
         if ($request->createEmployee) {
-            $employeeDTO = StartEmployeeDTO::fromRequest([
-                $request,
-                'userId' => $user->id,
-                'hasLoginAccess' => 1,
-            ]);
+            $employeeDTO = StartEmployeeDTO::fromRequest(
+                array_merge($request->all(), [
+                    'userId' => $user->id,
+                    'hasLoginAccess' => 1,
+                ])
+            );
 
             $this->createEmployee($employeeDTO->toArray());
         }

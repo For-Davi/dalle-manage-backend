@@ -40,10 +40,10 @@ class MovementService
             return $movements;
         }
 
-        $movementDTO = CreateOrUpdateMovementDTO::fromRequest([
+        $movementDTO = CreateOrUpdateMovementDTO::fromRequest(
             $request,
-            'date' => $requestDate->format('d-m-Y'),
-        ]);
+            ['date' => $requestDate->format('d-m-Y')]
+        );
 
         return $this->repository->create($movementDTO->toArray());
     }
@@ -52,10 +52,10 @@ class MovementService
     {
         $requestDate = Carbon::createFromFormat('d/m/Y', $request->date);
 
-        $movementDTO = CreateOrUpdateMovementDTO::fromRequest([
+        $movementDTO = CreateOrUpdateMovementDTO::fromRequest(
             $request,
-            'date' => $requestDate->format('d-m-Y'),
-        ]);
+            ['date' => $requestDate->format('d-m-Y')]
+        );
 
         return $this->repository->update($request->id, $movementDTO->toArray());
     }

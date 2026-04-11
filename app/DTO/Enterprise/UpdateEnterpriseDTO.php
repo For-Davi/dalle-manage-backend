@@ -21,7 +21,7 @@ class UpdateEnterpriseDTO extends BaseDTO
         public ?string $complement,
     ) {}
 
-    public static function fromRequest(array $data): self
+    public static function fromRequest($data): self
     {
         return new self(
             name: $data['name'],

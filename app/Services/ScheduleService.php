@@ -31,10 +31,10 @@ class ScheduleService
                     $date->day($date->daysInMonth);
                 }
 
-                $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest([
+                $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest(
                     $request,
-                    'date' => $date->format('d-m-Y'),
-                ]);
+                    ['date' => $date->format('d-m-Y')]
+                );
 
                 $schedules[] = $this->repository->create($scheduleDTO->toArray());
             }
@@ -42,10 +42,10 @@ class ScheduleService
             return $schedules;
         }
 
-        $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest([
+        $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest(
             $request,
-            'date' => $requestDate->format('d-m-Y'),
-        ]);
+            ['date' => $requestDate->format('d-m-Y')]
+        );
 
         return $this->repository->create($scheduleDTO->toArray());
     }
@@ -54,10 +54,10 @@ class ScheduleService
     {
         $requestDate = Carbon::createFromFormat('d/m/Y', $request->date);
 
-        $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest([
+        $scheduleDTO = CreateOrUpdateScheduleDTO::fromRequest(
             $request,
-            'date' => $requestDate->format('d-m-Y'),
-        ]);
+            ['date' => $requestDate->format('d-m-Y')]
+        );
 
         return $this->repository->update($request->id, $scheduleDTO->toArray());
     }
@@ -112,9 +112,7 @@ class ScheduleService
     {
         $dateTime = now()->format('Ymd_His');
 
-        $exportScheduleDTO = FilterScheduleDTO::fromRequest([
-            ...$request->only(['period', 'category', 'type']),
-        ]);
+        $exportScheduleDTO = FilterScheduleDTO::fromRequest($request);
         $schedules = $this->repository->getAllWithFilter($exportScheduleDTO->toArray(), ['category']);
 
         if ($request->format === 'excel') {
