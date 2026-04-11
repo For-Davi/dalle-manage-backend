@@ -18,11 +18,6 @@ class Role extends Model implements HasCacheTags
     protected $fillable = [
         'name',
         'enterprise_id',
-        'permissions',
-    ];
-
-    protected $casts = [
-        'permissions' => 'array',
     ];
 
     protected static function booted()
