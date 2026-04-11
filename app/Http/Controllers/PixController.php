@@ -15,6 +15,7 @@ class PixController extends BaseController
     public function store(CreatePaymentPixRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('subscription.payment');
             $pix = $this->service->store($request);
 
             return response()->json(['pix' => new PixResource($pix['pix'])], 200);

@@ -74,6 +74,11 @@ class PermissionsSeeder extends Seeder
             ['slug' => 'user.update', 'description' => 'Atualizar usuário'],
             ['slug' => 'user.delete', 'description' => 'Excluir usuários'],
 
+            ['slug' => 'employee.view', 'description' => 'Visualizar funcionários'],
+            ['slug' => 'employee.create', 'description' => 'Cadastrar funcionário'],
+            ['slug' => 'employee.update', 'description' => 'Atualizar funcionário'],
+            ['slug' => 'employee.delete', 'description' => 'Excluir funcionários'],
+
             ['slug' => 'department.view', 'description' => 'Visualizar departamentos'],
             ['slug' => 'department.create', 'description' => 'Criar departamento'],
             ['slug' => 'department.update', 'description' => 'Atualizar departamento'],
@@ -94,6 +99,8 @@ class PermissionsSeeder extends Seeder
             ['slug' => 'receipt.create', 'description' => 'Gerar recebimento'],
             ['slug' => 'receipt.update', 'description' => 'Atualizar recebimento'],
             ['slug' => 'receipt.delete', 'description' => 'Excluir recebimentos'],
+
+            ['slug' => 'commission.view', 'description' => 'Visualizar comissões'],
 
             // Clientes e Fornecedores
             ['slug' => 'client.view', 'description' => 'Visualizar clientes'],
@@ -124,6 +131,11 @@ class PermissionsSeeder extends Seeder
             // Configurações
             ['slug' => 'config.view', 'description' => 'Visualizar configurações'],
             ['slug' => 'config.edit', 'description' => 'Editar configurações'],
+
+            ['slug' => 'role.view', 'description' => 'Visualizar permissões'],
+            ['slug' => 'role.create', 'description' => 'Criar permissões'],
+            ['slug' => 'role.edit', 'description' => 'Editar permissões'],
+            ['slug' => 'role.delete', 'description' => 'Excluir permissões'],
         ];
 
         foreach ($permissions as $permission) {

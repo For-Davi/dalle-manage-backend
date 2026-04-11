@@ -51,6 +51,7 @@ class ClientController extends BaseController
     public function store(CreateClientRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('client.create');
             $this->service->create($request);
             $clients = $this->repository->getAllByEnterprise();
 
@@ -61,6 +62,7 @@ class ClientController extends BaseController
     public function update(UpdateClientRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('client.update');
             $this->service->update($request);
             $clients = $this->repository->getAllByEnterprise();
 
@@ -71,6 +73,7 @@ class ClientController extends BaseController
     public function destroy(DeleteClientRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('client.delete');
             $this->repository->delete($request->route('clientID'));
             $clients = $this->repository->getAllByEnterprise();
 

@@ -28,6 +28,7 @@ class ColorController extends BaseController
     public function store(CreateProductColorRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product-color.create');
             $this->service->create($request);
             $colors = $this->repository->getAllByEnterprise();
 
@@ -38,6 +39,7 @@ class ColorController extends BaseController
     public function update(UpdateProductColorRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product-color.update');
             $this->service->update($request);
             $colors = $this->repository->getAllByEnterprise();
 
@@ -48,6 +50,7 @@ class ColorController extends BaseController
     public function destroy(DeleteProductColorRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product-color.delete');
             $this->repository->delete($request->route('colorID'));
             $colors = $this->repository->getAllByEnterprise();
 

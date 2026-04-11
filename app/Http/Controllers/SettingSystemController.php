@@ -26,6 +26,7 @@ class SettingSystemController extends BaseController
     public function update(UpdateSettingSystemRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('config.update');
             $this->service->update($request);
             $system = $this->repository->getByEnterprise();
 

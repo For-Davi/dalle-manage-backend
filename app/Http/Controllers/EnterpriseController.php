@@ -26,6 +26,7 @@ class EnterpriseController extends BaseController
     public function update(UpdateEnterpriseRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('enterprise.update');
             $this->service->update($request);
 
             return response()->json(['message' => 'Dados da empresa atualizados'], 200);
@@ -35,6 +36,7 @@ class EnterpriseController extends BaseController
     public function destroy(Request $request)
     {
         return $this->safeTransaction(function () {
+            check_permission('enterprise.delete');
             $this->repository->delete();
 
             return response()->json(['message' => 'Empresa deletada'], 200);

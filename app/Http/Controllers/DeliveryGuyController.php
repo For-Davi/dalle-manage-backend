@@ -38,6 +38,7 @@ class DeliveryGuyController extends BaseController
     public function create(CreateDeliveryGuyRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('delivery-guy.create');
             $this->service->create($request);
 
             return response()->json(['message' => 'Entregador cadastrado'], 201);
@@ -47,6 +48,7 @@ class DeliveryGuyController extends BaseController
     public function update(UpdateDeliveryGuyRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('delivery-guy.update');
             $this->service->update($request);
             $deliveriesGuys = $this->repository->getAllByEnterprise();
 
@@ -57,6 +59,7 @@ class DeliveryGuyController extends BaseController
     public function destroy(DeleteDeliveryGuyRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('delivery-guy.delete');
             $this->repository->delete($request->route('deliveryGuyID'));
 
             $deliveriesGuys = $this->repository->getAllByEnterprise();

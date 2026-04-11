@@ -50,6 +50,7 @@ class ReceiptController extends BaseController
     public function store(CreateReceiptRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('receipt.create');
             $this->service->create($request);
             $receipts = $this->repository->getAllByEnterprise(['type']);
 
@@ -60,6 +61,7 @@ class ReceiptController extends BaseController
     public function update(UpdateReceiptRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('receipt.update');
             $this->service->update($request);
             $receipts = $this->repository->getAllByEnterprise(['type']);
 
@@ -70,6 +72,7 @@ class ReceiptController extends BaseController
     public function destroy(DeleteReceiptRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('receipt.delete');
             $this->repository->delete($request->route('receiptID'));
             $receipts = $this->repository->getAllByEnterprise(['type']);
 

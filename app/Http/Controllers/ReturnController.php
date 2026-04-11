@@ -66,6 +66,7 @@ class ReturnController extends BaseController
     public function store(CreateReturnRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('return.create');
             $couponData = $this->service->create($request);
             $returns = $this->repository->getAllBySale($request['saleID']);
             $coupon = is_object($couponData) ? new ReturnExchangeTaxCouponResource($couponData) : null;
@@ -77,6 +78,7 @@ class ReturnController extends BaseController
     public function update(UpdateReturnRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('return.update');
             $this->service->update($request);
             $returns = $this->repository->getAllBySale($request['saleID']);
 
@@ -87,6 +89,7 @@ class ReturnController extends BaseController
     public function destroy(DeleteReturnRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('return.delete');
             $this->repository->deleteReturn($request->route('returnID'));
             $returns = $this->repository->getAllBySale($request->route('saleID'));
 

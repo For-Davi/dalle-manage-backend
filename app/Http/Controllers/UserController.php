@@ -194,6 +194,7 @@ class UserController extends BaseController
     public function store(CreateUserRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('user.create');
             $this->service->store($request);
             $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
@@ -204,6 +205,7 @@ class UserController extends BaseController
     public function update(UpdateUserRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('user.update');
             $this->service->update($request);
             $users = $this->repository->getAllByEnterprise(['department', 'role']);
 
@@ -214,6 +216,7 @@ class UserController extends BaseController
     public function destroy(DeleteUserRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('user.delete');
             $this->repository->delete($request->route('userID'), $request->deleteEmployee);
             $users = $this->repository->getAllByEnterprise(['department', 'role']);
 

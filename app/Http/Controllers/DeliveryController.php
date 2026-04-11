@@ -58,6 +58,7 @@ class DeliveryController extends BaseController
     public function schedule(CreateScheduledDeliveryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('delivery.update');
             $this->service->schedule($request);
             $status = $request->query('status', 'all');
             $deliveries = $this->repository->getDeliveries($status);
@@ -69,6 +70,7 @@ class DeliveryController extends BaseController
     public function partialDelivered(CreatePartialDeliveryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('delivery.update');
             $this->service->partialDelivered($request);
             $status = $request->query('status', 'all');
             $deliveries = $this->repository->getDeliveries($status);
@@ -80,6 +82,7 @@ class DeliveryController extends BaseController
     public function update(UpdateDeliveryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('delivery.update');
             $this->service->update($request);
             $status = $request->query('status', 'all');
             $deliveries = $this->repository->getDeliveries($status);

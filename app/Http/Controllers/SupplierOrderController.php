@@ -59,6 +59,7 @@ class SupplierOrderController extends BaseController
     public function received(UpdateSupplierOrderReceivedRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-order.update');
             $this->service->received($request);
             $item = $this->orderItemRepository->findById($request->items[0]['id']);
             $order = $this->repository->findById($item->supplier_order_id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
@@ -70,6 +71,7 @@ class SupplierOrderController extends BaseController
     public function store(CreateSupplierOrderRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-order.create');
             $this->service->create($request);
             $orders = $this->repository->getAllByEnterprise();
 
@@ -80,6 +82,7 @@ class SupplierOrderController extends BaseController
     public function update(UpdateSupplierOrderRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-order.update');
             $this->service->update($request);
             $orders = $this->repository->getAllByEnterprise();
 
@@ -90,6 +93,7 @@ class SupplierOrderController extends BaseController
     public function updateStatus(UpdateSupplierOrderStatusRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-order.update');
             $this->service->updateStatus($request);
             $order = $this->repository->findById($request->id, ['items.variant', 'items.variant.color', 'items.variant.gridItem', 'items.variant.product', 'user']);
 
@@ -107,6 +111,7 @@ class SupplierOrderController extends BaseController
     public function destroy(DeleteSupplierOrderRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-order.delete');
             $this->repository->delete($request->route('orderID'));
             $orders = $this->repository->getAllByEnterprise();
 

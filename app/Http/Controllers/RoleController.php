@@ -35,6 +35,7 @@ class RoleController extends BaseController
     public function store(CreateRoleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('role.create');
             $this->service->create($request);
             $roles = $this->repository->getAllByEnterprise(['permissions']);
 
@@ -45,6 +46,7 @@ class RoleController extends BaseController
     public function update(UpdateRoleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('role.update');
             $this->service->update($request);
             $roles = $this->repository->getAllByEnterprise(['permissions']);
 
@@ -55,6 +57,7 @@ class RoleController extends BaseController
     public function destroy(DeleteRoleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('role.delete');
             $role = $this->repository->findById($request->route('roleID'));
             $role->permissions()->detach();
 

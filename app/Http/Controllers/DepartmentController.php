@@ -28,6 +28,7 @@ class DepartmentController extends BaseController
     public function store(CreateDepartmentRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('department.create');
             $this->service->create($request);
             $departments = $this->repository->getAllByEnterprise();
 
@@ -38,6 +39,7 @@ class DepartmentController extends BaseController
     public function update(UpdateDepartmentRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('department.update');
             $this->service->update($request);
             $departments = $this->repository->getAllByEnterprise();
 
@@ -48,6 +50,7 @@ class DepartmentController extends BaseController
     public function destroy(DeleteDepartmentRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('department.delete');
             $this->repository->delete($request->route('departmentID'));
             $departments = $this->repository->getAllByEnterprise();
 

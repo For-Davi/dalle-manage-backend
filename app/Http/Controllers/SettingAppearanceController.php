@@ -26,6 +26,7 @@ class SettingAppearanceController extends BaseController
     public function update(UpdateSettingAppearanceRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('config.update');
             $this->service->update($request);
             $appearance = $this->repository->getByEnterprise();
 

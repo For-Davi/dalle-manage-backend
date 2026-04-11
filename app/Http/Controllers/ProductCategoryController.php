@@ -28,6 +28,7 @@ class ProductCategoryController extends BaseController
     public function store(CreateProductCategoryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product-category.create');
             $this->service->create($request);
             $categories = $this->repository->getAllByEnterprise();
 
@@ -38,6 +39,7 @@ class ProductCategoryController extends BaseController
     public function update(UpdateProductCategoryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product-category.update');
             $this->service->update($request);
             $categories = $this->repository->getAllByEnterprise();
 
@@ -48,6 +50,7 @@ class ProductCategoryController extends BaseController
     public function destroy(DeleteProductCategoryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product-category.delete');
             $this->repository->delete($request->route('categoryID'));
             $categories = $this->repository->getAllByEnterprise();
 

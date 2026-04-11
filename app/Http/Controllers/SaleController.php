@@ -63,6 +63,7 @@ class SaleController extends BaseController
     public function store(CreateSaleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('sale.create');
             $sale = $this->service->create($request);
 
             return response()->json(['sale' => $sale, 'message' => 'Venda realizada'], 201);
@@ -72,6 +73,7 @@ class SaleController extends BaseController
     public function update(UpdateSaleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('sale.cancel');
             $this->service->update($request);
 
             return response()->json(['message' => 'Venda cancelada'], 201);
@@ -81,6 +83,7 @@ class SaleController extends BaseController
     public function destroy(DeleteSaleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('sale.delete');
             $this->repository->deleteSale($request->route('saleID'));
             $sales = $this->repository->getAllByEnterprise();
 

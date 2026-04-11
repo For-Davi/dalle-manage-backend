@@ -38,6 +38,7 @@ class SupplierCategoryController extends BaseController
     public function store(CreateSupplierCategoryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-category.create');
             $this->service->create($request);
             $categories = $this->repository->getAllByEnterprise();
 
@@ -48,6 +49,7 @@ class SupplierCategoryController extends BaseController
     public function update(UpdateSupplierCategoryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-category.update');
             $this->service->update($request);
             $categories = $this->repository->getAllByEnterprise();
 
@@ -58,6 +60,7 @@ class SupplierCategoryController extends BaseController
     public function destroy(DeleteSupplierCategoryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-category.delete');
             $this->repository->delete($request->route('categoryID'));
             $categories = $this->repository->getAllByEnterprise();
 

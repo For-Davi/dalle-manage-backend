@@ -28,6 +28,7 @@ class TagController extends BaseController
     public function store(CreateTagRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('tag.create');
             $this->service->create($request);
             $tags = $this->repository->getAllByEnterprise();
 
@@ -38,6 +39,7 @@ class TagController extends BaseController
     public function update(UpdateTagRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('tag.update');
             $this->service->update($request);
             $tags = $this->repository->getAllByEnterprise();
 
@@ -48,6 +50,7 @@ class TagController extends BaseController
     public function destroy(DeleteTagRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('tag.delete');
             $this->repository->delete($request->route('tagID'));
             $tags = $this->repository->getAllByEnterprise();
 

@@ -43,6 +43,7 @@ class EmployeeController extends BaseController
     public function removeAccessLogin(CheckIDEmployeeRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('employee.update');
             $this->service->removeAccessLogin($request->employeeId);
             $employees = $this->repository->getAllByEnterprise();
 
@@ -53,6 +54,7 @@ class EmployeeController extends BaseController
     public function createAccessLogin(CreateAccessLoginRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('employee.update');
             $this->service->createAccessLogin($request);
             $employees = $this->repository->getAllByEnterprise();
 
@@ -73,6 +75,7 @@ class EmployeeController extends BaseController
     public function store(CreateEmployeeRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('employee.create');
             $this->service->create($request);
             $employees = $this->repository->getAllByEnterprise();
 
@@ -83,6 +86,7 @@ class EmployeeController extends BaseController
     public function update(UpdateEmployeeRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('employee.update');
             $this->service->update($request);
             $employees = $this->repository->getAllByEnterprise();
 
@@ -93,6 +97,7 @@ class EmployeeController extends BaseController
     public function destroy(DeleteEmployeeRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('employee.delete');
             $this->repository->delete($request->route('employeeID'));
             $employees = $this->repository->getAllByEnterprise();
 

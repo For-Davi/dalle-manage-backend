@@ -3,8 +3,8 @@
 use App\Helpers\PermissionHelper;
 
 if (! function_exists('check_permission')) {
-    function check_permission(string $slug)
+    function check_permission(...$slugs)
     {
-        PermissionHelper::hasPermission($slug);
+        PermissionHelper::hasPermissions($slugs);
     }
 }

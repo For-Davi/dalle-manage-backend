@@ -20,6 +20,7 @@ class CommissionController extends BaseController
     public function index(FilterCommissionRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
+            check_permission('commission.view');
             $commissionFilterDTO = FilterCommissionDTO::fromRequest($request);
             $commissions = $this->repository->getAllWithFilter($commissionFilterDTO->toArray());
 

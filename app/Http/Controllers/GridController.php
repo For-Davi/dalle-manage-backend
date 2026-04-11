@@ -55,6 +55,7 @@ class GridController extends BaseController
     public function store(CreateGridGroupRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('grid.create');
             $this->gridGroupService->create($request);
             $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
@@ -65,6 +66,7 @@ class GridController extends BaseController
     public function storeItem(CreateGridItemRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('grid.create');
             $this->gridItemService->create($request);
             $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
@@ -75,6 +77,7 @@ class GridController extends BaseController
     public function update(UpdateGridGroupRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('grid.update');
             $this->gridGroupService->update($request);
             $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
@@ -85,6 +88,7 @@ class GridController extends BaseController
     public function updateItem(UpdateGridItemRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('grid.update');
             $this->gridItemService->update($request);
             $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
@@ -95,6 +99,7 @@ class GridController extends BaseController
     public function destroy(DeleteGridGroupRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('grid.delete');
             $this->gridGroupRepository->delete($request->route('gridID'));
             $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 
@@ -105,6 +110,7 @@ class GridController extends BaseController
     public function destroyItem(DeleteGridItemRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('grid.delete');
             $this->gridItemRepository->delete($request->route('itemID'));
             $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);
 

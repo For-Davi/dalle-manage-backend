@@ -59,6 +59,7 @@ class SupplierController extends BaseController
     public function store(CreateSupplierRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier.create');
             $this->service->create($request);
             $suppliers = $this->repository->getAllByEnterprise();
 
@@ -69,6 +70,7 @@ class SupplierController extends BaseController
     public function update(UpdateSupplierRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier.update');
             $this->service->update($request);
             $suppliers = $this->repository->getAllByEnterprise();
 
@@ -79,6 +81,7 @@ class SupplierController extends BaseController
     public function destroy(DeleteSupplierRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier.delete');
             $this->repository->delete($request->route('supplierID'));
             $suppliers = $this->repository->getAllByEnterprise();
 

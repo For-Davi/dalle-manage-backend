@@ -39,6 +39,7 @@ class SupplierCatalogController extends BaseController
     public function store(CreateCatalogSupplierRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-catalog.create');
             $this->service->create($request);
             $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
 
@@ -49,6 +50,7 @@ class SupplierCatalogController extends BaseController
     public function update(UpdateCatalogSupplierRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('supplier-catalog.update');
             $this->service->update($request);
             $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
 
@@ -59,6 +61,7 @@ class SupplierCatalogController extends BaseController
     public function destroy(DeleteCatalogSupplierRequest $request, $supplierID, $productVariantID)
     {
         return $this->safeTransaction(function () use ($request, $supplierID, $productVariantID) {
+            check_permission('supplier-catalog.delete');
             $this->repository->delete($supplierID, $productVariantID);
             $catalog = $this->repository->getBySupplier($request->supplierID, ['variant.product', 'variant.color', 'supplier']);
 

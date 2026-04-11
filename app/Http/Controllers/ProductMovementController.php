@@ -14,6 +14,7 @@ class ProductMovementController extends BaseController
     public function store(CreateProductMovementRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.movement');
             $this->service->create($request);
             $message = match ($request->type) {
                 'in' => 'Movimentação de entrada realizada',
@@ -28,6 +29,7 @@ class ProductMovementController extends BaseController
     public function storeStockReentry(CreateProductMovementRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.movement');
             $this->service->createWhenItsStockReentry($request);
             $message = match ($request->type) {
                 'in' => 'Movimentação de entrada realizada',

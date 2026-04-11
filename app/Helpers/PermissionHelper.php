@@ -8,21 +8,20 @@ use Illuminate\Validation\ValidationException;
 
 class PermissionHelper
 {
-    public static function hasPermission($permissionSlug)
+    public static function hasPermissions(array $slugs)
     {
         $user = Auth::user();
 
-        if (! $user || ! $user->hasPermission($permissionSlug)) {
+        foreach ($slugs as $slug) {
+            if (! $user || ! $user->hasPermission($slug)) {
 
-            $permissionData = Permission::where('slug', $permissionSlug)->first();
+                $permissionData = Permission::where('slug', $slug)->first();
+                $description = $permissionData ? $permissionData->description : "ação ({$slug})";
 
-            $description = $permissionData
-                ? $permissionData->description
-                : "ação específica ({$permissionSlug})";
-
-            throw ValidationException::withMessages([
-                'permission' => ["Acesso negado! Você não possui permissão para: {$description}."],
-            ]);
+                throw ValidationException::withMessages([
+                    'permission' => ["Acesso negado! Você precisa da permissão: {$description}."],
+                ]);
+            }
         }
     }
 }

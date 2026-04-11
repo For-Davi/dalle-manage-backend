@@ -118,6 +118,7 @@ class ProductController extends BaseController
     public function store(CreateProductRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.create');
             $this->service->create($request);
             $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
@@ -154,6 +155,7 @@ class ProductController extends BaseController
     public function updateBasic(UpdateProductBasicRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.update');
             $product = $this->service->updateBasic($request);
             $product->load(['category', 'logs']);
 
@@ -164,6 +166,7 @@ class ProductController extends BaseController
     public function updateAdvanced(UpdateProductAdvancedRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.update');
             $advanced = $this->service->updateAdvanced($request);
             $product = $this->repository->findById($request->productID, ['logs']);
 
@@ -174,6 +177,7 @@ class ProductController extends BaseController
     public function updateTag(UpdateProductTagRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.update');
             $this->service->updateTag($request);
             $product = $this->repository->findById($request->productID, ['tags', 'logs']);
 
@@ -184,6 +188,7 @@ class ProductController extends BaseController
     public function updateMedia(UpdateProductMediaRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.update');
             $this->service->updateMedia($request);
             $product = $this->repository->findById($request->productID, ['images', 'logs']);
             $product->images->transform(function ($image) {
@@ -199,6 +204,7 @@ class ProductController extends BaseController
     public function updateVariant(UpdateProductVariantRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.update');
             $this->service->updateVariant($request);
             $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color']);
 
@@ -209,6 +215,7 @@ class ProductController extends BaseController
     public function destroy(DeleteProductRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.delete');
             $this->repository->delete($request->route('productID'));
             $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 
@@ -219,6 +226,7 @@ class ProductController extends BaseController
     public function destroyVariant(DeleteProductVariantRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('product.delete');
             $this->productVariantRepository->delete($request->route('variantID'));
             $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);
 

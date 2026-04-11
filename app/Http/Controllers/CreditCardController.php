@@ -14,6 +14,7 @@ class CreditCardController extends BaseController
     public function store(CreatePaymentCreditCardRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('subscription.payment');
             $result = $this->service->store($request);
 
             return response()->json(['result' => $result], 200);

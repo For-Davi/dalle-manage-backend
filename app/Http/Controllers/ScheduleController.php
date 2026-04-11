@@ -61,6 +61,7 @@ class ScheduleController extends BaseController
     public function store(CreateScheduleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('transaction.create');
             $this->service->create($request);
             $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
@@ -78,6 +79,7 @@ class ScheduleController extends BaseController
     public function update(UpdateScheduleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('transaction.update');
             $this->service->update($request);
             $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
@@ -88,6 +90,7 @@ class ScheduleController extends BaseController
     public function destroy(DeleteScheduleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('transaction.delete');
             $this->repository->delete($request->route('scheduleID'));
             $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
@@ -98,6 +101,7 @@ class ScheduleController extends BaseController
     public function finishSchedule(FinishScheduleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('transaction.update');
             $this->service->finishSchedule($request);
             $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 

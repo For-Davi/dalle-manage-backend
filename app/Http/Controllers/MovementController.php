@@ -60,6 +60,7 @@ class MovementController extends BaseController
     public function store(CreateMovementRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('transaction.create');
             $this->service->create($request);
             $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
@@ -77,6 +78,7 @@ class MovementController extends BaseController
     public function update(UpdateMovementRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('transaction.update');
             $this->service->update($request);
             $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
@@ -87,6 +89,7 @@ class MovementController extends BaseController
     public function destroy(DeleteMovementRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_permission('transaction.delete');
             $this->repository->delete($request->route('movementID'));
             $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
 
