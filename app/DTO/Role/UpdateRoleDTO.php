@@ -4,18 +4,18 @@ namespace App\DTO\Role;
 
 use App\DTO\BaseDTO;
 
-class RoleStartDTO extends BaseDTO
+class UpdateRoleDTO extends BaseDTO
 {
     public function __construct(
         public string $name,
-        public string $enterprise_id
+        public readonly ?string $description,
     ) {}
 
     public static function fromRequest($data): self
     {
         return new self(
-            name: 'Master',
-            enterprise_id: $data['enterprise_id'],
+            name: $data['name'],
+            description: $data['description'],
         );
     }
 }

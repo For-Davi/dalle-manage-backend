@@ -19,7 +19,7 @@ class DeliveryGuyController extends BaseController
 
     public function index(Request $request)
     {
-        return $this->safeExecute(function () use ($request) {
+        return $this->safeExecute(function () {
             $deliveriesGuys = $this->repository->getAllByEnterprise();
 
             return response()->json(['deliveriesGuys' => $deliveriesGuys], 200);

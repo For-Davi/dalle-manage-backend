@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
     public function up(): void
     {
         Schema::table('sale_deliveries', function (Blueprint $table) {
@@ -26,12 +25,12 @@ return new class extends Migration
         Schema::table('sale_deliveries', function (Blueprint $table) {
             $table->dropForeign(['delivery_guy_id']);
             $table->dropColumn(['status',
-            'scheduled_date',
-            'delivery_guy_id',
-            'delivery_guy_name',
-            'delivery_guy_phone',
-            'updated_by_name',
-            'updated_by_email',
+                'scheduled_date',
+                'delivery_guy_id',
+                'delivery_guy_name',
+                'delivery_guy_phone',
+                'updated_by_name',
+                'updated_by_email',
             ]);
         });
     }

@@ -10,8 +10,8 @@ class DeliveryGuyHelper
 {
     public static function existsDeliveryGuy($id)
     {
-            if($id){
-                $deliveryGuy = DB::table('delivery_guys')
+        if ($id) {
+            $deliveryGuy = DB::table('delivery_guys')
                 ->where('id', $id)
                 ->where('enterprise_id', Auth::user()->enterprise_id)
                 ->first();
@@ -23,6 +23,6 @@ class DeliveryGuyHelper
                     'deliveryGuyID' => ['O entregador informado não possui cadastro.'],
                 ]);
             }
-            }
+        }
     }
 }

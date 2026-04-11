@@ -16,7 +16,7 @@ class DeliveryGuyRepository extends BaseRepository
     {
         $deliveryGuy = $this->findById($id);
 
-        if($deliveryGuy){
+        if ($deliveryGuy) {
             return $deliveryGuy->delete();
         }
 

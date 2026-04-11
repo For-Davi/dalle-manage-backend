@@ -8,9 +8,9 @@ use App\DTO\Sale\SaleItem\UpdateSaleItemDTO;
 use App\Helpers\DeliveryGuyHelper;
 use App\Helpers\DeliveryHelper;
 use App\Repositories\DeliveryGuyRepository;
+use App\Repositories\ReturnExchangeItemRepository;
 use App\Repositories\SaleDeliveryRepository;
 use App\Repositories\SaleItemRepository;
-use App\Repositories\ReturnExchangeItemRepository;
 
 class DeliveryService
 {
@@ -29,11 +29,11 @@ class DeliveryService
 
         $deliveryGuy = null;
 
-        if($request->deliveryStatus === 'delivered' && !$delivery->delivery_guy_id && !$delivery->delivery_guy_name){
+        if ($request->deliveryStatus === 'delivered' && ! $delivery->delivery_guy_id && ! $delivery->delivery_guy_name) {
             DeliveryGuyHelper::existsDeliveryGuy($request->deliveryGuyID);
             $deliveryGuy = $this->deliveryGuyRepository->findById($request->deliveryGuyID);
         }
-        
+
         $this->updateItensWhenDelivered($delivery->sale_id, $delivery->return_id);
 
         $deliveryDTO = UpdateDeliveryDTO::fromRequest($request->deliveryStatus, $deliveryGuy);
@@ -48,14 +48,14 @@ class DeliveryService
 
         $deliveryGuy = null;
 
-        if($request->deliveryGuyID){
+        if ($request->deliveryGuyID) {
             $deliveryGuy = $this->deliveryGuyRepository->findById($request->deliveryGuyID);
         }
 
         $scheduleDTO = CreateScheduleDeliveryDTO::fromRequest($request, $deliveryGuy?->name, $deliveryGuy?->phone);
 
         return $this->repository->update($request->deliveryID, $scheduleDTO->toArray());
-    }   
+    }
 
     public function partialDelivered($request)
     {
@@ -63,9 +63,9 @@ class DeliveryService
         DeliveryHelper::checkDeliveredAndSaledQuantity($request['deliveryID'], $request['deliveredProducts']);
         $isStatusDelivered = DeliveryHelper::isStatusDelivered($request['deliveredProducts']);
 
-        $this->updateSaleItens($request['deliveryID'],$request['deliveredProducts']);
+        $this->updateSaleItens($request['deliveryID'], $request['deliveredProducts']);
 
-        if($isStatusDelivered){
+        if ($isStatusDelivered) {
             $this->updateDelivery($request['deliveryID'], 'delivered');
         } else {
             $this->updateDelivery($request['deliveryID'], 'partial_delivered');
@@ -73,29 +73,29 @@ class DeliveryService
     }
 
     private function updateItensWhenDelivered(int $saleID, ?int $returnID)
-    {   
-        if($returnID){
+    {
+        if ($returnID) {
             $products = $this->returnExchangeItemRepository->findByReturnId($returnID);
 
-        foreach($products as $product){
-            $saleItemDTO = UpdateSaleItemDTO::fromRequest([
-                'delivered' => 1,
-                'quantityDelivered' => $product->quantity
-            ]);
+            foreach ($products as $product) {
+                $saleItemDTO = UpdateSaleItemDTO::fromRequest([
+                    'delivered' => 1,
+                    'quantityDelivered' => $product->quantity,
+                ]);
 
-            $this->returnExchangeItemRepository->updateByProductVariantID($product->product_variant_id, $returnID, $saleItemDTO->toArray());
-        }
+                $this->returnExchangeItemRepository->updateByProductVariantID($product->product_variant_id, $returnID, $saleItemDTO->toArray());
+            }
         } else {
             $products = $this->saleItemRepository->findBySaleId($saleID);
 
-        foreach($products as $product){
-            $saleItemDTO = UpdateSaleItemDTO::fromRequest([
-                'delivered' => 1,
-                'quantityDelivered' => $product->quantity
-            ]);
+            foreach ($products as $product) {
+                $saleItemDTO = UpdateSaleItemDTO::fromRequest([
+                    'delivered' => 1,
+                    'quantityDelivered' => $product->quantity,
+                ]);
 
-            $this->saleItemRepository->updateByProductVariantID($product->product_variant_id, $saleID, $saleItemDTO->toArray());
-        }
+                $this->saleItemRepository->updateByProductVariantID($product->product_variant_id, $saleID, $saleItemDTO->toArray());
+            }
         }
 
         return true;
@@ -105,27 +105,27 @@ class DeliveryService
     {
         $delivery = $this->repository->findById($deliveryID);
 
-        if($delivery->return_id){
+        if ($delivery->return_id) {
 
-            foreach($deliveredProducts as $data){
-            $saleItemDTO = UpdateSaleItemDTO::fromRequest([
-                'delivered' => $data['quantitySaled'] === $data['quantityDelivered'] ? 1 : 0,
-                'quantityDelivered' => $data['quantityDelivered']
-            ]);
+            foreach ($deliveredProducts as $data) {
+                $saleItemDTO = UpdateSaleItemDTO::fromRequest([
+                    'delivered' => $data['quantitySaled'] === $data['quantityDelivered'] ? 1 : 0,
+                    'quantityDelivered' => $data['quantityDelivered'],
+                ]);
 
-            $this->returnExchangeItemRepository->updateByProductVariantID($data['productVariantID'], $delivery->return_id, $saleItemDTO->toArray());
-        }
+                $this->returnExchangeItemRepository->updateByProductVariantID($data['productVariantID'], $delivery->return_id, $saleItemDTO->toArray());
+            }
 
         } else {
 
-            foreach($deliveredProducts as $data){
-            $saleItemDTO = UpdateSaleItemDTO::fromRequest([
-                'delivered' => $data['quantitySaled'] === $data['quantityDelivered'] ? 1 : 0,
-                'quantityDelivered' => $data['quantityDelivered']
-            ]);
+            foreach ($deliveredProducts as $data) {
+                $saleItemDTO = UpdateSaleItemDTO::fromRequest([
+                    'delivered' => $data['quantitySaled'] === $data['quantityDelivered'] ? 1 : 0,
+                    'quantityDelivered' => $data['quantityDelivered'],
+                ]);
 
-            $this->saleItemRepository->updateByProductVariantID($data['productVariantID'], $delivery->sale_id, $saleItemDTO->toArray());
-        }
+                $this->saleItemRepository->updateByProductVariantID($data['productVariantID'], $delivery->sale_id, $saleItemDTO->toArray());
+            }
 
         }
 
@@ -134,8 +134,8 @@ class DeliveryService
 
     private function updateDelivery(int $deliveryID, string $status)
     {
-       $deliveryDTO = UpdateDeliveryDTO::fromRequest($status);
+        $deliveryDTO = UpdateDeliveryDTO::fromRequest($status);
 
-       return $this->repository->update($deliveryID, $deliveryDTO->toArray());
+        return $this->repository->update($deliveryID, $deliveryDTO->toArray());
     }
 }

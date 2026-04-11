@@ -56,7 +56,7 @@ class SaleService
         $this->createSalePaymentsMethods($request->paymentData, $sale->id, $enterpriseID);
 
         // Criação do itens da venda
-        $this->createSaleItens($request->saleData, $request->input('deliveryData.freight'),$sale->id, $enterpriseID);
+        $this->createSaleItens($request->saleData, $request->input('deliveryData.freight'), $sale->id, $enterpriseID);
 
         // Criação do frete
         if ($request->input('deliveryData.freight')) {

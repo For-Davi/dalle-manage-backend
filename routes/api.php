@@ -215,8 +215,11 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     });
 
     Route::prefix('role')->group(function () {
+        Route::get('/', [RoleController::class, 'index']);
         Route::get('/list-select', [RoleController::class, 'indexSelect']);
         Route::post('/', [RoleController::class, 'store']);
+        Route::put('/', [RoleController::class, 'update']);
+        Route::delete('/{roleID}', [RoleController::class, 'destroy']);
     });
 
     Route::prefix('transaction')->group(function () {

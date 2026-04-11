@@ -25,7 +25,7 @@ class CreateReturnDTO extends BaseDTO
         public ?string $seller_email,
     ) {}
 
-    public static function fromRequest($data, $sellerName = null, $sellerEmail = null, $exchangeOrDifferenceCurrentValue): self
+    public static function fromRequest($data, $sellerName, $sellerEmail, $exchangeOrDifferenceCurrentValue): self
     {
         return new self(
             sale_id: $data['saleID'],

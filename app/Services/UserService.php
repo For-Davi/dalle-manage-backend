@@ -21,6 +21,7 @@ use App\Http\Client\PaymentsHttpClient;
 use App\Jobs\Email\SendInviteUserEmailJob;
 use App\Jobs\Email\SendResetPasswordEmail;
 use App\Models\PasswordResetToken;
+use App\Models\Permission;
 use App\Repositories\EmployeeRepository;
 use App\Repositories\EnterpriseRepository;
 use App\Repositories\ImageRepository;
@@ -160,6 +161,7 @@ class UserService
 
         $roleDTO = RoleStartDTO::fromRequest(['enterprise_id' => $enterprise->id]);
         $role = $this->startRole($roleDTO->toArray());
+        $this->syncPermissionsRole($role->id);
 
         $userDTO = UserStartDTO::fromRequest([
             ...$request->only(['name', 'password', 'email']),
@@ -219,6 +221,8 @@ class UserService
 
         $user = $this->createUser($userDTO->toArray());
 
+        $this->syncPermissionsRole($user->role_id);
+
         $admin = $request->user();
         $enterprise = $this->enterpriseRepository->findById(Auth::user()->enterprise_id);
         $token = app('auth.password.broker')->createToken($user);
@@ -249,6 +253,13 @@ class UserService
         if ($resetRecord) {
             $resetRecord->update(['type' => $type]);
         }
+    }
+
+    private function syncPermissionsRole($roleID)
+    {
+        $role = $this->roleRepository->findById($roleID);
+        $allPermissionIds = Permission::pluck('id');
+        $role->permissions()->sync($allPermissionIds);
     }
 
     public function update($request)

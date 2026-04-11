@@ -5,7 +5,7 @@ namespace App\Http\Requests\Role;
 use App\Models\Permission;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateRoleRequest extends FormRequest
+class UpdateRoleRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,6 +15,7 @@ class CreateRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => 'required|integer|exists:roles,id',
             'name' => 'required|string|min:1|max:30',
             'description' => 'nullable|string|max:500',
             'permissions' => [
@@ -42,6 +43,9 @@ class CreateRoleRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'id.required' => 'O identificador do perfil é obrigatório.',
+            'id.integer' => 'O identificador do perfil deve ser um número inteiro.',
+            'id.exists' => 'O perfil informado não foi encontrado.',
             'name.required' => 'O nome do perfil é obrigatório.',
             'name.string' => 'O nome deve ser um texto válido.',
             'name.min' => 'O nome do perfil deve ter pelo menos 1 caractere.',

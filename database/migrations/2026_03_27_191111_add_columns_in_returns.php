@@ -21,12 +21,12 @@ return new class extends Migration
     {
         Schema::table('returns', function (Blueprint $table) {
             $table->dropColumn([
-            'exchange_value',
-            'difference_value',
-            'current_value',
-            'fees',
-            'change'
-        ]);
+                'exchange_value',
+                'difference_value',
+                'current_value',
+                'fees',
+                'change',
+            ]);
         });
     }
 };

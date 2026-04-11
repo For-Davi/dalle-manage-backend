@@ -7,7 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class DeliveryResource extends JsonResource
 {
-
     public function toArray(Request $request): array
     {
         $items = $this->return_id !== null ? $this->returnExchangeItems : $this->saleItems;
@@ -38,17 +37,17 @@ class DeliveryResource extends JsonResource
             'updated_by_email' => $this->updated_by_email,
             'items' => $items->map(function ($item) {
                 return [
-                    'product_name'       => $item->product_name,
-                    'product_sku'        => $item->product_sku,
-                    'product_price'      => $item->product_price,
-                    'quantity'           => $item->quantity,
-                    'total'              => $item->total,
-                    'grid'               => $item->product_grid_name,
-                    'product_code'       => $item->product_code,
-                    'color'              => $item->product_color,
-                    'color_name'         => $item->product_color_name,
+                    'product_name' => $item->product_name,
+                    'product_sku' => $item->product_sku,
+                    'product_price' => $item->product_price,
+                    'quantity' => $item->quantity,
+                    'total' => $item->total,
+                    'grid' => $item->product_grid_name,
+                    'product_code' => $item->product_code,
+                    'color' => $item->product_color,
+                    'color_name' => $item->product_color_name,
                     'quantity_delivered' => $item->quantity_delivered ?? 0,
-                    'delivered' => $item->delivered
+                    'delivered' => $item->delivered,
                 ];
             }),
         ];

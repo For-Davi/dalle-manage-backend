@@ -21,8 +21,9 @@ class ReturnExchangeItemRepository extends BaseRepository
     {
         $product = $this->model->where('product_variant_id', $productVariantID)->where('return_id', $returnID)->first();
 
-        if($product){
+        if ($product) {
             $product->update($data);
+
             return true;
         }
 
