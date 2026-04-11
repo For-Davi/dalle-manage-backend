@@ -111,7 +111,7 @@
 
     <div class="header">
         <h2>Relatório de Comissões</h2>
-        <p>Gerado em: {{ now()->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s') }}</p>
+        <p>Gerado em: {{ now()->format('d/m/Y H:i:s') }}</p>
     </div>
 
     @if($commissionDetails->count() > 0)

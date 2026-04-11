@@ -23,7 +23,7 @@ class MovementRepository extends BaseRepository
         }
 
         if ($onlyPeriodActual) {
-            $now = Carbon::now('America/Sao_Paulo');
+            $now = Carbon::now();
             $month = str_pad($now->month, 2, '0', STR_PAD_LEFT);
             $year = $now->year;
 
@@ -76,7 +76,7 @@ class MovementRepository extends BaseRepository
         }
 
         if (empty($filters['period'])) {
-            $now = Carbon::now('America/Sao_Paulo');
+            $now = Carbon::now();
             $month = $now->month;
             $year = $now->year;
         } else {

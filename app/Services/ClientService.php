@@ -68,7 +68,7 @@ class ClientService
         ];
 
         if ($setting->has_credit_expired_data) {
-            $updateData['credit_expires_at'] = Carbon::now('America/Sao_Paulo')->addDays($setting->quantity_credit_expire_days);
+            $updateData['credit_expires_at'] = Carbon::now()->addDays($setting->quantity_credit_expire_days);
         }
 
         return $this->repository->update($client->id, $updateData);

@@ -49,7 +49,7 @@ class WebhookAsaasService
 
     private function calculateExpiredDate(int $monthQuantity): string
     {
-        return now('America/Sao_Paulo')
+        return now()
             ->addMonths($monthQuantity)
             ->toDateTimeString();
     }

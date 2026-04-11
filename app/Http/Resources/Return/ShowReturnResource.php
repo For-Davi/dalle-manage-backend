@@ -23,8 +23,8 @@ class ShowReturnResource extends JsonResource
             'updated_by_email' => $this->updated_by_email,
             'seller_name' => $this->seller_name,
             'seller_email' => $this->seller_email,
-            'created_at' => $this->created_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
-            'updated_at' => $this->updated_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+            'created_at' => $this->created_at->format('d/m/Y H:i:s'),
+            'updated_at' => $this->updated_at->format('d/m/Y H:i:s'),
             'return_items' => $this->items->map(function ($item) {
                 return [
                     'product_name' => $item->product_name,

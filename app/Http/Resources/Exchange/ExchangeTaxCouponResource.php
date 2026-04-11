@@ -15,7 +15,7 @@ class ExchangeTaxCouponResource extends JsonResource
                 'fees' => $this->additionalExchange?->fees,
                 'total' => $this->difference_value,
                 'change' => $this->additionalExchange?->change,
-                'date' => $this->created_at?->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i:s'),
+                'date' => $this->created_at?->format('d/m/Y H:i:s'),
             ],
             'enterprise' => [
                 'id' => $this->sale?->enterprise?->id,

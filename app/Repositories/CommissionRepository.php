@@ -16,21 +16,19 @@ class CommissionRepository extends BaseRepository
 
     public function getAllWithFilter(array $filters)
     {
-        $timezone = 'America/Sao_Paulo';
-
         if (empty($filters['start_period']) && empty($filters['end_period'])) {
-            $now = Carbon::now($timezone);
+            $now = Carbon::now();
             $start = $now->copy()->startOfYear()->toDateTimeString();
             $end = $now->copy()->endOfYear()->toDateTimeString();
         } else {
             $start = ! empty($filters['start_period'])
-                ? Carbon::createFromFormat('m/Y', $filters['start_period'], $timezone)
+                ? Carbon::createFromFormat('m/Y', $filters['start_period'])
                     ->startOfMonth()
                     ->startOfDay()
                     ->toDateTimeString()
                 : null;
             $end = ! empty($filters['end_period'])
-                ? Carbon::createFromFormat('m/Y', $filters['end_period'], $timezone)
+                ? Carbon::createFromFormat('m/Y', $filters['end_period'])
                     ->endOfMonth()
                     ->endOfDay()
                     ->toDateTimeString()

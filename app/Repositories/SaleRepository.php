@@ -21,7 +21,6 @@ class SaleRepository extends BaseRepository
 
     public function getAllWithFilter(array $filters)
     {
-        $tz = 'America/Sao_Paulo';
         $query = $this->model
             ->where('enterprise_id', $filters['enterprise_id']);
 
@@ -29,19 +28,19 @@ class SaleRepository extends BaseRepository
         $hasEnd = ! empty($filters['end_date']);
 
         if ($hasStart && ! $hasEnd) {
-            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'], $tz)->startOfDay();
+            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'])->startOfDay();
 
             $query->where('date', '>=', $start);
         }
 
         if ($hasEnd && ! $hasStart) {
-            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'], $tz)->endOfDay();
+            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'])->endOfDay();
 
             $query->where('date', '<=', $end);
         }
         if ($hasStart && $hasEnd) {
-            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'], $tz)->startOfDay();
-            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'], $tz)->endOfDay();
+            $start = Carbon::createFromFormat('d/m/Y', $filters['start_date'])->startOfDay();
+            $end = Carbon::createFromFormat('d/m/Y', $filters['end_date'])->endOfDay();
 
             $query->whereBetween('date', [$start, $end]);
         }
@@ -101,7 +100,7 @@ class SaleRepository extends BaseRepository
 
     public function getTodayData()
     {
-        $sales = DB::table('sales')->where('date', Carbon::now('America/Sao_Paulo')->format('d-m-Y'));
+        $sales = DB::table('sales')->where('date', Carbon::now()->format('d-m-Y'));
 
         return $sales;
     }
