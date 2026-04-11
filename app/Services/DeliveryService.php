@@ -72,6 +72,28 @@ class DeliveryService
         }
     }
 
+    public function export($request)
+    {
+        // $dateTime = now()->format('Ymd_His');
+
+        // $exportMovementDTO = FilterMovementDTO::fromRequest($request);
+        // $movements = $this->repository->getAllWithFilter($exportMovementDTO->toArray(), ['category']);
+
+        // if ($request->format === 'excel') {
+        //     $fileName = "movements_{$dateTime}.xlsx";
+
+        //     return (new MovementsExport($movements))->download($fileName);
+        // } else {
+        //     $fileName = "movements_{$dateTime}.xlsx";
+
+        //     $pdf = Pdf::loadView('exports.movements-pdf', [
+        //         'movements' => $movements,
+        //     ]);
+
+        //     return $pdf->download($fileName);
+        // }
+    }
+
     private function updateItensWhenDelivered(int $saleID, ?int $returnID)
     {   
         if($returnID){

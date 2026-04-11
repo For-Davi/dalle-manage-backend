@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Delivery\CreatePartialDeliveryRequest;
 use App\Http\Requests\Delivery\CreateScheduledDeliveryRequest;
+use App\Http\Requests\Delivery\ExportDeliveryRequest;
 use App\Http\Requests\Delivery\FilterDeliveryRequest;
 use App\Http\Requests\Delivery\ShowDeliveryRequest;
 use App\Http\Requests\Delivery\UpdateDeliveryRequest;
@@ -80,6 +81,13 @@ class DeliveryController extends BaseController
 
             return response()->json(['deliveries' => $deliveries, 'message' => 'Entrega atualizada'], 200);
         }, 'Erro ao marcar atualizar entrega', $request);
+    }
+
+    public function export(ExportDeliveryRequest $request)
+    {
+        return $this->safeExecute(function () use ($request) {
+            return $this->service->export($request);
+        }, 'Erro ao exportar entregas', $request);
     }
     
 }

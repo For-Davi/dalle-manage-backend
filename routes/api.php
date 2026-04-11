@@ -343,6 +343,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/filter', [DeliveryController::class, 'filter']);
         Route::post('/schedule', [DeliveryController::class, 'schedule']);
         Route::post('/partial-delivered', [DeliveryController::class, 'partialDelivered']);
+        Route::post('/export', [DeliveryController::class, 'export']);
         Route::put('/', [DeliveryController::class, 'update']);
     });
 
