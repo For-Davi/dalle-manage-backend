@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Role;
 
-use App\Models\Permission;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateRoleRequest extends FormRequest
@@ -17,25 +16,12 @@ class CreateRoleRequest extends FormRequest
         return [
             'name' => 'required|string|min:1|max:30',
             'description' => 'nullable|string|max:500',
-            'permissions' => [
+            'permissions' => 'required|array',
+            'permissions.*' => [
                 'required',
-                'array',
-                function ($attribute, $value, $fail) {
-                    $slugs = array_keys($value);
-                    $allSlugs = Permission::pluck('slug')->toArray();
-
-                    $invalidSlugs = array_diff($slugs, $allSlugs);
-                    if (! empty($invalidSlugs)) {
-                        $fail('Uma ou mais permissões informadas são inválidas ou não existem no sistema.');
-                    }
-
-                    $missingSlugs = array_diff($allSlugs, $slugs);
-                    if (! empty($missingSlugs)) {
-                        $fail('Todas as permissões do sistema devem ser informadas.');
-                    }
-                },
+                'integer',
+                'exists:permissions,id',
             ],
-            'permissions.*' => 'required|integer|in:0,1',
         ];
     }
 
@@ -50,9 +36,9 @@ class CreateRoleRequest extends FormRequest
             'description.max' => 'A descrição não pode exceder 500 caracteres.',
             'permissions.required' => 'É necessário informar as permissões para este perfil.',
             'permissions.array' => 'O formato das permissões é inválido.',
-            'permissions.*.required' => 'O status da permissão é obrigatório.',
-            'permissions.*.integer' => 'O valor da permissão deve ser um número inteiro.',
-            'permissions.*.in' => 'O valor da permissão deve ser 0 (desativado) ou 1 (ativado).',
+            'permissions.*.required' => 'O ID da permissão é obrigatório.',
+            'permissions.*.integer' => 'O ID da permissão deve ser um número inteiro.',
+            'permissions.*.exists' => 'Uma ou mais permissões informadas não existem no sistema.',
         ];
     }
 }

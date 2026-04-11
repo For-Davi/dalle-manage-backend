@@ -130,11 +130,11 @@ class PermissionsSeeder extends Seeder
 
             // Configurações
             ['slug' => 'config.view', 'description' => 'Visualizar configurações'],
-            ['slug' => 'config.edit', 'description' => 'Editar configurações'],
+            ['slug' => 'config.update', 'description' => 'Editar configurações'],
 
             ['slug' => 'role.view', 'description' => 'Visualizar permissões'],
             ['slug' => 'role.create', 'description' => 'Criar permissões'],
-            ['slug' => 'role.edit', 'description' => 'Editar permissões'],
+            ['slug' => 'role.update', 'description' => 'Editar permissões'],
             ['slug' => 'role.delete', 'description' => 'Excluir permissões'],
         ];
 

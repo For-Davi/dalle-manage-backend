@@ -5,7 +5,6 @@ namespace App\Services;
 use App\DTO\Role\CreateRoleDTO;
 use App\DTO\Role\UpdateRoleDTO;
 use App\Helpers\RoleHelper;
-use App\Models\Permission;
 use App\Repositories\RoleRepository;
 
 class RoleService
@@ -14,37 +13,28 @@ class RoleService
 
     public function create($request)
     {
-        RoleHelper::existsRole(
-            $request->name,
-            'create'
-        );
+        RoleHelper::existsRole($request->name, 'create');
 
         $roleDTO = CreateRoleDTO::fromRequest($request);
         $role = $this->repository->create($roleDTO->toArray());
-        $this->syncPermissionsRole($role);
+        $this->syncPermissionsRole($role, $request->permissions);
 
         return $role;
     }
 
     public function update($request)
     {
-        RoleHelper::existsRole(
-            $request->name,
-            'update',
-            $request->id
-        );
+        RoleHelper::existsRole($request->name, 'update', $request->id);
 
         $roleDTO = UpdateRoleDTO::fromRequest($request);
-
         $role = $this->repository->update($request->id, $roleDTO->toArray());
-        $this->syncPermissionsRole($role);
+        $this->syncPermissionsRole($role, $request->permissions);
 
         return $role;
     }
 
-    private function syncPermissionsRole($role)
+    private function syncPermissionsRole($role, array $permissionIds)
     {
-        $allPermissionIds = Permission::pluck('id');
-        $role->permissions()->sync($allPermissionIds);
+        $role->permissions()->sync($permissionIds);
     }
 }

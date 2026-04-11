@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Role\CreateRoleRequest;
 use App\Http\Requests\Role\DeleteRoleRequest;
+use App\Http\Requests\Role\ShowRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Http\Resources\Role\RoleSelectResource;
 use App\Repositories\RoleRepository;
@@ -30,6 +31,15 @@ class RoleController extends BaseController
 
             return response()->json(['roles' => RoleSelectResource::collection($roles)], 200);
         }, 'Erro ao buscar roles', $request);
+    }
+
+    public function show(ShowRoleRequest $request)
+    {
+        return $this->safeExecute(function () use ($request) {
+            $role = $this->repository->findById($request->route('roleID'), ['permissions']);
+
+            return response()->json(['role' => $role], 200);
+        }, 'Erro ao buscar permissão', $request);
     }
 
     public function store(CreateRoleRequest $request)

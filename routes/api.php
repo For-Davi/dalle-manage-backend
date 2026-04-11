@@ -15,6 +15,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PixController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
@@ -216,10 +217,15 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('role')->group(function () {
         Route::get('/', [RoleController::class, 'index']);
+        Route::get('/{roleID}', [RoleController::class, 'show']);
         Route::get('/list-select', [RoleController::class, 'indexSelect']);
         Route::post('/', [RoleController::class, 'store']);
         Route::put('/', [RoleController::class, 'update']);
         Route::delete('/{roleID}', [RoleController::class, 'destroy']);
+    });
+
+    Route::prefix('permission')->group(function () {
+        Route::get('/', [PermissionController::class, 'index']);
     });
 
     Route::prefix('transaction')->group(function () {
