@@ -49,7 +49,7 @@ class UserController extends BaseController
     {
         return $this->safeExecute(function () use ($request) {
             $user = $this->service->login($request);
-            $user->load(['enterprise', 'image']);
+            $user->load(['enterprise', 'image', 'role.permissions']);
             if ($user->image) {
                 $user->image->url = asset($user->image->url);
             }
@@ -67,7 +67,7 @@ class UserController extends BaseController
     {
         return $this->safeTransaction(function () use ($request) {
             $user = $this->service->register($request);
-            $user->load(['enterprise', 'image']);
+            $user->load(['enterprise', 'image', 'role.permissions']);
             if ($user->image) {
                 $user->image->url = asset($user->image->url);
             }
