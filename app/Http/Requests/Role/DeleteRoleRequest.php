@@ -22,11 +22,12 @@ class DeleteRoleRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $role = Role::find($value);
 
-                    if ($role && strtoupper($role->name) === 'MASTER') {
+                    if ($role && $role->is_system === 1) {
                         $fail('O perfil Master não pode ser excluído.');
                     }
                 },
             ],
+            'newRoleID' => 'required|integer|exists:roles,id',
         ];
     }
 
@@ -34,6 +35,7 @@ class DeleteRoleRequest extends FormRequest
     {
         return array_merge($this->all(), [
             'roleID' => $this->route('roleID'),
+            'newRoleID' => $this->route('newRoleID'),
         ]);
     }
 
@@ -42,7 +44,11 @@ class DeleteRoleRequest extends FormRequest
         return [
             'roleID.required' => 'O identificador do perfil é obrigatório.',
             'roleID.integer' => 'O identificador do perfil deve ser um número inteiro.',
-            'roleID.exists' => 'O perfil informado não foi encontrado.',
+            'roleID.exists' => 'O perfil selecionado para exclusão não foi encontrado.',
+
+            'newRoleID.required' => 'É necessário informar um novo perfil para transferir os registros.',
+            'newRoleID.integer' => 'O identificador do novo perfil deve ser um número inteiro.',
+            'newRoleID.exists' => 'O perfil de destino informado não existe.',
         ];
     }
 }

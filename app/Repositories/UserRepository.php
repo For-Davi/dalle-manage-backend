@@ -70,6 +70,14 @@ class UserRepository extends BaseRepository
         return null;
     }
 
+    public function updateByRole($roleID, $newRoleID)
+    {
+        $users = $this->model->where('role_id', $roleID)->get();
+        foreach ($users as $user) {
+            $user->update(['role_id' => $newRoleID]);
+        }
+    }
+
     public function updatePassword($id, array $data)
     {
         $user = $this->findById($id);

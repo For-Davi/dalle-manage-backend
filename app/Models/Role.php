@@ -17,6 +17,7 @@ class Role extends Model implements HasCacheTags
 
     protected $fillable = [
         'name',
+        'description',
         'enterprise_id',
     ];
 

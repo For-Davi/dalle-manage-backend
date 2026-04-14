@@ -68,10 +68,7 @@ class RoleController extends BaseController
     {
         return $this->safeTransaction(function () use ($request) {
             check_permission('role.delete');
-            $role = $this->repository->findById($request->route('roleID'));
-            $role->permissions()->detach();
-
-            $this->repository->delete($request->route('roleID'));
+            $this->service->delete($request);
             $roles = $this->repository->getAllByEnterprise(['permissions']);
 
             return response()->json(['roles' => $roles, 'message' => 'Role excluída'], 200);
