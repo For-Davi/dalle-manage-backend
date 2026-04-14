@@ -22,11 +22,17 @@ class PaymentsHttpClient
 
     public function request(string $method, string $uri, array $data = [])
     {
+        $base = rtrim($this->baseUrl, '/');
+        $receipt = trim($this->paymentReceipt, '/');
+        $endpoint = ltrim($uri, '/');
+
+        $url = "{$base}/{$receipt}/{$endpoint}";
+
         $response = Http::withHeaders([
             'accept' => 'application/json',
             'Content-Type' => 'application/json',
             'access_token' => $this->token,
-        ])->{$method}($this->baseUrl.$this->paymentReceipt.$uri, $data);
+        ])->{$method}($url, $data);
 
         $json = $response->json();
 

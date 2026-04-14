@@ -5,7 +5,8 @@ services:
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: sail-8.4/app
+        image: dalle_manage/app
+        container_name: dalle_manage_app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -34,11 +35,11 @@ services:
 
     redis:
         image: 'redis:7-alpine'
-        container_name: redis
+        container_name: dalle_manage_redis
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
-            - 'sail-redis:/data'
+            - 'dalle_manage_redis:/data'
         networks:
             - manage-network
         healthcheck:
@@ -48,7 +49,7 @@ services:
 
     prometheus:
         image: prom/prometheus
-        container_name: prometheus
+        container_name: dalle_manage_prometheus
         ports:
             - '9090:9090'
         volumes:
@@ -56,19 +57,22 @@ services:
         command: '--config.file=/etc/prometheus/prometheus.yml'
         networks:
             - manage-network
+
     grafana:
         image: grafana/grafana
-        container_name: grafana
+        container_name: dalle_manage_grafana
         ports:
             - '3000:3000'
         volumes:
-            - 'grafana_data:/var/lib/grafana'
+            - 'dalle_manage_grafana:/var/lib/grafana'
         networks:
             - manage-network
         depends_on:
             - prometheus
+
     mysql_manage:
         image: 'mysql/mysql-server:8.0'
+        container_name: dalle_manage_mysql
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
@@ -78,7 +82,7 @@ services:
             MYSQL_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ALLOW_EMPTY_PASSWORD: 1
         volumes:
-            - 'sail-mysql:/var/lib/mysql'
+            - 'dalle_manage_mysql:/var/lib/mysql'
         networks:
             - manage-network
         healthcheck:
@@ -89,10 +93,11 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+
     smtp:
-        platform: linux/x86_64
         image: mailhog/mailhog
-        container_name: docker-workspace-smtp
+        platform: linux/x86_64
+        container_name: dalle_manage_smtp
         logging:
             driver: none
         ports:
@@ -107,8 +112,8 @@ networks:
         external: true
 
 volumes:
-    sail-mysql:
+    dalle_manage_mysql:
         driver: local
-    sail-redis:
+    dalle_manage_redis:
         driver: local
-    grafana_data: null
+    dalle_manage_grafana:
