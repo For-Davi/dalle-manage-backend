@@ -30,6 +30,8 @@ class PermissionRole extends Model implements HasCacheTags
 
         return [
             "permission_role:enterprise:{$enterpriseId}",
+            "role:enterprise:{$enterpriseId}",
+            "user:enterprise:{$enterpriseId}",
         ];
     }
 

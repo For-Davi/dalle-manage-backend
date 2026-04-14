@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\Role\CreateRoleDTO;
 use App\DTO\Role\UpdateRoleDTO;
 use App\Helpers\RoleHelper;
+use App\Observers\CacheInvalidationObserver;
 use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 
@@ -46,6 +47,7 @@ class RoleService
     private function syncPermissionsRole($role, array $permissionIds)
     {
         $role->permissions()->sync($permissionIds);
+        (new CacheInvalidationObserver)->updated($role);
     }
 
     private function updateAllRolesInUsers($roleID, $newRoleID)

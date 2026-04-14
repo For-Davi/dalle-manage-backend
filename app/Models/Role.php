@@ -34,6 +34,7 @@ class Role extends Model implements HasCacheTags
 
         return [
             "role:enterprise:{$this->enterprise_id}",
+            "user:enterprise:{$this->enterprise_id}",
         ];
     }
 
