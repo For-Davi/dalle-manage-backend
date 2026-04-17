@@ -138,7 +138,10 @@
   <div class="totals">
     <div>
       <span><strong>TROCO:</strong> R$ {{ number_format($coupon->change, 2, ',', '.') }}</span>
-      <span class="total">TOTAL: R$ {{ number_format($coupon->exchange_value, 2, ',', '.') }}</span>
+      <span class="total">TOTAL: R$ {{ $coupon->difference_value > 0 ? number_format($coupon->difference_value, 2, ',', '.') : number_format($coupon->delivery->freight_value, 2, ',', '.') }}</span>
+    </div>
+    <div>
+      <span><strong>TARIFAS:</strong> R$ {{ $coupon->freight_fees > 0 ? number_format($coupon->freight_fees, 2, ',', '.') : number_format($coupon->fees, 2, ',', '.') }}</span>
     </div>
     @if($coupon->delivery)
       <div>

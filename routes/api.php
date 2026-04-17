@@ -37,6 +37,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\DeliveryGuyController;
+use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -346,5 +347,9 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/', [DeliveryGuyController::class, 'store']);
         Route::put('/', [DeliveryGuyController::class, 'update']);
         Route::delete('/{deliveryGuyID}', [DeliveryGuyController::class, 'destroy']);
+    });
+
+    Route::prefix('cache')->group(function () {
+        Route::post('/clear', [CacheController::class, 'clear']);
     });
 });

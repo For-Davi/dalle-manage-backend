@@ -19,6 +19,7 @@ class SaleDeliveryRepository extends BaseRepository
         $enterpriseId = Auth::user()->enterprise_id;
 
         $query = SaleDelivery::whereHas('sale', function ($q) use ($enterpriseId) {
+            $q->where('status', 'active');
             $q->where('enterprise_id', $enterpriseId);
         });
 

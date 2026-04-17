@@ -52,9 +52,9 @@ class ReturnController extends BaseController
     {
         return $this->safeExecute(function () use ($request) {
             if($request->notDelivered){
-                $products = $this->returnExchangeItemRepository->findByReturnId($request->route('saleID'), true);
+                $products = $this->returnExchangeItemRepository->findByReturnId($request->route('returnID'), true);
             } else {
-                $products = $this->returnExchangeItemRepository->findByReturnId($request->route('saleID'));
+                $products = $this->returnExchangeItemRepository->findByReturnId($request->route('returnID'));
             }
 
             return response()->json(['products' => ShowLinkedReturnProductsResource::collection($products)], 200);
