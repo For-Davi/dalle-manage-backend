@@ -114,7 +114,7 @@
       <div class="flex row justify-between align-center full-width">
         <span class="text-bold text-h6">{{ isset($couponData['enterprise']['name']) ? strtoupper($couponData['enterprise']['name']) : '' }}</span>
         <span class="text-bold text-h6">
-          {{ \Carbon\Carbon::parse($couponData['exchange']['created_at'])->format('d/m/Y H:i:s') }}
+          {{ \Carbon\Carbon::parse($couponData['created_at'])->format('d/m/Y H:i:s') }}
         </span>
       </div>
 
@@ -141,8 +141,8 @@
           </tr>
         </thead>
         <tbody>
-          @if(isset($couponData['products']) && count($couponData['products']) > 0)
-            @foreach($couponData['products'] as $index => $product)
+          @if(isset($couponData['returnExchangeItems']) && count($couponData['returnExchangeItems']) > 0)
+            @foreach($couponData['returnExchangeItems'] as $index => $product)
               <tr class="product-row">
                 <td class="text-left">{{ str_pad($index + 1, 3, '0', STR_PAD_LEFT) }}</td>
                 <td class="text-left">{{ $product['product_sku'] ?? '' }}</td>
@@ -163,12 +163,15 @@
 
       <div class="flex row justify-between full-width">
         <div>
-          <div class="text-bold text-body1">TROCO: R$ {{ $couponData['additional']['change'] ?? '0' }}</div>
-          <div class="text-right text-bold text-h6">TOTAL: R$ {{ $couponData['exchange']['difference_value'] ?? '0' }}</div>
+          <div class="text-bold text-body1">TROCO: R$ {{ $couponData['freight_change'] > 0 ? $couponData['freight_change'] : $couponData['change'] }}</div>
+          <div class="text-right text-bold text-h6">TOTAL: R$ {{ $couponData['difference_value'] > 0 ? $couponData['difference_value'] : $couponData['delivery']['freight_value'] }}</div>
         </div>
         <div class="text-bold text-body1">
-          TARIFAS: R$ {{ $couponData['additional']['fees'] ?? '0' }}
+          TARIFAS: R$ {{ $couponData['freight_fees'] > 0 ? $couponData['freight_fees'] : $couponData['fees'] }}
         </div>
+        <div class="text-bold text-body1" style="margin-top: 6px;">
+            FRETE: R$ {{ $couponData['delivery']['freight_value']  }}
+          </div>
       </div>
     </div>
   </div>

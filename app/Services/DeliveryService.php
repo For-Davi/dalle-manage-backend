@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\Delivery\CreateScheduleDeliveryDTO;
+use App\DTO\Delivery\FilterDeliveryDTO;
 use App\DTO\Delivery\UpdateDeliveryDTO;
 use App\DTO\Sale\SaleItem\UpdateSaleItemDTO;
 use App\Helpers\DeliveryGuyHelper;
@@ -11,6 +12,7 @@ use App\Repositories\DeliveryGuyRepository;
 use App\Repositories\SaleDeliveryRepository;
 use App\Repositories\SaleItemRepository;
 use App\Repositories\ReturnExchangeItemRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DeliveryService
 {
@@ -74,24 +76,17 @@ class DeliveryService
 
     public function export($request)
     {
-        // $dateTime = now()->format('Ymd_His');
+        $dateTime = now()->format('Ymd_His');
 
-        // $exportMovementDTO = FilterMovementDTO::fromRequest($request);
-        // $movements = $this->repository->getAllWithFilter($exportMovementDTO->toArray(), ['category']);
+        $deliveries = $this->repository->getDeliveries($request['status'], $request->all(), true);
 
-        // if ($request->format === 'excel') {
-        //     $fileName = "movements_{$dateTime}.xlsx";
+        $fileName = "deliveries_{$dateTime}.pdf";
 
-        //     return (new MovementsExport($movements))->download($fileName);
-        // } else {
-        //     $fileName = "movements_{$dateTime}.xlsx";
+        $pdf = Pdf::loadView('exports.deliveries-pdf', [
+            'deliveries' => $deliveries,
+        ]);
 
-        //     $pdf = Pdf::loadView('exports.movements-pdf', [
-        //         'movements' => $movements,
-        //     ]);
-
-        //     return $pdf->download($fileName);
-        // }
+        return $pdf->download($fileName);
     }
 
     private function updateItensWhenDelivered(int $saleID, ?int $returnID)

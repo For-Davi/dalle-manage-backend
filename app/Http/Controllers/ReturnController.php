@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Return\CreateReturnRequest;
 use App\Http\Requests\Return\DeleteReturnRequest;
+use App\Http\Requests\Return\ExchangeReturnSendToEmailRequest;
+use App\Http\Requests\Return\ExportExchangeReturnRequest;
 use App\Http\Requests\Return\IndexReturnRequest;
 use App\Http\Requests\Return\ShowReturnRequest;
 use App\Http\Requests\Return\UpdateReturnRequest;
@@ -13,6 +15,7 @@ use App\Http\Resources\Return\ShowLinkedReturnProductsResource;
 use App\Http\Resources\Return\ShowReturnResource;
 use App\Repositories\ReturnRepository;
 use App\Repositories\StockReentryReturnItemRepository;
+use App\Repositories\ReturnExchangeItemRepository;
 use App\Services\ReturnService;
 use Illuminate\Http\Request;
 
@@ -21,6 +24,7 @@ class ReturnController extends BaseController
     public function __construct(
         protected ReturnRepository $repository,
         protected ReturnService $service,
+        protected ReturnExchangeItemRepository $returnExchangeItemRepository,
         protected StockReentryReturnItemRepository $stockReentryReturnItemRepository,
     ) {}
 
@@ -47,10 +51,13 @@ class ReturnController extends BaseController
     public function showLinked(ShowReturnRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
-            $return = $this->repository->findById($request->route('returnID'));
-            $return->load(['returnExchangeItems']);
+            if($request->notDelivered){
+                $products = $this->returnExchangeItemRepository->findByReturnId($request->route('saleID'), true);
+            } else {
+                $products = $this->returnExchangeItemRepository->findByReturnId($request->route('saleID'));
+            }
 
-            return response()->json(['products' => new ShowLinkedReturnProductsResource($return)], 200);
+            return response()->json(['products' => ShowLinkedReturnProductsResource::collection($products)], 200);
         }, 'Erro ao buscar devoluções vinculadas', $request);
     }
 
@@ -72,6 +79,22 @@ class ReturnController extends BaseController
 
             return response()->json(['returns' => ReturnResource::collection($returns), 'coupon' => $coupon,'message' => 'Registro de devolução criado'], 201);
         }, 'Erro ao criar devolução', $request);
+    }
+
+    public function export(ExportExchangeReturnRequest $request)
+    {
+        return $this->safeExecute(function () use ($request) {
+            return $this->service->export($request);
+        }, 'Erro ao exportar troca', $request);
+    }
+
+    public function sendToEmail(ExchangeReturnSendToEmailRequest $request)
+    {
+        return $this->safeExecute(function () use ($request) {
+            $result = $this->service->sendToEmail($request);
+
+            return response()->json(['message' => $result], 200);
+        }, 'Erro ao enviar cupom para o email', $request);
     }
 
     public function update(UpdateReturnRequest $request)

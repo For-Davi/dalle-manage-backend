@@ -14,7 +14,7 @@ class SaleDeliveryRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function getDeliveries(string $status, ?array $filters = null)
+    public function getDeliveries(string $status, ?array $filters = null, ?bool $returnProducts = null)
     {
         $enterpriseId = Auth::user()->enterprise_id;
 
@@ -64,7 +64,19 @@ class SaleDeliveryRepository extends BaseRepository
             $query->where('delivery_guy_id', $filters['deliveryGuy']);
         }
 
-        return $query->get();
+        $deliveries = $query->get();
+
+        if($returnProducts){
+            $deliveries->each(function ($delivery) {
+    if ($delivery->return_id) {
+        $delivery->load('returnExchangeItems');
+    } else {
+        $delivery->load('saleItems');
+    }
+});
+        }
+
+        return $deliveries;
     }
 
     public function getDeliveryStats()
@@ -79,7 +91,7 @@ class SaleDeliveryRepository extends BaseRepository
             'delivered' => $deliveries->filter(function ($delivery) {
                 return in_array($delivery->status, [
                     'delivered',
-                    'partial_delivery',
+                    'partial_delivered',
                     'delivered_in_person',
                 ]);
             })->count(),

@@ -47,6 +47,9 @@ class SaleService
     {
         $enterpriseID = Auth::user()->enterprise_id;
 
+        //Validação se o cliente existe
+        ClientHelper::existsClient($request['clientData']['id'], 'clientData.id');
+
         $this->validateSale($request->input('saleData.products'));
 
         // Cria a venda
@@ -154,7 +157,7 @@ class SaleService
                 $receipt = $this->receiptRepository->findById($payment['receiptID']);
             }
 
-            $salePaymentDTO = CreateSalePaymentDTO::fromRequest($payment, $saleID, null, $receipt->identifier, $paymentMethodID, $installments, $amount);
+            $salePaymentDTO = CreateSalePaymentDTO::fromRequest($payment, $saleID, null, $receipt?->identifier, $paymentMethodID, $installments, $amount);
 
             $this->salePaymentsRepository->create($salePaymentDTO->toArray());
         }
@@ -162,7 +165,7 @@ class SaleService
 
     private function createSaleDelivery($deliveryData, int $saleID)
     {
-        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($deliveryData, $saleID, null);
+        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($deliveryData, $saleID);
         $this->saleDeliveryRepository->create($deliveryDTO->toArray());
     }
 

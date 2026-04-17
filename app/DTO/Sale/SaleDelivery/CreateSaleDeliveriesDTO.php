@@ -6,7 +6,7 @@ class CreateSaleDeliveriesDTO
 {
     public function __construct(
         public readonly int $sale_id,
-        public readonly ?int $exchange_id,
+        public readonly ?int $return_id,
         public readonly float $freight_value,
         public readonly ?string $cep,
         public readonly string $state,
@@ -20,12 +20,12 @@ class CreateSaleDeliveriesDTO
         public readonly ?string $observation,
     ) {}
 
-    public static function fromRequest($data, $saleID, $exchangeID): self
+    public static function fromRequest($data, $saleID, $returnID = null, $fees = null): self
     {
         return new self(
             sale_id: $saleID,
-            exchange_id: $exchangeID ?? null,
-            freight_value: $data['freightValue'],
+            return_id: $returnID ?? null,
+            freight_value: $fees ?  $data['freightValue'] + $fees :  $data['freightValue'],
             cep: $data['cep'],
             city: $data['city'],
             state: $data['state'],
@@ -43,7 +43,7 @@ class CreateSaleDeliveriesDTO
     {
         return [
             'sale_id' => $this->sale_id,
-            'exchange_id' => $this->exchange_id,
+            'return_id' => $this->return_id,
             'freight_value' => $this->freight_value,
             'cep' => $this->cep,
             'city' => $this->city,

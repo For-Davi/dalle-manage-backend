@@ -23,6 +23,13 @@ class ShowReturnResource extends JsonResource
             'updated_by_email' => $this->updated_by_email,
             'seller_name' => $this->seller_name,
             'seller_email' => $this->seller_email,
+            'exchange_value' => $this->exchange_value,
+            'difference_value' => $this->difference_value,
+            'current_value' => $this->current_value,
+            'freight_fees' => $this->freight_fees,
+            'freight_change' => $this->freight_change,
+            'fees' => $this->fees,
+            'change' => $this->change,
             'created_at' => $this->created_at->format('d/m/Y H:i:s'),
             'updated_at' => $this->updated_at->format('d/m/Y H:i:s'),
             'return_items' => $this->items->map(function ($item) {
@@ -51,6 +58,23 @@ class ShowReturnResource extends JsonResource
                     'color_name' => $exchangeItem->product_color_name,
                 ];
             }),
+            'exchange_payment_methods' => $this->exchangePaymentMethod->map(function ($payment){
+                return [
+                    'value' => $payment->value,
+                    'installments' => $payment->installments,
+                    'type' => $payment->type->name,
+                    'receipt' => $payment->receipt_name,
+                ];
+            }),
+            'sale_payment_methods' => $this->salePaymentMethod->map(function ($payment){
+                return [
+                    'value' => $payment->value,
+                    'installments' => $payment->installments,
+                    'type' => $payment->type->name,
+                    'receipt' => $payment->receipt_name,
+                ];
+            }),
+            'delivery' => $this->delivery,
         ];
     }
 }

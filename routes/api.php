@@ -320,20 +320,13 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('returns')->group(function () {
         Route::get('/{saleID}', [ReturnController::class, 'index']);
         Route::get('/return/{returnID}', [ReturnController::class, 'show']);
-        Route::get('/linked/{returnID}', [ReturnController::class, 'showLinked']);
+        Route::post('/linked/{returnID}', [ReturnController::class, 'showLinked']);
         Route::get('/stock/reentry', [ReturnController::class, 'showStockReentry']);
         Route::post('/', [ReturnController::class, 'store']);
+        Route::post('/export', [ReturnController::class, 'export']);
+        Route::post('/send-to-email', [ReturnController::class, 'sendToEmail']);
         Route::put('/', [ReturnController::class, 'update']);
         Route::delete('/{saleID}/{returnID}', [ReturnController::class, 'destroy']);
-    });
-
-    Route::prefix('exchange')->group(function () {
-        Route::get('/{saleID}', [ExchangeController::class, 'index']);
-        Route::get('/exchange/{exchangeID}', [ExchangeController::class, 'show']);
-        Route::post('/', [ExchangeController::class, 'createExchangePayment']);
-        Route::post('/difference', [ExchangeController::class, 'createDifferencePayment']);
-        Route::post('/export', [ExchangeController::class, 'export']);
-        Route::post('/send-to-email', [ExchangeController::class, 'sendToEmail']);
     });
 
     Route::prefix('delivery')->group(function () {
@@ -350,7 +343,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('delivery-guy')->group(function () {
         Route::get('/', [DeliveryGuyController::class, 'index']);
         Route::get('/{deliveryGuyID}', [DeliveryGuyController::class, 'show']);
-        Route::post('/', [DeliveryGuyController::class, 'create']);
+        Route::post('/', [DeliveryGuyController::class, 'store']);
         Route::put('/', [DeliveryGuyController::class, 'update']);
         Route::delete('/{deliveryGuyID}', [DeliveryGuyController::class, 'destroy']);
     });

@@ -45,9 +45,9 @@ class CreateSaleRequest extends FormRequest
     {
         return [
             // REGRAS DO CLIENTE
-            'clientData' => 'nullable|array',
-            'clientData.id' => 'required_with:clientData|exists:clients,id',
-            'clientData.name' => 'required_with:clientData|string|min:1|max:100',
+            'clientData' => 'required|array',
+            'clientData.id' => 'required:clientData|exists:clients,id',
+            'clientData.name' => 'required:clientData|string|min:1|max:100',
             'clientData.email' => 'nullable|email|max:100',
             'clientData.dateBirthday' => 'nullable|string',
             'clientData.cpf' => 'nullable|numeric',
@@ -109,8 +109,8 @@ class CreateSaleRequest extends FormRequest
             // Cliente
             'clientData.array' => 'Os dados do cliente devem ser um array',
             'clientData.id.exists' => 'O cliente selecionado não existe.',
-            'clientData.id.required_with' => 'O ID do cliente é obrigatório quando os dados do cliente são informados.',
-            'clientData.name.required_with' => 'O nome do cliente é obrigatório quando os dados do cliente são informados.',
+            'clientData.id.required' => 'O ID do cliente é obrigatório quando.',
+            'clientData.name.required' => 'O nome do cliente é obrigatório.',
             'clientData.name.string' => 'O nome do cliente deve ser um texto.',
             'clientData.name.min' => 'O nome do cliente deve ter pelo menos 1 caractere.',
             'clientData.name.max' => 'O nome do cliente não pode exceder 100 caracteres.',

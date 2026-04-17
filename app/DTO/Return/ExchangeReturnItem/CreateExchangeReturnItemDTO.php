@@ -17,6 +17,10 @@ class CreateExchangeReturnItemDTO extends BaseDTO
         public ?string $product_color_name,
         public int $quantity,
         public float $total,
+        public ?string $product_grid_size,
+        public ?string $product_grid_name,
+        public int $delivered,
+        public int $quantity_delivered,
     ) {}
 
     public static function fromRequest($data): self
@@ -32,6 +36,10 @@ class CreateExchangeReturnItemDTO extends BaseDTO
             product_color_name: $data['productColorName'] ?? null,
             quantity: $data['quantity'],
             total: $data['total'],
+            product_grid_size: $data['productGridSize'],
+            product_grid_name: $data['productGridName'],
+            delivered: $data['delivered'],
+            quantity_delivered: $data['quantityDelivered'],
         );
     }
 }

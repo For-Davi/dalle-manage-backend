@@ -14,6 +14,7 @@ class ExportDeliveryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'status' => 'required|string',
             'startDate' => 'nullable|string|date_format:d/m/Y',
             'endDate' => 'nullable|string|date_format:d/m/Y',
             'startScheduledDate' => 'nullable|string|date_format:d/m/Y',

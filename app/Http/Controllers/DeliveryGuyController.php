@@ -35,12 +35,13 @@ class DeliveryGuyController extends BaseController
         }, 'Erro ao buscar entregador', $request);
     }
 
-    public function create(CreateDeliveryGuyRequest $request)
+    public function store(CreateDeliveryGuyRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
             $this->service->create($request);
+            $deliveryGuys = $this->repository->getAllByEnterprise();
 
-            return response()->json(['message' => 'Entregador cadastrado'], 201);
+            return response()->json(['deliveryGuys' => $deliveryGuys, 'message' => 'Entregador cadastrado'], 201);
         }, 'Erro ao criar entregador', $request);
     }
 

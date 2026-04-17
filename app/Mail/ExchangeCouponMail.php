@@ -21,7 +21,7 @@ class ExchangeCouponMail extends Mailable
     {
         $this->coupon = $coupon;
 
-        $this->formattedDate = Carbon::parse($coupon['exchange']['created_at'])
+        $this->formattedDate = Carbon::parse($coupon->created_at)
             ->format('d/m/Y H:i:s');
     }
 

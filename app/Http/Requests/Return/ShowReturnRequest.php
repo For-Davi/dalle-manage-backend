@@ -15,6 +15,7 @@ class ShowReturnRequest extends FormRequest
     {
         return [
             'returnID' => 'required|exists:returns,id',
+            'notDelivered' => 'nullable|in:1,0'
         ];
     }
 
@@ -23,6 +24,7 @@ class ShowReturnRequest extends FormRequest
         return [
             'returnID.required' => 'O ID da devolução é obrigatório',
             'returnID.exists' => 'O ID da devolução informada não existe',
+            'notDelivered.in' => 'O campo filtrar não entregues deve ser verdadeiro (1) ou falso (0).',
         ];
     }
 

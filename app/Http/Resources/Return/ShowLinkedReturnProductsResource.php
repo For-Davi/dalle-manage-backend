@@ -9,17 +9,18 @@ class ShowLinkedReturnProductsResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return $this->returnExchangeItems->map(function ($exchangeItem) {
-            return [
-                'product_variant_id' => $exchangeItem->product_variant_id,
-                'product_name' => $exchangeItem->product_name,
-                'product_sku' => $exchangeItem->product_sku,
-                'product_price' => $exchangeItem->product_price,
-                'quantity' => $exchangeItem->quantity,
-                'total' => $exchangeItem->total,
-                'color' => $exchangeItem->product_color,
-                'color_name' => $exchangeItem->product_color_name,
-            ];
-        })->values()->toArray();
+        return [
+            'product_variant_id' => $this->product_variant_id,
+            'product_name' => $this->product_name,
+            'product_sku' => $this->product_sku,
+            'product_price' => $this->product_price,
+            'quantity' => $this->quantity,
+            'total' => $this->total,
+            // 'grid' => $this->product_grid_name,
+            'product_code' => $this->product_code,
+            'color' => $this->product_color,
+            'color_name' => $this->product_color_name,
+            'quantity_delivered' => $this->quantity_delivered
+        ];
     }
 }

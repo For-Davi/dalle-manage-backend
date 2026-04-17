@@ -14,6 +14,8 @@ return new class extends Migration
             $table->decimal('current_value', 10, 2);
             $table->decimal('fees', 10, 2);
             $table->decimal('change', 10, 2);
+            $table->decimal('freight_fees', 10, 2);
+            $table->decimal('freight_change', 10, 2);
         });
     }
 
@@ -25,7 +27,9 @@ return new class extends Migration
             'difference_value',
             'current_value',
             'fees',
-            'change'
+            'change',
+            'freight_fees',
+            'freight_change'
         ]);
         });
     }

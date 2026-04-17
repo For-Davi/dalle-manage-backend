@@ -30,6 +30,8 @@ class Returns extends Model implements HasCacheTags
         'seller_id',
         'seller_name',
         'seller_email',
+        'freight_fees',
+        'freight_change',
     ];
 
     public function getCacheTags(): array
@@ -77,5 +79,15 @@ class Returns extends Model implements HasCacheTags
     public function returns()
     {
         return $this->hasOne(Returns::class, 'linked_return_id');
+    }
+
+    public function exchangePaymentMethod()
+    {
+        return $this->hasMany(ExchangePaymentMethod::class, 'return_id');
+    }
+
+    public function salePaymentMethod()
+    {
+        return $this->hasMany(SalePaymentMethod::class, 'return_id');
     }
 }
