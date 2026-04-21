@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\ClientRepository;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
 

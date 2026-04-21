@@ -58,7 +58,7 @@ class ShowReturnResource extends JsonResource
                     'color_name' => $exchangeItem->product_color_name,
                 ];
             }),
-            'exchange_payment_methods' => $this->exchangePaymentMethod->map(function ($payment){
+            'exchange_payment_methods' => $this->exchangePaymentMethod->map(function ($payment) {
                 return [
                     'value' => $payment->value,
                     'installments' => $payment->installments,
@@ -66,7 +66,7 @@ class ShowReturnResource extends JsonResource
                     'receipt' => $payment->receipt_name,
                 ];
             }),
-            'sale_payment_methods' => $this->salePaymentMethod->map(function ($payment){
+            'sale_payment_methods' => $this->salePaymentMethod->map(function ($payment) {
                 return [
                     'value' => $payment->value,
                     'installments' => $payment->installments,

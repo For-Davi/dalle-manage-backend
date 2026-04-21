@@ -9,6 +9,7 @@ use App\DTO\Sale\SaleDelivery\CreateSaleDeliveriesDTO;
 use App\DTO\Sale\SaleItem\CreateSaleItemDTO;
 use App\DTO\Sale\SalePayment\CreateSalePaymentDTO;
 use App\Helpers\ClientHelper;
+use App\Helpers\ProductHelper;
 use App\Helpers\ProductVariantHelper;
 use App\Helpers\SaleHelper;
 use App\Jobs\Email\SendCouponToEmailJob;
@@ -47,10 +48,10 @@ class SaleService
     {
         $enterpriseID = Auth::user()->enterprise_id;
 
-        //Validação se o cliente existe
+        // Validação se o cliente existe
         ClientHelper::existsClient($request['clientData']['id'], 'clientData.id');
 
-        $this->validateSale($request->input('saleData.products'));
+        $this->validateSaleProducts($request->input('saleData.products'));
 
         // Cria a venda
         $sale = $this->createSale($request, $enterpriseID);
@@ -59,7 +60,7 @@ class SaleService
         $this->createSalePaymentsMethods($request->paymentData, $sale->id, $enterpriseID);
 
         // Criação do itens da venda
-        $this->createSaleItens($request->saleData, $request->input('deliveryData.freight'),$sale->id, $enterpriseID);
+        $this->createSaleItens($request->saleData, $request->input('deliveryData.freight'), $sale->id, $enterpriseID);
 
         // Criação do frete
         if ($request->input('deliveryData.freight')) {
@@ -127,6 +128,17 @@ class SaleService
         return null;
     }
 
+    public function checkProducts($request)
+    {
+        foreach ($request['products'] as $product) {
+            ProductVariantHelper::existsProductVariant($product['product_id'], $product['product_variant_id']);
+            ProductVariantHelper::isProductVariantActive($product['product_variant_id']);
+            ProductHelper::validateDiscount($product['product_id'], $product['discount']);
+        }
+
+        return true;
+    }
+
     private function createSalePaymentsMethods(array $payments, int $saleID, int $enterpriseID): void
     {
         foreach ($payments['payment'] as $payment) {
@@ -172,12 +184,21 @@ class SaleService
     private function createSaleItens(array $products, int $hasFreight, int $saleID, int $enterpriseID): void
     {
         foreach ($products['products'] as $product) {
+
             $productVariant = $this->productVariantRepository
                 ->findById($product['productVariantID'], ['product.category', 'color', 'gridItem.gridGroup', 'suppliers']);
 
             $price = $product['offer'] ?? $product['price'];
             $hasOffer = $price > 0 && isset($product['offer']);
             $unitPrice = $hasOffer ? $product['offer'] : $product['price'];
+            $discountValue = 0;
+
+            if ($product['discount'] && $product['discount'] > 0) {
+                $discountValue = $unitPrice * ($product['discount'] / 100);
+                $unitPrice = $unitPrice - $discountValue;
+
+            }
+
             $quantity = $product['newQuantity'] ?? 0;
 
             $total = $unitPrice * $quantity;
@@ -188,6 +209,8 @@ class SaleService
                 'productName' => $productVariant->product->name,
                 'productSKU' => $productVariant->sku ?? null,
                 'productPrice' => $unitPrice,
+                'productDiscount' => $product['discount'],
+                'productDiscountValue' => $discountValue,
                 'productColor' => $productVariant->color?->hex_color_code ?? null,
                 'productColorName' => $productVariant->color?->name ?? null,
                 'productGridSize' => $productVariant->gridItem?->size ?? null,
@@ -220,13 +243,14 @@ class SaleService
         }
     }
 
-    private function validateSale($products)
+    private function validateSaleProducts($products)
     {
         foreach ($products as $product) {
-            ProductVariantHelper::existsProductVariant($product['productVariantID']);
+            ProductVariantHelper::existsProductVariant($product['productID'], $product['productVariantID']);
             ProductVariantHelper::isProductVariantActive($product['productVariantID']);
             ProductVariantHelper::hasProductVariantStock($product['productVariantID']);
             ProductVariantHelper::quantityExceedsStock($product['productVariantID'], $product['newQuantity']);
+            ProductHelper::validateDiscount($product['productID'], $product['discount']);
         }
     }
 
@@ -242,7 +266,6 @@ class SaleService
 
     private function createSale($request, $enterpriseID)
     {
-
         $totalValue = $this->getTotalValue([
             $request->input('saleData.totalPrice'),
             $request->input('deliveryData.freightValue'),

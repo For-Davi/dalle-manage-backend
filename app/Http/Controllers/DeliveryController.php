@@ -28,14 +28,16 @@ class DeliveryController extends BaseController
             return response()->json(['deliveries' => $deliveries], 200);
         }, 'Erro ao buscar as entregas', $request);
     }
+
     public function getDashboard(Request $request)
     {
-        return $this->safeExecute(function () use ($request) {
+        return $this->safeExecute(function () {
             $dashboard = $this->repository->getDeliveryStats();
 
             return response()->json(['dashboard' => $dashboard], 200);
         }, 'Erro ao buscar dados do dashboard de entregas', $request);
     }
+
     public function show(ShowDeliveryRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
@@ -44,6 +46,7 @@ class DeliveryController extends BaseController
             return response()->json(['delivery' => new DeliveryResource($delivery)], 200);
         }, 'Erro ao buscar entrega', $request);
     }
+
     public function filter(FilterDeliveryRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
@@ -52,6 +55,7 @@ class DeliveryController extends BaseController
             return response()->json(['deliveries' => $deliveries], 200);
         }, 'Erro ao filtrar entregas', $request);
     }
+
     public function schedule(CreateScheduledDeliveryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
@@ -62,6 +66,7 @@ class DeliveryController extends BaseController
             return response()->json(['deliveries' => $deliveries], 200);
         }, 'Erro ao agendar entrega', $request);
     }
+
     public function partialDelivered(CreatePartialDeliveryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
@@ -72,6 +77,7 @@ class DeliveryController extends BaseController
             return response()->json(['deliveries' => $deliveries, 'message' => 'Entrega marcada como entregue parcialmente'], 200);
         }, 'Erro ao marcar a entrega como entregue parcialmente', $request);
     }
+
     public function update(UpdateDeliveryRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
@@ -89,5 +95,4 @@ class DeliveryController extends BaseController
             return $this->service->export($request);
         }, 'Erro ao exportar entregas', $request);
     }
-    
 }

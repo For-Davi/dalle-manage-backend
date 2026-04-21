@@ -13,9 +13,9 @@ use App\Http\Resources\Return\ReturnExchangeTaxCouponResource;
 use App\Http\Resources\Return\ReturnResource;
 use App\Http\Resources\Return\ShowLinkedReturnProductsResource;
 use App\Http\Resources\Return\ShowReturnResource;
+use App\Repositories\ReturnExchangeItemRepository;
 use App\Repositories\ReturnRepository;
 use App\Repositories\StockReentryReturnItemRepository;
-use App\Repositories\ReturnExchangeItemRepository;
 use App\Services\ReturnService;
 use Illuminate\Http\Request;
 
@@ -51,7 +51,7 @@ class ReturnController extends BaseController
     public function showLinked(ShowReturnRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
-            if($request->notDelivered){
+            if ($request->notDelivered) {
                 $products = $this->returnExchangeItemRepository->findByReturnId($request->route('returnID'), true);
             } else {
                 $products = $this->returnExchangeItemRepository->findByReturnId($request->route('returnID'));
@@ -73,11 +73,11 @@ class ReturnController extends BaseController
     public function store(CreateReturnRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
-            $couponData =  $this->service->create($request);
+            $couponData = $this->service->create($request);
             $returns = $this->repository->getAllBySale($request['saleID']);
             $coupon = is_object($couponData) ? new ReturnExchangeTaxCouponResource($couponData) : null;
 
-            return response()->json(['returns' => ReturnResource::collection($returns), 'coupon' => $coupon,'message' => 'Registro de devolução criado'], 201);
+            return response()->json(['returns' => ReturnResource::collection($returns), 'coupon' => $coupon, 'message' => 'Registro de devolução criado'], 201);
         }, 'Erro ao criar devolução', $request);
     }
 

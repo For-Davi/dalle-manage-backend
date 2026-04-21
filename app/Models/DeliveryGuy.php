@@ -21,7 +21,7 @@ class DeliveryGuy extends Model implements HasCacheTags
         'phone',
         'cpf',
         'vehicle',
-        'enterprise_id'
+        'enterprise_id',
     ];
 
     protected static function booted()

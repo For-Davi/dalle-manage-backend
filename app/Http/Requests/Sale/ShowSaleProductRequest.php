@@ -15,7 +15,7 @@ class ShowSaleProductRequest extends FormRequest
     {
         return [
             'saleID' => 'required|exists:sales,id',
-            'notDelivered' => 'nullable|in:1,0'
+            'notDelivered' => 'nullable|in:1,0',
         ];
     }
 

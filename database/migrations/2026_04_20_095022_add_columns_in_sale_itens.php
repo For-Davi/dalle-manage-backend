@@ -9,16 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sale_itens', function (Blueprint $table) {
-            $table->boolean('delivered');
-            $table->integer('quantity_delivered');
+            $table->decimal('product_discount', 10, 2)->default(0);
+            $table->decimal('product_discount_value', 10, 2)->default(0);
         });
     }
 
     public function down(): void
     {
         Schema::table('sale_itens', function (Blueprint $table) {
-            $table->dropColumn('delivered');
-            $table->dropColumn('quantity_delivered');
+            $table->dropColumn(['product_discount', 'product_discount_value']);
         });
     }
 };

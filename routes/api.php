@@ -1,14 +1,16 @@
 <?php
 
+use App\Http\Controllers\CacheController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\DeliveryGuyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
-use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
@@ -35,9 +37,6 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
-use App\Http\Controllers\DeliveryController;
-use App\Http\Controllers\DeliveryGuyController;
-use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -296,6 +295,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
+        Route::post('/check-products', [SaleController::class, 'checkProducts']);
     });
 
     Route::prefix('subscription')->group(function () {

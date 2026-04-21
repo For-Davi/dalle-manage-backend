@@ -2,35 +2,35 @@
 
 namespace App\Services;
 
+use App\DTO\Exchange\ExchangePayment\CreateExchangePaymentMethodDTO;
 use App\DTO\Return\CreateReturnDTO;
 use App\DTO\Return\ExchangeReturnItem\CreateExchangeReturnItemDTO;
 use App\DTO\Return\ReturnItem\CreateReturnItemDTO;
 use App\DTO\Return\UpdateReturnDTO;
+use App\DTO\Sale\SaleDelivery\CreateSaleDeliveriesDTO;
+use App\DTO\Sale\SalePayment\CreateSalePaymentDTO;
 use App\DTO\StockReentry\CreateStockReentryReturnItemsDTO;
+use App\Helpers\ExchangeHelper;
+use App\Helpers\ExchangePaymentHelper;
 use App\Helpers\ProductVariantHelper;
 use App\Helpers\ReturnHelper;
 use App\Helpers\ReturnItemHelper;
+use App\Helpers\SaleHelper;
 use App\Helpers\StockReentryReturnItemHelper;
+use App\Jobs\Email\SendCouponToEmailJob;
+use App\Repositories\ClientRepository;
 use App\Repositories\EmployeeRepository;
+use App\Repositories\ExchangePaymentMethodRepository;
 use App\Repositories\ProductMovementRepository;
+use App\Repositories\ReceiptRepository;
 use App\Repositories\ReturnExchangeItemRepository;
 use App\Repositories\ReturnItemRepository;
 use App\Repositories\ReturnRepository;
-use App\Repositories\StockReentryReturnItemRepository;
-use App\Repositories\ExchangePaymentMethodRepository;
-use App\Repositories\SalePaymentsMethodRepository;
-use App\DTO\Exchange\ExchangePayment\CreateExchangePaymentMethodDTO;
-use App\DTO\Sale\SalePayment\CreateSalePaymentDTO;
-use App\DTO\Sale\SaleDelivery\CreateSaleDeliveriesDTO;
 use App\Repositories\SaleDeliveryRepository;
-use App\Helpers\ExchangeHelper;
-use App\Repositories\ReceiptRepository;
-use App\Helpers\ExchangePaymentHelper;
-use App\Helpers\SaleHelper;
+use App\Repositories\SalePaymentsMethodRepository;
 use App\Repositories\SaleRepository;
-use App\Repositories\ClientRepository;
+use App\Repositories\StockReentryReturnItemRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Jobs\Email\SendCouponToEmailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -88,9 +88,9 @@ class ReturnService
             $this->createReturnExchangeProductMovement($return->id, $enterpriseID, 'trade', 'out');
         }
 
-        //Criação da entrega da devolução (caso tenha)
-        if($request['paymentData']['deliveryData']['freight']){
-            $this->createReturnDelivery($request['paymentData']['deliveryData'], $request['paymentData']['freightPaymentData']['fees'],$return->sale_id, $return->id);
+        // Criação da entrega da devolução (caso tenha)
+        if ($request['paymentData']['deliveryData']['freight']) {
+            $this->createReturnDelivery($request['paymentData']['deliveryData'], $request['paymentData']['freightPaymentData']['fees'], $return->sale_id, $return->id);
         }
 
         // Validação se gera crédito
@@ -159,27 +159,27 @@ class ReturnService
 
         $currentTotal = $sale->current_total;
 
-        if($return->exchange_value > 0 && $exchangePaymentsMethods->isNotEmpty()){
+        if ($return->exchange_value > 0 && $exchangePaymentsMethods->isNotEmpty()) {
             $currentTotal += $return->current_value;
         }
-        if($return->difference_value > 0){
+        if ($return->difference_value > 0) {
             $currentTotal -= $return->current_value;
         }
-        if($return->exchange_value > 0 && $exchangePaymentsMethods->isEmpty()){
+        if ($return->exchange_value > 0 && $exchangePaymentsMethods->isEmpty()) {
             $client = $this->clientRepository->findById($sale->client_id);
 
             return $this->clientService->updateCredit(null, $client->credits, $client->id, 'status', 'decrease');
         }
-        if($currentTotal < 0){
+        if ($currentTotal < 0) {
             $currentTotal = 0;
         }
 
         return $this->saleRepository->update($saleID, ['current_total' => $currentTotal]);
     }
 
-    private function createReturnDelivery($delivery, $fees,int $saleID,int $returnID)
+    private function createReturnDelivery($delivery, $fees, int $saleID, int $returnID)
     {
-        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($delivery,$saleID, $returnID, $fees);
+        $deliveryDTO = CreateSaleDeliveriesDTO::fromRequest($delivery, $saleID, $returnID, $fees);
         $this->saleDeliveryRepository->create($deliveryDTO->toArray());
     }
 
@@ -190,21 +190,24 @@ class ReturnService
 
     private function createPayment($request, int $saleID, int $returnID, int $enterpriseID)
     {
-        if($request['exchangeData']['exchangeValue'] > 0){
+        if ($request['exchangeData']['exchangeValue'] > 0) {
             $this->createExchangePayment($request['paymentData']['paymentExchangeOrDifferenceData']['payment'], $returnID, $enterpriseID);
         }
 
-        if($request['exchangeData']['differenceValue'] > 0){
+        if ($request['exchangeData']['differenceValue'] > 0) {
             $this->createDifferenceOrFreightPayment($request['paymentData']['paymentExchangeOrDifferenceData']['payment'], $saleID, $returnID, $enterpriseID);
-            $this->clientCreditAndCurrentValueUpdate($request['paymentData']['paymentExchangeOrDifferenceData']['payment'], $saleID, $returnID,'paymentData.paymentExchangeOrDifferenceData.payment.*.value');
+            $this->clientCreditAndCurrentValueUpdate($request['paymentData']['paymentExchangeOrDifferenceData']['payment'], $saleID, $returnID, 'paymentData.paymentExchangeOrDifferenceData.payment.*.value');
+
             return $this->repository->findById($returnID, ['sale.enterprise', 'returnExchangeItems', 'delivery']);
         }
 
-        if($request['exchangeData']['differenceValue'] === 0 && $request['paymentData']['deliveryData']['freight'] && $request['paymentData']['deliveryData']['freightValue'] > 0){
+        if ($request['exchangeData']['differenceValue'] === 0 && $request['paymentData']['deliveryData']['freight'] && $request['paymentData']['deliveryData']['freightValue'] > 0) {
             $this->createDifferenceOrFreightPayment($request['paymentData']['freightPaymentData']['payment'], $saleID, $returnID, $enterpriseID);
-            $this->clientCreditAndCurrentValueUpdate($request['paymentData']['freightPaymentData']['payment'], $saleID, $returnID,'paymentData.freightPaymentData.payment.*.value');
+            $this->clientCreditAndCurrentValueUpdate($request['paymentData']['freightPaymentData']['payment'], $saleID, $returnID, 'paymentData.freightPaymentData.payment.*.value');
+
             return $this->repository->findById($returnID, ['sale.enterprise', 'returnExchangeItems', 'delivery']);
         }
+
         return true;
     }
 
@@ -212,7 +215,7 @@ class ReturnService
     {
         $creditValue = $this->checkIfExistsCredit($payments);
 
-        if($creditValue){
+        if ($creditValue) {
             $this->clientService->updateCredit($saleID, $creditValue, null, $errorField, 'decrease');
 
             return $this->updateCurrentValue($returnID, $creditValue);
@@ -243,7 +246,7 @@ class ReturnService
 
     private function createExchangePayment($payments, int $returnID, int $enterpriseID)
     {
-        foreach($payments as $payment){
+        foreach ($payments as $payment) {
             ExchangePaymentHelper::existsReceipt($payment['receiptID']);
             $paymentMethodID = ExchangePaymentHelper::findPaymentMethodID($payment['paymentType'], $enterpriseID, $payment['receiptID']);
 
@@ -259,9 +262,9 @@ class ReturnService
 
     private function createDifferenceOrFreightPayment($payments, int $saleID, int $returnID, int $enterpriseID)
     {
-        foreach($payments as $payment){
+        foreach ($payments as $payment) {
 
-            if($payment['paymentType'] !== 'CREDIT'){
+            if ($payment['paymentType'] !== 'CREDIT') {
                 SaleHelper::existsReceipt($payment['receiptID']);
             }
             $paymentMethodID = SaleHelper::findPaymentMethodID($payment['paymentType'], $enterpriseID, $payment['receiptID']);
@@ -282,9 +285,9 @@ class ReturnService
             $paymentDTO = CreateSalePaymentDTO::fromRequest($payment, $saleID, $returnID, $receipt->identifier, $paymentMethodID, $installments, $amount);
 
             $this->salePaymentsMethodRepository->create($paymentDTO->toArray());
-            }
+        }
 
-            return true;
+        return true;
     }
 
     private function createReturn($request)
@@ -295,10 +298,10 @@ class ReturnService
         if ($request['sellerID'] && $request['exchangeProducts']) {
             $seller = $this->employeeRepository->findById($request['sellerID']);
         }
-        if($request['exchangeData']['exchangeValue'] > 0 && !$request['exchangeData']['generatesCredit']){
+        if ($request['exchangeData']['exchangeValue'] > 0 && ! $request['exchangeData']['generatesCredit']) {
             $exchangeOrDifferenceCurrentValue += $request['exchangeData']['exchangeValue'];
         }
-        if($request['exchangeData']['differenceValue'] > 0 && !$request['exchangeData']['generatesCredit']){
+        if ($request['exchangeData']['differenceValue'] > 0 && ! $request['exchangeData']['generatesCredit']) {
             $exchangeOrDifferenceCurrentValue += $request['exchangeData']['differenceValue'];
             $exchangeOrDifferenceCurrentValue += $request['paymentData']['deliveryData']['freightValue'];
         }

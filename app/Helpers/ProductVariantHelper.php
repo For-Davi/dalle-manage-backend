@@ -8,13 +8,27 @@ use Illuminate\Validation\ValidationException;
 
 class ProductVariantHelper
 {
-    public static function existsProductVariant($productVariantID)
+    public static function existsProductVariant($productID, $productVariantID)
     {
-        $existingProduct = DB::table('product_variants')->where('id', $productVariantID)->first();
+        $existinProduct = DB::table('products')
+            ->where('enterprise_id', Auth::user()->enterprise_id)
+            ->where('id', $productID)
+            ->first();
 
-        if (! $existingProduct) {
+        if (! $existinProduct) {
             throw ValidationException::withMessages([
-                'dataSale.products.*.productVariantID' => ['O produto selecionado não existe.'],
+                'productID' => ['O produto informado não existe.'],
+            ]);
+        }
+
+        $existingVariant = DB::table('product_variants')
+            ->where('enterprise_id', Auth::user()->enterprise_id)
+            ->where('product_id', $productID)->where('id', $productVariantID)
+            ->first();
+
+        if (! $existingVariant) {
+            throw ValidationException::withMessages([
+                'productID' => ['O produto informado não existe.'],
             ]);
         }
     }

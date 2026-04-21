@@ -27,7 +27,7 @@ class CreateReturnDTO extends BaseDTO
         public float $freight_change,
     ) {}
 
-    public static function fromRequest($data, $sellerName = null, $sellerEmail = null, $exchangeOrDifferenceCurrentValue): self
+    public static function fromRequest($data, $sellerName, $sellerEmail, $exchangeOrDifferenceCurrentValue): self
     {
         return new self(
             sale_id: $data['saleID'],

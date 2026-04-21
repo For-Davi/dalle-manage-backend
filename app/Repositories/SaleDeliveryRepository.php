@@ -67,14 +67,14 @@ class SaleDeliveryRepository extends BaseRepository
 
         $deliveries = $query->get();
 
-        if($returnProducts){
+        if ($returnProducts) {
             $deliveries->each(function ($delivery) {
-    if ($delivery->return_id) {
-        $delivery->load('returnExchangeItems');
-    } else {
-        $delivery->load('saleItems');
-    }
-});
+                if ($delivery->return_id) {
+                    $delivery->load('returnExchangeItems');
+                } else {
+                    $delivery->load('saleItems');
+                }
+            });
         }
 
         return $deliveries;

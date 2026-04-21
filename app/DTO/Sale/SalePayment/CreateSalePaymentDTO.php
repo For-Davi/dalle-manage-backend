@@ -14,7 +14,7 @@ class CreateSalePaymentDTO
         public readonly ?int $return_id,
     ) {}
 
-    public static function fromRequest($data, $saleID, $returnID = null, $receiptName, $paymentMethodID, $installments, $amount): self
+    public static function fromRequest($data, $saleID, $returnID, $receiptName, $paymentMethodID, $installments, $amount): self
     {
         return new self(
             sale_id: $saleID,

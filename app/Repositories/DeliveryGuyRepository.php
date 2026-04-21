@@ -17,8 +17,9 @@ class DeliveryGuyRepository extends BaseRepository
     {
         $deliveryGuy = $this->findById($id);
 
-        if($deliveryGuy){
-            DB::table('sale_deliveries')->where('delivery_guy_id', $id)->update(['delivery_guy_id' => null]);;
+        if ($deliveryGuy) {
+            DB::table('sale_deliveries')->where('delivery_guy_id', $id)->update(['delivery_guy_id' => null]);
+
             return $deliveryGuy->delete();
         }
 
