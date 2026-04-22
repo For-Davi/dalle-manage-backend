@@ -18,7 +18,7 @@ class CacheService
 
         $keys = $redis->keys($pattern);
 
-        if (!empty($keys)) {
+        if (! empty($keys)) {
             $redis->del($keys);
         }
 

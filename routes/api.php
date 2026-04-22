@@ -1,14 +1,16 @@
 <?php
 
+use App\Http\Controllers\CacheController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CreditCardController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\DeliveryGuyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
-use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
@@ -35,9 +37,6 @@ use App\Http\Controllers\TransactionCategoryController;
 use App\Http\Controllers\TypeReceiptController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookAsaasController;
-use App\Http\Controllers\DeliveryController;
-use App\Http\Controllers\DeliveryGuyController;
-use App\Http\Controllers\CacheController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -150,12 +149,14 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::prefix('variant')->group(function () {
             Route::get('/{variantID}', [ProductController::class, 'showVariant']);
             Route::post('/search', [ProductController::class, 'search']);
+            Route::get('/movement/{productVariantID}', [ProductMovementController::class, 'indexByVariant']);
             Route::post('/movement', [ProductMovementController::class, 'store']);
             Route::post('/check-codes', [ProductController::class, 'checkCodes']);
             Route::put('/', [ProductController::class, 'updateVariant']);
             Route::delete('/{variantID}', [ProductController::class, 'destroyVariant']);
         });
 
+        Route::get('/movement/{productMovementID}', [ProductMovementController::class, 'show']);
         Route::prefix('stock-reentry')->group(function () {
             Route::post('/movement', [ProductMovementController::class, 'storeStockReentry']);
         });

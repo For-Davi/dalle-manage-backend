@@ -17,7 +17,7 @@ class UpdateDeliveryRequest extends FormRequest
             'deliveryID' => 'required|exists:sale_deliveries,id',
             'deliveryStatus' => 'required|in:delivered,delivered_in_person|string',
             'status' => 'required|string',
-            'deliveryGuyID' => 'nullable|exists:delivery_guys,id'
+            'deliveryGuyID' => 'nullable|exists:delivery_guys,id',
         ];
     }
 

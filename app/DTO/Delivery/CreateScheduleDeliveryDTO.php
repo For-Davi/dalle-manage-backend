@@ -3,8 +3,8 @@
 namespace App\DTO\Delivery;
 
 use App\DTO\BaseDTO;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class CreateScheduleDeliveryDTO extends BaseDTO
 {

@@ -71,21 +71,21 @@ class CreateReturnRequest extends FormRequest
     }
 
     private function requiresReceiptID(): bool
-{
-    if (!$this->mustHaveExchangeOrDifferencePayment()) {
+    {
+        if (! $this->mustHaveExchangeOrDifferencePayment()) {
+            return false;
+        }
+
+        $payments = $this->input('paymentData.paymentExchangeOrDifferenceData.payment', []);
+
+        foreach ($payments as $payment) {
+            if (($payment['paymentType'] ?? null) !== 'CREDIT' && empty($payment['receiptID'])) {
+                return true;
+            }
+        }
+
         return false;
     }
-
-    $payments = $this->input('paymentData.paymentExchangeOrDifferenceData.payment', []);
-
-    foreach ($payments as $payment) {
-        if (($payment['paymentType'] ?? null) !== 'CREDIT' && empty($payment['receiptID'])) {
-            return true;
-        }
-    }
-
-    return false;
-}
 
     private function mustHaveExchangeOrDifferencePayment(): bool
     {

@@ -20,7 +20,7 @@ class ShowLinkedReturnProductsResource extends JsonResource
             'product_code' => $this->product_code,
             'color' => $this->product_color,
             'color_name' => $this->product_color_name,
-            'quantity_delivered' => $this->quantity_delivered
+            'quantity_delivered' => $this->quantity_delivered,
         ];
     }
 }

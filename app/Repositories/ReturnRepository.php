@@ -4,13 +4,12 @@ namespace App\Repositories;
 
 use App\Models\Returns;
 use App\Repositories\Base\BaseRepository;
-use App\Repositories\SaleRepository;
-use App\Repositories\ClientRepository;
 use Illuminate\Support\Facades\DB;
 
 class ReturnRepository extends BaseRepository
 {
     protected $saleRepository;
+
     protected $clientRepository;
 
     public function __construct(Returns $model, SaleRepository $saleRepository, ClientRepository $clientRepository)
@@ -30,16 +29,16 @@ class ReturnRepository extends BaseRepository
         $return = $this->findById($id);
 
         if ($return) {
-            if($return->exchange_value > 0 && $return->status === 'active'){
+            if ($return->exchange_value > 0 && $return->status === 'active') {
                 $sale = $this->saleRepository->findById($return->sale_id);
 
-                if($sale->client_id){
+                if ($sale->client_id) {
                     $client = $this->clientRepository->findById($sale->client_id);
                     $credit = $client->credits;
 
                     $credit -= $return->exchange_value;
 
-                    if($credit <= 0){
+                    if ($credit <= 0) {
                         $updateData = ['credits' => 0, 'credit_expires_at' => null];
                     } else {
                         $updateData = ['credits' => $credit];

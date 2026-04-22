@@ -15,7 +15,7 @@ class ShowReturnRequest extends FormRequest
     {
         return [
             'returnID' => 'required|exists:returns,id',
-            'notDelivered' => 'nullable|in:1,0'
+            'notDelivered' => 'nullable|in:1,0',
         ];
     }
 

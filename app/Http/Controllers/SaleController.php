@@ -91,7 +91,7 @@ class SaleController extends BaseController
     public function showProducts(ShowSaleProductRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
-            if($request->notDelivered){
+            if ($request->notDelivered) {
                 $products = $this->saleItemRepository->findBySaleId($request->route('saleID'), true);
             } else {
                 $products = $this->saleItemRepository->findBySaleId($request->route('saleID'));

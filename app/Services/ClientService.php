@@ -60,7 +60,7 @@ class ClientService
 
         $client = $this->repository->findById($clientID);
 
-        if($status === 'decrease'){
+        if ($status === 'decrease') {
             ClientHelper::validateCredit($client->id, $credit, $field);
 
             $updateData = [
@@ -71,13 +71,13 @@ class ClientService
             $setting = $this->settingSystemRepository->getByEnterprise(Auth::user()->enterprise_id);
 
             $updateData = [
-            'credits' => $client->credits + $credit,
-            'credit_expires_at' => null,
-        ];
+                'credits' => $client->credits + $credit,
+                'credit_expires_at' => null,
+            ];
 
-        if ($setting->has_credit_expired_data) {
-            $updateData['credit_expires_at'] = Carbon::now()->addDays($setting->quantity_credit_expire_days);
-        }
+            if ($setting->has_credit_expired_data) {
+                $updateData['credit_expires_at'] = Carbon::now()->addDays($setting->quantity_credit_expire_days);
+            }
         }
 
         return $this->repository->update($client->id, $updateData);

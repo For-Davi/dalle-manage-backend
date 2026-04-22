@@ -28,18 +28,18 @@ class UpdateDeliveryGuyRequest extends FormRequest
         return [
             'deliveryGuyID.required' => 'O ID do entregador é obrigatório',
             'deliveryGuyID.exists' => 'O ID do entregador informado não existe',
-        'name.required' => 'O nome do entregador é obrigatório.',
-        'name.string' => 'O nome do entregador deve ser um texto.',
-        'name.min' => 'O nome do entregador deve ter pelo menos 1 caractere.',
-        'name.max' => 'O nome do entregador não pode exceder 100 caracteres.',
-        'email.email' => 'O e-mail deve ser um e-mail válido.',
-        'email.max' => 'O e-mail não pode exceder 100 caracteres.',
-        'cpf.numeric' => 'O CPF deve conter apenas números.',
-        'phone.string' => 'O telefone deve ser um texto.',
-        'phone.max' => 'O telefone não pode exceder 20 caracteres.',
-        'vehicle.required' => 'O veículo é obrigatório.',
-        'vehicle.string' => 'O veículo deve ser um texto.',
-        'vehicle.max' => 'O veículo não pode exceder 30 caracteres.',
-    ];
+            'name.required' => 'O nome do entregador é obrigatório.',
+            'name.string' => 'O nome do entregador deve ser um texto.',
+            'name.min' => 'O nome do entregador deve ter pelo menos 1 caractere.',
+            'name.max' => 'O nome do entregador não pode exceder 100 caracteres.',
+            'email.email' => 'O e-mail deve ser um e-mail válido.',
+            'email.max' => 'O e-mail não pode exceder 100 caracteres.',
+            'cpf.numeric' => 'O CPF deve conter apenas números.',
+            'phone.string' => 'O telefone deve ser um texto.',
+            'phone.max' => 'O telefone não pode exceder 20 caracteres.',
+            'vehicle.required' => 'O veículo é obrigatório.',
+            'vehicle.string' => 'O veículo deve ser um texto.',
+            'vehicle.max' => 'O veículo não pode exceder 30 caracteres.',
+        ];
     }
 }

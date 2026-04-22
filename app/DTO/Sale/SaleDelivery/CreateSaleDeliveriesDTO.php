@@ -25,7 +25,7 @@ class CreateSaleDeliveriesDTO
         return new self(
             sale_id: $saleID,
             return_id: $returnID ?? null,
-            freight_value: $fees ?  $data['freightValue'] + $fees :  $data['freightValue'],
+            freight_value: $fees ? $data['freightValue'] + $fees : $data['freightValue'],
             cep: $data['cep'],
             city: $data['city'],
             state: $data['state'],

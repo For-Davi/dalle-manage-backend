@@ -14,7 +14,7 @@ class SaleItemRepository extends BaseRepository
 
     public function findBySaleId($id, $notDelivered = null)
     {
-        if($notDelivered){
+        if ($notDelivered) {
             return $this->getAllByEnterprise(filters: ['sale_id' => $id, 'delivered' => 0]);
         } else {
             return $this->getAllByEnterprise(filters: ['sale_id' => $id]);
@@ -25,8 +25,9 @@ class SaleItemRepository extends BaseRepository
     {
         $product = $this->model->where('product_variant_id', $productVariantID)->where('sale_id', $saleID)->first();
 
-        if($product){
+        if ($product) {
             $product->update($data);
+
             return true;
         }
 

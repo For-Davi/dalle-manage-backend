@@ -47,7 +47,7 @@ class SaleService
     {
         $enterpriseID = Auth::user()->enterprise_id;
 
-        //Validação se o cliente existe
+        // Validação se o cliente existe
         ClientHelper::existsClient($request['clientData']['id'], 'clientData.id');
 
         $this->validateSale($request->input('saleData.products'));
@@ -59,7 +59,7 @@ class SaleService
         $this->createSalePaymentsMethods($request->paymentData, $sale->id, $enterpriseID);
 
         // Criação do itens da venda
-        $this->createSaleItens($request->saleData, $request->input('deliveryData.freight'),$sale->id, $enterpriseID);
+        $this->createSaleItens($request->saleData, $request->input('deliveryData.freight'), $sale->id, $enterpriseID);
 
         // Criação do frete
         if ($request->input('deliveryData.freight')) {

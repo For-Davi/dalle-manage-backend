@@ -17,8 +17,8 @@ class DeliveryGuyFactory extends Factory
             'phone' => $this->faker->numerify('###########'),
             'cpf' => $this->faker->numerify('###########'),
             'vehicle' => $this->faker->randomElement([
-            'Carro', 'Moto', 'Caminhão', 'Van', 'Bicicleta'
-        ]) . ' - ' . $this->faker->numerify('####'),
+                'Carro', 'Moto', 'Caminhão', 'Van', 'Bicicleta',
+            ]).' - '.$this->faker->numerify('####'),
         ];
     }
 }
