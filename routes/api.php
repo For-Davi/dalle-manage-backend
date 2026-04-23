@@ -297,6 +297,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
+        Route::post('/check-products', [SaleController::class, 'checkProducts']);
     });
 
     Route::prefix('subscription')->group(function () {
