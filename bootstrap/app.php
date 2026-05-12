@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'token.expiration' => CheckTokenExpiration::class,
             'webhook.asaas' => CheckWebhookAsaasToken::class,
+            'seller.token.expiration' => CheckTokenExpiration::class,
         ]);
     })
     ->withBroadcasting(

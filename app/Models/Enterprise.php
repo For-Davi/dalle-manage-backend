@@ -31,6 +31,7 @@ class Enterprise extends Model implements HasCacheTags
         'active',
         'seller_id',
         'expired_date',
+        'first_payment_subscription',
     ];
 
     public function setSellerCodeAttribute($value)

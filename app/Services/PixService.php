@@ -21,6 +21,6 @@ class PixService
             'identifier' => 'dalle_manage',
         ];
 
-        return $this->http->request('post', '/payment/pix', $data);
+        return $this->http->request('post', 'payment/pix', $data);
     }
 }

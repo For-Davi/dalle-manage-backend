@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\DTO\DalleAdm\Commission\CreateCommissionDTO;
 use App\Enums\Subscription\Subscription;
 use App\Jobs\Notification\SendNotificationJob;
 use App\Jobs\Payment\PaymentSuccessJob;
+use App\Repositories\DalleAdm\CommissionRepository;
+use App\Repositories\DalleAdm\SellerRepository;
 use App\Repositories\EnterpriseRepository;
 use App\Repositories\SubscriptionRepository;
 use App\Repositories\UserRepository;
@@ -15,16 +18,30 @@ class WebhookAsaasService
         protected SubscriptionRepository $subscriptionRepository,
         protected UserRepository $userRepository,
         protected EnterpriseRepository $enterpriseRepository,
+        protected SellerRepository $sellerAdmRepository,
+        protected CommissionRepository $commissionAdmRepository,
     ) {}
 
-    public function update(array $request): bool
+    public function update($request): bool
     {
         $parsed = $this->parseExternalReference($request['payment']['externalReference']);
 
-        $user = $this->userRepository->findById($parsed['userID']);
+        $user = $this->userRepository->findByIdWithoutCache($parsed['userID']);
+
         $expiredDate = $this->calculateExpiredDate($parsed['monthQuantity']);
 
-        $this->enterpriseRepository->update($user->enterprise_id, [
+        $enterprise = $this->enterpriseRepository->findByIdWithoutCache($user->enterprise_id);
+
+        if (! $enterprise->first_payment_subscription && $enterprise->seller_id) {
+
+            $this->createCommission($enterprise->seller_id, $enterprise, $request['payment']['value']);
+
+            $updated = $this->enterpriseRepository->updateWithoutCache($user->enterprise_id, [
+                'first_payment_subscription' => 1,
+            ]);
+        }
+
+        $this->enterpriseRepository->updateWithoutCache($user->enterprise_id, [
             'subscription_id' => $parsed['subscriptionID'],
             'expired_date' => $expiredDate,
         ]);
@@ -54,9 +71,9 @@ class WebhookAsaasService
             ->toDateTimeString();
     }
 
-    private function sendRenewalNotification(mixed $user, int $subscriptionID, string $expiredDate): void
+    private function sendRenewalNotification($user, int $subscriptionID, string $expiredDate): void
     {
-        $subscription = $this->subscriptionRepository->findById($subscriptionID);
+        $subscription = $this->subscriptionRepository->findByIdWithoutCache($subscriptionID);
         $subscriptionName = Subscription::from($subscription->name)->label();
 
         SendNotificationJob::dispatch(
@@ -76,5 +93,16 @@ class WebhookAsaasService
         • **Plano:** {$subscriptionName}
         • **Novo Vencimento:** {$expiredDate}
         MSG;
+    }
+
+    private function createCommission(string $sellerID, $enterprise, float $totalValue)
+    {
+        $seller = $this->sellerAdmRepository->findByCode($sellerID);
+
+        $commissionValue = $totalValue * ($seller->commission / 100);
+
+        $commissionDTO = CreateCommissionDTO::fromRequest($seller, $enterprise, $commissionValue);
+
+        return $this->commissionAdmRepository->create($commissionDTO->toArray());
     }
 }

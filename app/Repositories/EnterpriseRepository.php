@@ -14,6 +14,22 @@ class EnterpriseRepository extends BaseRepository
         parent::__construct($model);
     }
 
+    public function findEnterpriseWithId(int $id)
+    {
+        return $this->model->where('id', $id);
+    }
+
+    public function updateWithoutCache(int $id, array $data)
+    {
+        $enterprise = $this->model->where('id', $id)->first();
+
+        if ($enterprise) {
+            return $enterprise->update($data);
+        }
+
+        return null;
+    }
+
     public function findMyEnterprise(): ?Enterprise
     {
         $query = $this->model->query();

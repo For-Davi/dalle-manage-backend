@@ -26,6 +26,6 @@ class CreditCardService
             'creditCardHolderInfo' => $request->creditCardHolderInfo,
         ];
 
-        return $this->http->request('post', '/payment/credit-card/', $data);
+        return $this->http->request('post', 'payment/credit-card/', $data);
     }
 }

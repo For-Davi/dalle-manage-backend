@@ -5,6 +5,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CreditCardController;
+use App\Http\Controllers\DalleAdm\SellerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\DeliveryGuyController;
@@ -50,6 +51,11 @@ Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/verify', [UserController::class, 'verify']);
 Route::post('/seller-registration', [SellerRegistrationController::class, 'store']);
 Route::post('/newPassword', [UserController::class, 'newPassword']);
+Route::prefix('dalle-manage/seller')->group(function () {
+    Route::post('login', [SellerController::class, 'login']);
+    Route::post('/reset', [SellerController::class, 'reset']);
+    Route::post('/newPassword', [SellerController::class, 'newPassword']);
+});
 Route::get('/auth/google/redirect', [UserController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [UserController::class, 'handleGoogleCallback']);
 
@@ -353,5 +359,13 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('cache')->group(function () {
         Route::post('/clear', [CacheController::class, 'clear']);
+    });
+});
+
+Route::middleware(['auth:seller', 'seller.token.expiration'])->group(function () {
+    Route::prefix('dalle-manage/seller')->group(function () {
+        Route::post('/dashboard', [SellerController::class, 'dashboard']);
+        Route::put('/update-data', [SellerController::class, 'updateData']);
+        Route::put('/update-password', [SellerController::class, 'updatePassword']);
     });
 });
