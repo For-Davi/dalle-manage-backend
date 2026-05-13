@@ -32,8 +32,7 @@ class WebhookAsaasService
 
         $enterprise = $this->enterpriseRepository->findByIdWithoutCache($user->enterprise_id);
 
-        if (! $enterprise->first_payment_subscription && $enterprise->seller_id) {
-
+        if ($enterprise->first_payment_subscription === 0 && $enterprise->seller_id) {
             $this->createCommission($enterprise->seller_id, $enterprise, $request['payment']['value']);
 
             $updated = $this->enterpriseRepository->updateWithoutCache($user->enterprise_id, [
