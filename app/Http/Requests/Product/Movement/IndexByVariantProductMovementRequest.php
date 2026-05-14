@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Exchange;
+namespace App\Http\Requests\Product\Movement;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class IndexExchangeRequest extends FormRequest
+class IndexByVariantProductMovementRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,15 +14,15 @@ class IndexExchangeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'saleID' => 'required|exists:sales,id',
+            'productVariantID' => 'required|exists:product_variants,id',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'saleID.required' => 'O ID da venda é obrigatório',
-            'saleID.exists' => 'O ID da venda informada não existe',
+            'productVariantID.required' => 'O ID da variante do produto é obrigatório.',
+            'productVariantID.exists' => 'A variante do produto informada não existe.',
         ];
     }
 

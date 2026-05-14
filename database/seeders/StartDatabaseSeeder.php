@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Client;
+use App\Models\DeliveryGuy;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Enterprise;
@@ -64,7 +65,10 @@ class StartDatabaseSeeder extends Seeder
                         'hex_color_code' => $color['hex_color_code'],
                     ]);
                 }
-
+                // ------------------------------------------------------------
+                DeliveryGuy::factory()->count(6)->create([
+                    'enterprise_id' => $enterprise->id,
+                ]);
                 // ------------------------------------------------------------
                 $departmentsData = [
                     'FINANCEIRO',

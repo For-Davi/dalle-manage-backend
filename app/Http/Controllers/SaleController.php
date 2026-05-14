@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\Sale\FilterSaleDTO;
+use App\Http\Requests\Sale\CheckSaleProductsRequest;
 use App\Http\Requests\Sale\CreateSaleRequest;
 use App\Http\Requests\Sale\DeleteSaleRequest;
 use App\Http\Requests\Sale\ExportSaleRequest;
@@ -137,5 +138,14 @@ class SaleController extends BaseController
 
             return response()->json(['message' => $result], 200);
         }, 'Erro ao enviar cupom para o email', $request);
+    }
+
+    public function checkProducts(CheckSaleProductsRequest $request)
+    {
+        return $this->safeExecute(function () use ($request) {
+            $this->service->checkProducts($request);
+
+            return response()->json([], 200);
+        }, 'Erro ao enviar os produtos da venda para a checagem de desconto', $request);
     }
 }

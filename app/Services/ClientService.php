@@ -49,7 +49,7 @@ class ClientService
         return 0;
     }
 
-    public function updateCredit($saleID, $credit, $clientID, $field)
+    public function updateCredit($saleID, $credit, $clientID, $field, $status)
     {
         if (! $clientID && $saleID) {
             $sale = $this->saleRepository->findById($saleID);
@@ -57,18 +57,27 @@ class ClientService
         }
 
         ClientHelper::existsClient($clientID, $field);
-        ClientHelper::validateCredit($clientID, $credit, $field);
 
-        $setting = $this->settingSystemRepository->getByEnterprise(Auth::user()->enterprise_id);
         $client = $this->repository->findById($clientID);
 
-        $updateData = [
-            'credits' => $client->credits + $credit,
-            'credit_expires_at' => null,
-        ];
+        if ($status === 'decrease') {
+            ClientHelper::validateCredit($client->id, $credit, $field);
 
-        if ($setting->has_credit_expired_data) {
-            $updateData['credit_expires_at'] = Carbon::now()->addDays($setting->quantity_credit_expire_days);
+            $updateData = [
+                'credits' => 0,
+                'credit_expires_at' => null,
+            ];
+        } else {
+            $setting = $this->settingSystemRepository->getByEnterprise(Auth::user()->enterprise_id);
+
+            $updateData = [
+                'credits' => $client->credits + $credit,
+                'credit_expires_at' => null,
+            ];
+
+            if ($setting->has_credit_expired_data) {
+                $updateData['credit_expires_at'] = Carbon::now()->addDays($setting->quantity_credit_expire_days);
+            }
         }
 
         return $this->repository->update($client->id, $updateData);

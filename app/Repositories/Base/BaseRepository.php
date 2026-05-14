@@ -123,6 +123,11 @@ abstract class BaseRepository
         });
     }
 
+    public function findByIdWithoutCache(int $id, array $relations = []): ?Model
+    {
+        return $this->model->newQuery()->with($relations)->find($id);
+    }
+
     public function findByCpf(string $cpf, array $relations = []): ?Model
     {
         $suffix = md5(serialize($relations));

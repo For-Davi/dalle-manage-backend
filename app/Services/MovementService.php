@@ -72,7 +72,7 @@ class MovementService
 
             return (new MovementsExport($movements))->download($fileName);
         } else {
-            $fileName = "movements_{$dateTime}.xlsx";
+            $fileName = "movements_{$dateTime}.pdf";
 
             $pdf = Pdf::loadView('exports.movements-pdf', [
                 'movements' => $movements,

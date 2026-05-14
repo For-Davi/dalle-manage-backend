@@ -14,6 +14,8 @@ class SellerRegistration extends Model
         'name',
         'email',
         'phone',
+        'cpf',
+        'password',
         'description',
     ];
 }

@@ -19,10 +19,13 @@ class SendResetPasswordEmail implements ShouldQueue
 
     protected $token;
 
-    public function __construct($user, $token)
+    protected $isSeller;
+
+    public function __construct($user, $token, $isSeller = null)
     {
         $this->user = $user;
         $this->token = $token;
+        $this->isSeller = $isSeller;
 
         $this->onQueue('emails');
     }
@@ -31,6 +34,6 @@ class SendResetPasswordEmail implements ShouldQueue
     {
         $reset = PasswordResetToken::firstOrNew(['email' => $this->user->email]);
 
-        Mail::to($this->user->email)->send(new ResetPasswordMail($reset->token, $this->user->name, config('app.url')));
+        Mail::to($this->user->email)->send(new ResetPasswordMail($reset->token, $this->user->name, $this->isSeller ? config('app.url').'/seller' : config('app.url')));
     }
 }

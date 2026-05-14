@@ -23,7 +23,11 @@ class ReturnExchangeItem extends Model implements HasCacheTags
         'product_price',
         'product_color',
         'product_color_name',
+        'product_grid_size',
+        'product_grid_name',
         'quantity',
+        'delivered',
+        'quantity_delivered',
         'total',
     ];
 

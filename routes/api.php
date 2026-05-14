@@ -1,16 +1,17 @@
 <?php
 
+use App\Http\Controllers\CacheController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CreditCardController;
+use App\Http\Controllers\DalleAdm\SellerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\DeliveryGuyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EnterpriseController;
-use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\GridController;
 use App\Http\Controllers\MovementController;
@@ -51,6 +52,11 @@ Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/verify', [UserController::class, 'verify']);
 Route::post('/seller-registration', [SellerRegistrationController::class, 'store']);
 Route::post('/newPassword', [UserController::class, 'newPassword']);
+Route::prefix('dalle-manage/seller')->group(function () {
+    Route::post('login', [SellerController::class, 'login']);
+    Route::post('/reset', [SellerController::class, 'reset']);
+    Route::post('/newPassword', [SellerController::class, 'newPassword']);
+});
 Route::get('/auth/google/redirect', [UserController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [UserController::class, 'handleGoogleCallback']);
 
@@ -150,12 +156,14 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::prefix('variant')->group(function () {
             Route::get('/{variantID}', [ProductController::class, 'showVariant']);
             Route::post('/search', [ProductController::class, 'search']);
+            Route::get('/movement/{productVariantID}', [ProductMovementController::class, 'indexByVariant']);
             Route::post('/movement', [ProductMovementController::class, 'store']);
             Route::post('/check-codes', [ProductController::class, 'checkCodes']);
             Route::put('/', [ProductController::class, 'updateVariant']);
             Route::delete('/{variantID}', [ProductController::class, 'destroyVariant']);
         });
 
+        Route::get('/movement/{productMovementID}', [ProductMovementController::class, 'show']);
         Route::prefix('stock-reentry')->group(function () {
             Route::post('/movement', [ProductMovementController::class, 'storeStockReentry']);
         });
@@ -305,6 +313,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::get('/coupon/{saleID}/', [SaleController::class, 'showCouponInfos']);
         Route::post('/export', [SaleController::class, 'export']);
         Route::post('/send-to-email', [SaleController::class, 'sendToEmail']);
+        Route::post('/check-products', [SaleController::class, 'checkProducts']);
     });
 
     Route::prefix('subscription')->group(function () {
@@ -330,20 +339,13 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
     Route::prefix('returns')->group(function () {
         Route::get('/{saleID}', [ReturnController::class, 'index']);
         Route::get('/return/{returnID}', [ReturnController::class, 'show']);
-        Route::get('/linked/{returnID}', [ReturnController::class, 'showLinked']);
+        Route::post('/linked/{returnID}', [ReturnController::class, 'showLinked']);
         Route::get('/stock/reentry', [ReturnController::class, 'showStockReentry']);
         Route::post('/', [ReturnController::class, 'store']);
+        Route::post('/export', [ReturnController::class, 'export']);
+        Route::post('/send-to-email', [ReturnController::class, 'sendToEmail']);
         Route::put('/', [ReturnController::class, 'update']);
         Route::delete('/{saleID}/{returnID}', [ReturnController::class, 'destroy']);
-    });
-
-    Route::prefix('exchange')->group(function () {
-        Route::get('/{saleID}', [ExchangeController::class, 'index']);
-        Route::get('/exchange/{exchangeID}', [ExchangeController::class, 'show']);
-        Route::post('/', [ExchangeController::class, 'createExchangePayment']);
-        Route::post('/difference', [ExchangeController::class, 'createDifferencePayment']);
-        Route::post('/export', [ExchangeController::class, 'export']);
-        Route::post('/send-to-email', [ExchangeController::class, 'sendToEmail']);
     });
 
     Route::prefix('delivery')->group(function () {
@@ -353,14 +355,27 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
         Route::post('/filter', [DeliveryController::class, 'filter']);
         Route::post('/schedule', [DeliveryController::class, 'schedule']);
         Route::post('/partial-delivered', [DeliveryController::class, 'partialDelivered']);
+        Route::post('/export', [DeliveryController::class, 'export']);
         Route::put('/', [DeliveryController::class, 'update']);
     });
 
     Route::prefix('delivery-guy')->group(function () {
         Route::get('/', [DeliveryGuyController::class, 'index']);
         Route::get('/{deliveryGuyID}', [DeliveryGuyController::class, 'show']);
-        Route::post('/', [DeliveryGuyController::class, 'create']);
+        Route::post('/', [DeliveryGuyController::class, 'store']);
         Route::put('/', [DeliveryGuyController::class, 'update']);
         Route::delete('/{deliveryGuyID}', [DeliveryGuyController::class, 'destroy']);
+    });
+
+    Route::prefix('cache')->group(function () {
+        Route::post('/clear', [CacheController::class, 'clear']);
+    });
+});
+
+Route::middleware(['auth:seller', 'seller.token.expiration'])->group(function () {
+    Route::prefix('dalle-manage/seller')->group(function () {
+        Route::post('/dashboard', [SellerController::class, 'dashboard']);
+        Route::put('/update-data', [SellerController::class, 'updateData']);
+        Route::put('/update-password', [SellerController::class, 'updatePassword']);
     });
 });

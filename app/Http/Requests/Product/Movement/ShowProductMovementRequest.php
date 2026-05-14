@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Exchange;
+namespace App\Http\Requests\Product\Movement;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ShowExchangeRequest extends FormRequest
+class ShowProductMovementRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,15 +14,15 @@ class ShowExchangeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'exchangeID' => 'required|exists:exchanges,id',
+            'productMovementID' => 'required|exists:product_movements,id',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'exchangeID.required' => 'O ID do estorno é obrigatório',
-            'exchangeID.exists' => 'O ID do estorno informado não existe',
+            'productMovementID.required' => 'O ID da movimentação é obrigatório.',
+            'productMovementID.exists' => 'A movimentação informada não existe.',
         ];
     }
 

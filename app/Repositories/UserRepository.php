@@ -15,6 +15,11 @@ class UserRepository extends BaseRepository
         parent::__construct($model);
     }
 
+    public function findByIdWithoutUser($id)
+    {
+        return $this->model->where('id', $id)->first();
+    }
+
     public function getAllWithFilter(FilterUserDTO $filters)
     {
         $query = $this->model->where('enterprise_id', $filters->enterprise_id);

@@ -11,6 +11,7 @@ use App\Repositories\DeliveryGuyRepository;
 use App\Repositories\ReturnExchangeItemRepository;
 use App\Repositories\SaleDeliveryRepository;
 use App\Repositories\SaleItemRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DeliveryService
 {
@@ -70,6 +71,21 @@ class DeliveryService
         } else {
             $this->updateDelivery($request['deliveryID'], 'partial_delivered');
         }
+    }
+
+    public function export($request)
+    {
+        $dateTime = now()->format('Ymd_His');
+
+        $deliveries = $this->repository->getDeliveries($request['status'], $request->all(), true);
+
+        $fileName = "deliveries_{$dateTime}.pdf";
+
+        $pdf = Pdf::loadView('exports.deliveries-pdf', [
+            'deliveries' => $deliveries,
+        ]);
+
+        return $pdf->download($fileName);
     }
 
     private function updateItensWhenDelivered(int $saleID, ?int $returnID)

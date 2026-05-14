@@ -164,7 +164,7 @@
       <div class="flex row justify-between full-width">
         <div>
           <div class="text-bold text-body1">TROCO: R$ {{ $couponData['sale']['change'] ?? '0' }}</div>
-          <div class="text-right text-bold text-h6">TOTAL: R$ {{ $couponData['sale']['total'] ?? '0' }}</div>
+          <div class="text-right text-bold text-h6">TOTAL: R$ {{ $couponData['sale']['starting_total'] ?? '0' }}</div>
         </div>
         <div class="text-bold text-body1">
           TARIFAS: R$ {{ $couponData['sale']['fees'] ?? '0' }}

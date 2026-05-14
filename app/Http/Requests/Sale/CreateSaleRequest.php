@@ -45,9 +45,9 @@ class CreateSaleRequest extends FormRequest
     {
         return [
             // REGRAS DO CLIENTE
-            'clientData' => 'nullable|array',
-            'clientData.id' => 'required_with:clientData|exists:clients,id',
-            'clientData.name' => 'required_with:clientData|string|min:1|max:100',
+            'clientData' => 'required|array',
+            'clientData.id' => 'required:clientData|exists:clients,id',
+            'clientData.name' => 'required:clientData|string|min:1|max:100',
             'clientData.email' => 'nullable|email|max:100',
             'clientData.dateBirthday' => 'nullable|string',
             'clientData.cpf' => 'nullable|numeric',
@@ -71,6 +71,7 @@ class CreateSaleRequest extends FormRequest
             'saleData.products' => 'required|array',
             'saleData.products.*.productID' => 'required|exists:products,id',
             'saleData.products.*.productVariantID' => 'required|exists:product_variants,id',
+            'saleData.products.*.discount' => 'nullable|numeric|min:0|max:100',
             'saleData.products.*.newQuantity' => 'required|min:1',
             'saleData.products.*.variantActive' => 'required|in:1',
 
@@ -109,8 +110,8 @@ class CreateSaleRequest extends FormRequest
             // Cliente
             'clientData.array' => 'Os dados do cliente devem ser um array',
             'clientData.id.exists' => 'O cliente selecionado não existe.',
-            'clientData.id.required_with' => 'O ID do cliente é obrigatório quando os dados do cliente são informados.',
-            'clientData.name.required_with' => 'O nome do cliente é obrigatório quando os dados do cliente são informados.',
+            'clientData.id.required' => 'O ID do cliente é obrigatório quando.',
+            'clientData.name.required' => 'O nome do cliente é obrigatório.',
             'clientData.name.string' => 'O nome do cliente deve ser um texto.',
             'clientData.name.min' => 'O nome do cliente deve ter pelo menos 1 caractere.',
             'clientData.name.max' => 'O nome do cliente não pode exceder 100 caracteres.',
@@ -140,6 +141,9 @@ class CreateSaleRequest extends FormRequest
             'saleData.products.array' => 'Os produtos devem ser um array.',
             'saleData.products.*.productVariantID.required' => 'O ID da variante do produto é obrigatório.',
             'saleData.products.*.productVariantID.exists' => 'O produto selecionado não existe.',
+            'saleData.products.*.discount.numeric' => 'O desconto do produto informado deve ser numérico.',
+            'saleData.products.*.discount.min' => 'O desconto informado deve ser no mínimo 0.',
+            'saleData.products.*.discount.max' => 'O desconto informado não pode ser maior que 100.',
             'saleData.products.*.newQuantity.required' => 'A quantidade do produto é obrigatória.',
             'saleData.products.*.newQuantity.min' => 'A quantidade do produto deve ser no mínimo 1.',
             'saleData.products.*.variantActive.required' => 'Deve ser informado se a variante está ativa ou não',

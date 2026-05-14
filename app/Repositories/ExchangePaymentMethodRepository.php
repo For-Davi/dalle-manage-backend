@@ -11,4 +11,9 @@ class ExchangePaymentMethodRepository extends BaseRepository
     {
         parent::__construct($model);
     }
+
+    public function findByReturnId($id)
+    {
+        return $this->getAllByEnterprise(filters: ['return_id' => $id]);
+    }
 }

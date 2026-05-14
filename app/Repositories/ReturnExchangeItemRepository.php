@@ -12,9 +12,13 @@ class ReturnExchangeItemRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function findByReturnId($id)
+    public function findByReturnId($id, $notDelivered = null)
     {
-        return $this->getAllByEnterprise(filters: ['return_id' => $id]);
+        if ($notDelivered) {
+            return $this->getAllByEnterprise(filters: ['return_id' => $id, 'delivered' => 0]);
+        } else {
+            return $this->getAllByEnterprise(filters: ['return_id' => $id]);
+        }
     }
 
     public function updateByProductVariantID(int $productVariantID, int $returnID, array $data)

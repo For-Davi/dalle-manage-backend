@@ -28,9 +28,9 @@ class SellerHelper
             ->where('code', $code)
             ->first();
 
-        if ($existCode) {
+        if (! $existCode) {
             throw ValidationException::withMessages([
-                'sellerCode' => ['O código informado já está sendo utilizado.'],
+                'sellerCode' => ['O código informado não existe.'],
             ]);
         }
     }

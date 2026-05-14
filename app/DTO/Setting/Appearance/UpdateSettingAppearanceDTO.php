@@ -23,7 +23,7 @@ class UpdateSettingAppearanceDTO extends BaseDTO
         public ?string $side_menu_color_code_selected_icon
     ) {}
 
-    public static function fromRequest(array $data): self
+    public static function fromRequest($data): self
     {
         return new self(
             title_page_color_default: $data['titlePageColorDefault'],

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DalleAdm\Seller;
 use App\Models\User;
 
 return [
@@ -14,6 +15,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'seller' => [
+            'driver' => 'seller-token',
+            'provider' => 'sellers',
+        ],
         'api' => [
             'driver' => 'sanctum',
             'provider' => 'users',
@@ -24,6 +29,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+        'sellers' => [
+            'driver' => 'eloquent',
+            'model' => Seller::class,
         ],
     ],
 
