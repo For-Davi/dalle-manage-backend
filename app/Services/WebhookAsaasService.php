@@ -37,12 +37,14 @@ class WebhookAsaasService
 
             $updated = $this->enterpriseRepository->updateWithoutCache($user->enterprise_id, [
                 'first_payment_subscription' => 1,
+                'allow_test_free' => 0,
             ]);
         }
 
         $this->enterpriseRepository->updateWithoutCache($user->enterprise_id, [
             'subscription_id' => $parsed['subscriptionID'],
             'expired_date' => $expiredDate,
+            'allow_test_free' => 0,
         ]);
 
         PaymentSuccessJob::dispatch();

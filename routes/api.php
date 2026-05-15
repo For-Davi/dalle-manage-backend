@@ -318,6 +318,7 @@ Route::middleware(['auth:sanctum', 'token.expiration'])->group(function () {
 
     Route::prefix('subscription')->group(function () {
         Route::get('/', [SubscriptionController::class, 'index']);
+        Route::post('test/', [SubscriptionController::class, 'test']);
 
         Route::prefix('payment')->group(function () {
             Route::post('pix/', [PixController::class, 'store']);
