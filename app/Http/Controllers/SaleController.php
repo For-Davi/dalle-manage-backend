@@ -143,6 +143,7 @@ class SaleController extends BaseController
     public function checkProducts(CheckSaleProductsRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
+            check_permission('sale-discount.create');
             $this->service->checkProducts($request);
 
             return response()->json([], 200);
