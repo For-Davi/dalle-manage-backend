@@ -59,6 +59,7 @@ class SupplierController extends BaseController
     public function store(CreateSupplierRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('suppliers');
             check_permission('supplier.create');
             $this->service->create($request);
             $suppliers = $this->repository->getAllByEnterprise();

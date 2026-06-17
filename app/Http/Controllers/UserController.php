@@ -194,6 +194,7 @@ class UserController extends BaseController
     public function store(CreateUserRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('users');
             check_permission('user.create');
             $this->service->store($request);
             $users = $this->repository->getAllByEnterprise(['department', 'role']);

@@ -64,6 +64,7 @@ class SaleController extends BaseController
     public function store(CreateSaleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('sales');
             check_permission('sale.create');
             $sale = $this->service->create($request);
 

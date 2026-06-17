@@ -28,6 +28,7 @@ class TagController extends BaseController
     public function store(CreateTagRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('tags');
             check_permission('product-tag.create');
             $this->service->create($request);
             $tags = $this->repository->getAllByEnterprise();
