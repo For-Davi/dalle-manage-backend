@@ -17,5 +17,3 @@ if (! function_exists('check_plan')) {
         PlanLimitHelper::checkPlan($resourceKey);
     }
 }
-
-

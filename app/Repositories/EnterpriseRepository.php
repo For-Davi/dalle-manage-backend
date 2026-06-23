@@ -81,7 +81,7 @@ class EnterpriseRepository extends BaseRepository
                 ->update(['department_id' => null]);
             DB::table('departments')->where('enterprise_id', $id)->delete();
 
-            //STOCK REENTRIES RETURN PRODUCTS
+            // STOCK REENTRIES RETURN PRODUCTS
             DB::table('stock_reentries_return_products')->where('enterprise_id', $id)->delete();
 
             // PRODUCTS ADVANCED
@@ -119,13 +119,12 @@ class EnterpriseRepository extends BaseRepository
             // PRODUCT MOVEMENTS
             DB::table('product_movements')->where('enterprise_id', $id)->delete();
 
-
-            //PEGAR OS IDS DE SALES
+            // PEGAR OS IDS DE SALES
             $salesIds = DB::table('sales')
                 ->where('enterprise_id', $id)
                 ->pluck('id');
 
-            //RETURNS
+            // RETURNS
             $returnIds = DB::table('returns')
                 ->whereIn('sale_id', $salesIds)
                 ->pluck('id');
@@ -135,23 +134,23 @@ class EnterpriseRepository extends BaseRepository
                 DB::table('return_exchange_items')->whereIn('return_id', $returnIds)->delete();
                 DB::table('exchange_payments_methods')->whereIn('return_id', $returnIds)->delete();
                 DB::table('returns')
-                ->whereIn('linked_return_id', $returnIds)
-                ->update(['linked_return_id' => null]);
+                    ->whereIn('linked_return_id', $returnIds)
+                    ->update(['linked_return_id' => null]);
 
-                //COMMISSIONS
+                // COMMISSIONS
                 DB::table('commissions')->whereIn('return_id', $returnIds)->delete();
             }
 
             DB::table('returns')->whereIn('sale_id', $salesIds)->delete();
 
-            //SALES
+            // SALES
             if ($salesIds->isNotEmpty()) {
                 DB::table('sale_deliveries')->whereIn('sale_id', $salesIds)->delete();
                 DB::table('sale_cancellations')->whereIn('sale_id', $salesIds)->delete();
                 DB::table('sale_payments_methods')->whereIn('sale_id', $salesIds)->delete();
                 DB::table('sale_itens')->whereIn('sale_id', $salesIds)->delete();
 
-                //COMISSIONS
+                // COMISSIONS
                 DB::table('commissions')->whereIn('sale_id', $salesIds)->delete();
             }
 
@@ -169,10 +168,10 @@ class EnterpriseRepository extends BaseRepository
                 DB::table('supplier_order_status_history')->whereIn('supplier_order_id', $supplierOrdersIds)->delete();
 
                 $supplierOrdersItemsIds = DB::table('supplier_order_items')
-                ->whereIn('supplier_order_id', $supplierOrdersIds)
-                ->pluck('id');
+                    ->whereIn('supplier_order_id', $supplierOrdersIds)
+                    ->pluck('id');
 
-                if($supplierOrdersItemsIds->isNotEmpty()){
+                if ($supplierOrdersItemsIds->isNotEmpty()) {
                     DB::table('supplier_order_receivings')->whereIn('supplier_order_item_id', $supplierOrdersItemsIds)->delete();
                 }
 
@@ -214,13 +213,13 @@ class EnterpriseRepository extends BaseRepository
                 })->delete();
 
             DB::table('users')
-            ->whereIn('image_id', function ($query) use ($id) {
-                $query->select('id')
-                    ->from('images')
-                    ->where('enterprise_id', $id);
-            })
-            ->update(['image_id' => null]);
-            
+                ->whereIn('image_id', function ($query) use ($id) {
+                    $query->select('id')
+                        ->from('images')
+                        ->where('enterprise_id', $id);
+                })
+                ->update(['image_id' => null]);
+
             DB::table('images')->where('enterprise_id', $id)->delete();
 
             // MOVEMENTS
@@ -232,10 +231,10 @@ class EnterpriseRepository extends BaseRepository
             // RECEIPTS
             DB::table('receipts')->where('enterprise_id', $id)->delete();
 
-            //PERMISSION ROLE
+            // PERMISSION ROLE
             $roleIds = DB::table('roles')->where('enterprise_id', $id)->pluck('id');
 
-            if($roleIds->isNotEmpty()){
+            if ($roleIds->isNotEmpty()) {
                 DB::table('permission_role')->whereIn('role_id', $roleIds)->delete();
             }
 
@@ -277,7 +276,6 @@ class EnterpriseRepository extends BaseRepository
 
             // USERS
             DB::table('users')->where('enterprise_id', $id)->delete();
-
 
             return $enterprise->delete();
         }

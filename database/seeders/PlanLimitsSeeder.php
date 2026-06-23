@@ -27,7 +27,6 @@ class PlanLimitsSeeder extends Seeder
             'sales' => ['free' => 50, 'basic' => null, 'premium' => null],
         ];
 
-
         foreach ($data as $resource => $plans) {
             foreach ($plans as $planName => $limit) {
                 DB::table('plan_limits')->insert([
