@@ -51,6 +51,7 @@ class ClientController extends BaseController
     public function store(CreateClientRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('clients');
             check_permission('client.create');
             $this->service->create($request);
             $clients = $this->repository->getAllByEnterprise();

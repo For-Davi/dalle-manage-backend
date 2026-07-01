@@ -50,6 +50,7 @@ class ReceiptController extends BaseController
     public function store(CreateReceiptRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('receipts');
             check_permission('receipt.create');
             $this->service->create($request);
             $receipts = $this->repository->getAllByEnterprise(['type']);

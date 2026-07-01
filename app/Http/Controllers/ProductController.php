@@ -118,6 +118,7 @@ class ProductController extends BaseController
     public function store(CreateProductRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('product_variants');
             check_permission('product.create');
             $this->service->create($request);
             $productsVariants = $this->productVariantRepository->getAllByEnterprise(['product', 'images', 'color', 'suppliers', 'gridItem.gridGroup']);

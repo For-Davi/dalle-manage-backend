@@ -28,6 +28,7 @@ class ColorController extends BaseController
     public function store(CreateProductColorRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('product_colors');
             check_permission('product-color.create');
             $this->service->create($request);
             $colors = $this->repository->getAllByEnterprise();

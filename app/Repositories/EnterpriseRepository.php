@@ -43,10 +43,33 @@ class EnterpriseRepository extends BaseRepository
 
     public function delete()
     {
-        $id = Auth::user()->enterpise_id;
+        $id = Auth::user()->enterprise_id;
         $enterprise = $this->findById($id);
         if ($enterprise) {
+            // DELIVERY GUYS
+            $deliveryGuyIds = DB::table('delivery_guys')
+                ->where('enterprise_id', $id)
+                ->pluck('id');
+
+            if ($deliveryGuyIds->isNotEmpty()) {
+                DB::table('sale_deliveries')
+                    ->whereIn('delivery_guy_id', $deliveryGuyIds)
+                    ->update(['delivery_guy_id' => null]);
+            }
+
+            DB::table('delivery_guys')->where('enterprise_id', $id)->delete();
+
             // CLIENTS
+            $clientsIds = DB::table('clients')
+                ->where('enterprise_id', $id)
+                ->pluck('id');
+
+            if ($clientsIds->isNotEmpty()) {
+                DB::table('sales')
+                    ->whereIn('client_id', $clientsIds)
+                    ->update(['client_id' => null]);
+            }
+
             DB::table('clients')->where('enterprise_id', $id)->delete();
 
             // DEPARTMENTS
@@ -58,8 +81,8 @@ class EnterpriseRepository extends BaseRepository
                 ->update(['department_id' => null]);
             DB::table('departments')->where('enterprise_id', $id)->delete();
 
-            // EMPLOYEES
-            DB::table('employees')->where('enterprise_id', $id)->delete();
+            // STOCK REENTRIES RETURN PRODUCTS
+            DB::table('stock_reentries_return_products')->where('enterprise_id', $id)->delete();
 
             // PRODUCTS ADVANCED
             DB::table('product_advanced')
@@ -96,6 +119,67 @@ class EnterpriseRepository extends BaseRepository
             // PRODUCT MOVEMENTS
             DB::table('product_movements')->where('enterprise_id', $id)->delete();
 
+            // PEGAR OS IDS DE SALES
+            $salesIds = DB::table('sales')
+                ->where('enterprise_id', $id)
+                ->pluck('id');
+
+            // RETURNS
+            $returnIds = DB::table('returns')
+                ->whereIn('sale_id', $salesIds)
+                ->pluck('id');
+
+            if ($returnIds->isNotEmpty()) {
+                DB::table('return_items')->whereIn('return_id', $returnIds)->delete();
+                DB::table('return_exchange_items')->whereIn('return_id', $returnIds)->delete();
+                DB::table('exchange_payments_methods')->whereIn('return_id', $returnIds)->delete();
+                DB::table('returns')
+                    ->whereIn('linked_return_id', $returnIds)
+                    ->update(['linked_return_id' => null]);
+
+                // COMMISSIONS
+                DB::table('commissions')->whereIn('return_id', $returnIds)->delete();
+            }
+
+            DB::table('returns')->whereIn('sale_id', $salesIds)->delete();
+
+            // SALES
+            if ($salesIds->isNotEmpty()) {
+                DB::table('sale_deliveries')->whereIn('sale_id', $salesIds)->delete();
+                DB::table('sale_cancellations')->whereIn('sale_id', $salesIds)->delete();
+                DB::table('sale_payments_methods')->whereIn('sale_id', $salesIds)->delete();
+                DB::table('sale_itens')->whereIn('sale_id', $salesIds)->delete();
+
+                // COMISSIONS
+                DB::table('commissions')->whereIn('sale_id', $salesIds)->delete();
+            }
+
+            DB::table('sales')->whereIn('id', $salesIds)->delete();
+
+            // EMPLOYEES
+            DB::table('employees')->where('enterprise_id', $id)->delete();
+
+            // SUPPLIER ORDER
+            $supplierOrdersIds = DB::table('supplier_orders')
+                ->where('enterprise_id', $id)
+                ->pluck('id');
+
+            if ($supplierOrdersIds->isNotEmpty()) {
+                DB::table('supplier_order_status_history')->whereIn('supplier_order_id', $supplierOrdersIds)->delete();
+
+                $supplierOrdersItemsIds = DB::table('supplier_order_items')
+                    ->whereIn('supplier_order_id', $supplierOrdersIds)
+                    ->pluck('id');
+
+                if ($supplierOrdersItemsIds->isNotEmpty()) {
+                    DB::table('supplier_order_receivings')->whereIn('supplier_order_item_id', $supplierOrdersItemsIds)->delete();
+                }
+
+                DB::table('supplier_order_items')->whereIn('supplier_order_id', $supplierOrdersIds)->delete();
+            }
+
+            DB::table('supplier_orders')->whereIn('id', $supplierOrdersIds)->delete();
+
             // PRODUCT VARIANTS
             DB::table('supplier_catalog')->where('enterprise_id', $id)
                 ->whereNotNull('product_variant_id')
@@ -127,6 +211,15 @@ class EnterpriseRepository extends BaseRepository
                         ->from('images')
                         ->where('enterprise_id', $id);
                 })->delete();
+
+            DB::table('users')
+                ->whereIn('image_id', function ($query) use ($id) {
+                    $query->select('id')
+                        ->from('images')
+                        ->where('enterprise_id', $id);
+                })
+                ->update(['image_id' => null]);
+
             DB::table('images')->where('enterprise_id', $id)->delete();
 
             // MOVEMENTS
@@ -137,6 +230,13 @@ class EnterpriseRepository extends BaseRepository
 
             // RECEIPTS
             DB::table('receipts')->where('enterprise_id', $id)->delete();
+
+            // PERMISSION ROLE
+            $roleIds = DB::table('roles')->where('enterprise_id', $id)->pluck('id');
+
+            if ($roleIds->isNotEmpty()) {
+                DB::table('permission_role')->whereIn('role_id', $roleIds)->delete();
+            }
 
             // ROLES
             DB::table('users')->where('enterprise_id', $id)

@@ -64,6 +64,7 @@ class SaleController extends BaseController
     public function store(CreateSaleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('sales');
             check_permission('sale.create');
             $sale = $this->service->create($request);
 
@@ -143,6 +144,7 @@ class SaleController extends BaseController
     public function checkProducts(CheckSaleProductsRequest $request)
     {
         return $this->safeExecute(function () use ($request) {
+            check_permission('sale-discount.create');
             $this->service->checkProducts($request);
 
             return response()->json([], 200);

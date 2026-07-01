@@ -2,55 +2,29 @@
 
 namespace App\Observers;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Redis;
+use App\Services\CacheService;
 
 class CacheInvalidationObserver
 {
-    public function created(Model $model): void
+    public function __construct(protected CacheService $cacheService) {}
+
+    public function created(): void
     {
-        $this->clearCache($model);
+        $this->cacheService->clearCache();
     }
 
-    public function updated(Model $model): void
+    public function updated(): void
     {
-        $this->clearCache($model);
+        $this->cacheService->clearCache();
     }
 
-    public function deleted(Model $model): void
+    public function deleted(): void
     {
-        $this->clearCache($model);
+        $this->cacheService->clearCache();
     }
 
-    public function restored(Model $model): void
+    public function restored(): void
     {
-        $this->clearCache($model);
-    }
-
-    private function clearCache(Model $model): void
-    {
-        $tags = $model->getCacheTags();
-
-        if (empty($tags)) {
-            return;
-        }
-
-        $redis = Redis::connection('cache');
-
-        foreach ($tags as $tag) {
-            $indexKey = 'cache_index:'.$tag;
-            $keys = $redis->smembers($indexKey);
-
-            if (! empty($keys)) {
-                $redis->pipeline(function ($pipe) use ($keys, $indexKey) {
-                    foreach ($keys as $key) {
-                        $pipe->unlink($key);
-                    }
-                    $pipe->del($indexKey);
-                });
-            } else {
-                $redis->del($indexKey);
-            }
-        }
+        $this->cacheService->clearCache();
     }
 }

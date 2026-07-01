@@ -55,6 +55,7 @@ class GridController extends BaseController
     public function store(CreateGridGroupRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('grid_groups');
             check_permission('grid.create');
             $this->gridGroupService->create($request);
             $gridGroups = $this->gridGroupRepository->getAllByEnterprise(['items']);

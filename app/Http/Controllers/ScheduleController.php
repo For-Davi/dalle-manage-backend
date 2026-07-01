@@ -61,6 +61,7 @@ class ScheduleController extends BaseController
     public function store(CreateScheduleRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('schedules');
             check_permission('transaction.create');
             $this->service->create($request);
             $schedules = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);

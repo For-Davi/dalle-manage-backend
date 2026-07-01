@@ -75,6 +75,7 @@ class EmployeeController extends BaseController
     public function store(CreateEmployeeRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('employees');
             check_permission('employee.create');
             $this->service->create($request);
             $employees = $this->repository->getAllByEnterprise();

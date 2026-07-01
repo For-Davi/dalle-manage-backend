@@ -60,6 +60,7 @@ class MovementController extends BaseController
     public function store(CreateMovementRequest $request)
     {
         return $this->safeTransaction(function () use ($request) {
+            check_plan('movements');
             check_permission('transaction.create');
             $this->service->create($request);
             $movements = $this->repository->getAllByEnterpriseAndPeriod(true, ['category']);
