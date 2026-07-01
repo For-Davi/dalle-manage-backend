@@ -12,11 +12,11 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.DM_BACK_SSH_HOST }}
+          username: ${{ secrets.DM_BACK_SSH_USER }}
+          key: ${{ secrets.DM_BACK_SSH_KEY }}
           script: |
-            cd ${{ secrets.DEPLOY_PATH }}
+            cd ${{ secrets.DM_BACK_DEPLOY_PATH }}
             git pull origin dev
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
