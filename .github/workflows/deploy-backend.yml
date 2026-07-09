@@ -18,7 +18,7 @@ jobs:
           script: |
             cd ${{ secrets.DM_BACK_DEPLOY_PATH }}
             git pull origin dev
-            composer install --no-dev --optimize-autoloader
+            composer install --optimize-autoloader
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
