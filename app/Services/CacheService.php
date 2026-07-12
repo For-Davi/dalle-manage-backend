@@ -9,9 +9,14 @@ class CacheService
 {
     public function __construct() {}
 
-    public function clearCache()
+    public function clearCache(?int $enterpriseID = null): bool
     {
-        $enterpriseID = Auth::user()->enterprise_id;
+        $enterpriseID ??= Auth::user()?->enterprise_id;
+
+        if (! $enterpriseID) {
+            return false;
+        }
+
         $pattern = "*enterprise:{$enterpriseID}:*";
 
         $redis = Redis::connection('cache');
