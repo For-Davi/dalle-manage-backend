@@ -30,7 +30,7 @@ abstract class BaseRepository
 
     protected function enterprisePrefix(?int $enterpriseID = null): string
     {
-        $id = $enterpriseID ?? Auth::user()->enterprise_id;
+        $id = $enterpriseID ?? Auth::user()?->enterprise_id ?? 'guest';
 
         return "{$this->modelKey()}:enterprise:{$id}";
     }
@@ -99,7 +99,7 @@ abstract class BaseRepository
 
     public function getAllByUser(?int $userID = null, array $relations = [])
     {
-        $userId = $userID ?? Auth::user()->id;
+        $userId = $userID ?? Auth::user()?->id ?? 'guest';
         $suffix = md5(serialize($relations));
 
         $key = "notification:user:{$userId}:{$suffix}";
